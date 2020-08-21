@@ -1,0 +1,16 @@
+Name of WEAP Area:
+Model Example_WEAP R tool
+
+Start Year:
+2014
+
+End Year:
+2018
+
+TimeStep per year:
+365
+
+Scenario:
+Reference
+
+if you run ScriptWEAPKeyGaugeBranches.vbs in your WEAP area you will get WEAPKeyGaugeBranches.csv within the folder WEAPKeyGaugeBranches created in your WEAP area folder.   

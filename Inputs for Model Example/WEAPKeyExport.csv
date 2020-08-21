@@ -1,0 +1,3 @@
+Name,WEAPBranch:Variable[unit]
+Tesalia inflow,Supply and Resources\Groundwater\Tesalia_01:Total Node Inflow[m^3]
+Tesalia storage,Supply and Resources\Groundwater\Tesalia_01:Storage[m^3]
