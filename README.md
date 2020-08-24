@@ -1,5 +1,6 @@
-Developed by Angelica Moncada (SEI-LAC Water Group member) (2020)
-R version 4.0.2
+Developed by Angelica Moncada (SEI-LAC Water Group member) (2020) under the R version 4.0.2
+https://www.weap21.org/
+https://www.sei.org/centres/latinoamerica/
 
 The WEAP Calibration and Ensemble with R tool serves to provide model builders with an automatic tool to assist in calibrating a WEAP model and/or run a WEAP ensemble.
 
