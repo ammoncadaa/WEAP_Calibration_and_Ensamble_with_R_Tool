@@ -1074,16 +1074,17 @@ shinyApp(
         write.csv(table,paste0(getwd(),"\\Resultsk_Summary","-SRp",input$srpercent,"-Z1",input$z1,"-Z2",input$z2,".csv"),row.names=F) 
         
         output$textRunEnsembleAConduc <- renderText({ paste0("Initial Conductivity was calculated for "," SRp: ",input$srpercent," Z1: ",input$z1," Z2: ",input$z2, ". Check the -SEI tool Results- folder within your working directory")  })
-        output$kestimate <- renderDataTable({
-          table
-        })
-        
       }
       
     })
+ 
+    output$kestimate <- renderDataTable({
+      table <- read.csv(paste0(getwd(),"\\Resultsk_Summary","-SRp",input$srpercent,"-Z1",input$z1,"-Z2",input$z2,".csv"), stringsAsFactors=F, check.names=F)
+      table
+    })
+    
     
     fileB <- reactive({
-      if (file.exists(paste0(getwd(),"\\ResultsGauges.csv"))){
         file <- read.csv(paste0(getwd(),"\\ResultsGauges.csv"), stringsAsFactors=F, check.names=F)
         colnames(file)=c("Year",
                          "Time step",
@@ -1103,38 +1104,14 @@ shinyApp(
         file <- aggregate(file[,1:(ncol(file)-1)], by=list(YearMonth=file$YearMonth),sum,na.rm=F)
         file$Dates=ymd(myDates)
         file$Q_P=round(file$Observed/file$Precipitation*100,2)
-        
-      } else {
-        file=data.frame(matrix(NA,ncol=6,nrow = 1))
-        colnames(file)=c("YearMonth" ,
-                         "Observed" ,
-                         "Precipitation",
-                         "Dates"   ,
-                         "Q_P"  ,
-                         "Month" )
-
-      }
-      fileB=file
-      fileB
+        fileB=file
+        fileB
     })
     
     fileA <- reactive({
-      if (file.exists(paste0(getwd(),"\\Resultsk","-SRp",input$srpercent,"-Z1",input$z1,"-Z2",input$z2,".csv"))){
-         file <- read.csv(paste0(getwd(),"\\Resultsk","-SRp",input$srpercent,"-Z1",input$z1,"-Z2",input$z2,".csv"), stringsAsFactors=F, check.names=F)
-        file$Dates=ymd(file$Dates)
-        file=file[file$Gauge==input$StreamflowSelectA,]
-        
-        
-      } else {
-        file=data.frame(matrix(NA,ncol=6,nrow = 1))
-        colnames(file)=c("Year",
-                         "Time step",
-                         "Gauge",
-                         "Dates", 
-                         "ks",
-                         "kd" )
-       
-      }
+      file <- read.csv(paste0(getwd(),"\\Resultsk","-SRp",input$srpercent,"-Z1",input$z1,"-Z2",input$z2,".csv"), stringsAsFactors=F, check.names=F)
+      file$Dates=ymd(file$Dates)
+      file=file[file$Gauge==input$StreamflowSelectA,]
       fileA=file
       fileA
     })
