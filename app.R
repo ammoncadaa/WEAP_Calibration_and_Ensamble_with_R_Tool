@@ -224,14 +224,13 @@ shinyApp(
                                      actionButton("actionA", label = "Run WEAP and Extract streamflow"),
                                      hr(),
                                      h5("When you click on -Run WEAP and Extract streamflow-, the calclations will begin and a progress bar at the bottom right corner of the tool interface will tell you the progress percentage of the calculations. You will also see that the result files appear within the working directoy."),
-                                     h5("After starting ensemble run, wait for all the runs to be done and the WEAP application to save before continuing."),
                                      hr(),
                                      textOutput("textRunEnsembleA"),
                                      textOutput("textRunEnsembleA1")
                            ),
                            wellPanel(h2("4.  User-defined values for estimating the initial conductivity", style = "color:green"),
                                      h5("Default values are already set. Update these to reflect the reality of your particular basin."),
-                                     numericInput('srpercent','3.1. How much of the streamflow is direct surface runoff (excluding base flow)? (%)',value=20),
+                                     numericInput('srpercent','3.1. How much of the streamflow is direct surface runoff (excluding base flow)? (DSR, %)',value=20),
                                      numericInput('z1','3.2. Enter in an estimate of the soil moisture content in the top bucket (z1, %)',value=30),
                                      numericInput('z2','3.3. Enter in an estimate of the soil moisture content in the bottom bucket (z2, %)',value=30),
                                      hr(),
@@ -239,7 +238,9 @@ shinyApp(
                                      hr(),
                                      actionButton("actionAConduc", label = "Calculate conductivity"),
                                      hr(),
+                                     h5("When finished, the name of the file created will appear below"),
                                      textOutput("textRunEnsembleAConduc")
+                                     
                            )
                     ),
                     column(8,
@@ -456,7 +457,7 @@ shinyApp(
                                      hr(),
                                      h5("When you click on -Run WEAP-, the ensemble will begin and a progress bar at the bottom right corner of the tool interface will tell you the progress percentage of the ensemble. You will also see new files start to appear within the working directoy, containing the results for each model run."),
                                      h5("After starting ensemble run, wait for all the runs to be done and the WEAP application to save before continuing."),
-                                     h5("You will know that the ensemble is finished when the progress bar disappears, and when you see the WEAP model stop running. At this point, you can go to the -3. Navigating Results- tab or -4. GOF filters- for exploring and filter the calibration results"),
+                                     h5("You will know that the ensemble is finished when the progress bar disappears, and when you see the WEAP model stop running. At this point, you can go to the -3. Navigating Results- tab or -4. GOF filters- for exploring and filter the calibration results or to the -5.User Graphs- tab to graph variables from any *.csv file."),
                                      hr(),
                                      textOutput("textRunEnsemble")
                            )
@@ -468,7 +469,6 @@ shinyApp(
         ),
         
         tabItem("Navigating_Results", 
-                fluidPage(
                   titlePanel(h1("Navigate Water balance results by combination of set of parameters", style = "color:green")),
                   hr(),
                   wellPanel(style = "background: white",
@@ -561,7 +561,8 @@ shinyApp(
                                                            wellPanel(plotlyOutput("SM2")))
                                                   ))))
                     ))
-                )),
+                ),
+      
         tabItem("GOF_filter", 
                 fluidPage(
                   titlePanel(h1("Select paramaters based on performance metrics", style = "color:green")),
@@ -593,8 +594,11 @@ shinyApp(
                              
                              h3("1. Calculate performance metrics within the indicated date range", style = "color:green"),
                              uiOutput("dateranget"),
-                             actionButton("actmetrics", label = "Calculate")),
-                      
+                             actionButton("actmetrics", label = "Calculate"),
+                            h5("When you click on -Calculate-, the calclations will begin and a progress bar at the bottom right corner of the tool interface will tell you the progress percentage of the calculations."),
+                            hr(),
+                            textOutput("textRunactmetrics")),
+                            
                       column(7,
                              
                              h3("2. Enter thresholds for performance metrics", style = "color:green"),
@@ -604,9 +608,39 @@ shinyApp(
                  
                   wellPanel(
                     h3("3. See filtered performance metrics", style = "color:green"),
-                    column(12,
-                           DT::dataTableOutput("metricsruns"),style = "overflow-x: scroll;" 
-                    )
+                    wellPanel(
+                      tabsetPanel(type="tabs",
+                                  tabPanel("Filtered GOF Graphs",
+                                           wellPanel(
+                                             fluidRow(
+                                               column(3,
+                                                      plotlyOutput("GOFtMAE")),
+                                               column(3,
+                                                      plotlyOutput("GOFtNRMSE")),
+                                               column(3,
+                                                      plotlyOutput("GOFtPBIAS")),
+                                               column(3,
+                                                      plotlyOutput("GOFtNSE"))
+                                             )),
+                                           hr(),
+                                           wellPanel(
+                                             fluidRow(
+                                               
+                                               column(3,
+                                                      plotlyOutput("GOFtd")),
+                                               column(3,
+                                                      plotlyOutput("GOFtR2")),
+                                               column(3,
+                                                      plotlyOutput("GOFtKGE")),
+                                               column(3,
+                                                      plotlyOutput("GOFtVE"))
+                                             ))
+                                  ),
+                                  tabPanel("Filtered GOF table",
+                                           column(12,
+                                                  DT::dataTableOutput("metricsruns"),style = "overflow-x: scroll;" 
+                                           ))
+                      ))
                   ),
                   wellPanel(
                     fluidRow(
@@ -630,32 +664,7 @@ shinyApp(
                                
                                wellPanel(
                                  tabsetPanel(type="tabs",
-                                             tabPanel("GOFs",
-                                                      wellPanel(
-                                                        fluidRow(
-                                                          column(3,
-                                                                 plotlyOutput("GOFtMAE")),
-                                                          column(3,
-                                                                 plotlyOutput("GOFtNRMSE")),
-                                                          column(3,
-                                                                 plotlyOutput("GOFtPBIAS")),
-                                                          column(3,
-                                                                 plotlyOutput("GOFtNSE"))
-                                                        )),
-                                                      hr(),
-                                                      wellPanel(
-                                                        fluidRow(
-                                                          
-                                                          column(3,
-                                                                 plotlyOutput("GOFtd")),
-                                                          column(3,
-                                                                 plotlyOutput("GOFtR2")),
-                                                          column(3,
-                                                                 plotlyOutput("GOFtKGE")),
-                                                          column(3,
-                                                                 plotlyOutput("GOFtVE"))
-                                                        ))
-                                             ),	 	
+	 	
                                              tabPanel("Streamflow",
                                                       fluidRow(
                                                         
@@ -694,6 +703,7 @@ shinyApp(
                              )
                       )))
                 )),
+      
         tabItem("Graphs", 
                 fluidPage(
                   titlePanel(h1("Select the file which contains the variables to plot", style = "color:green")),
@@ -712,8 +722,8 @@ shinyApp(
                     textInput("WD_resultsGraphs", "", "", width="80%"),
                     textOutput("textWD_resultsGraphs"),
                     hr(),
-                    h2("2. Choose de *.cvs file.", style = "color:green"),
-                    h5("The list of the *.cvs files within the working directory are listed below:"),
+                    h2("2. Choose de *.csv file.", style = "color:green"),
+                    h5("The list of the *.csv files within the working directory are listed below:"),
                     uiOutput("UploadedFileCsv"),
                     hr(),
                     h5("When the file is imported, it will appear here below:"),
@@ -1070,16 +1080,16 @@ shinyApp(
           
         }
         
-        write.csv(obs[,c(-4,-5)],paste0(getwd(),"\\Resultsk","-SRp",input$srpercent,"-Z1",input$z1,"-Z2",input$z2,".csv"),row.names=F) 
-        write.csv(table,paste0(getwd(),"\\Resultsk_Summary","-SRp",input$srpercent,"-Z1",input$z1,"-Z2",input$z2,".csv"),row.names=F) 
+        write.csv(obs[,c(-4,-5)],paste0(getwd(),"\\Resultsk","-DSR",input$srpercent,"-Z1",input$z1,"-Z2",input$z2,".csv"),row.names=F) 
+        write.csv(table,paste0(getwd(),"\\Resultsk_Summary","-DSR",input$srpercent,"-Z1",input$z1,"-Z2",input$z2,".csv"),row.names=F) 
         
-        output$textRunEnsembleAConduc <- renderText({ paste0("Initial Conductivity was calculated for "," SRp: ",input$srpercent," Z1: ",input$z1," Z2: ",input$z2, ". Check the -SEI tool Results- folder within your working directory")  })
+        output$textRunEnsembleAConduc <- renderText({ paste0("Initial Conductivity was calculated for "," DSR: ",input$srpercent," Z1: ",input$z1," Z2: ",input$z2, ". Check the -SEI tool Results- folder within your working directory")  })
       }
       
     })
  
     output$kestimate <- renderDataTable({
-      table <- read.csv(paste0(getwd(),"\\Resultsk_Summary","-SRp",input$srpercent,"-Z1",input$z1,"-Z2",input$z2,".csv"), stringsAsFactors=F, check.names=F)
+      table <- read.csv(paste0(getwd(),"\\Resultsk_Summary","-DSR",input$srpercent,"-Z1",input$z1,"-Z2",input$z2,".csv"), stringsAsFactors=F, check.names=F)
       table
     })
     
@@ -1109,7 +1119,7 @@ shinyApp(
     })
     
     fileA <- reactive({
-      file <- read.csv(paste0(getwd(),"\\Resultsk","-SRp",input$srpercent,"-Z1",input$z1,"-Z2",input$z2,".csv"), stringsAsFactors=F, check.names=F)
+      file <- read.csv(paste0(getwd(),"\\Resultsk","-DSR",input$srpercent,"-Z1",input$z1,"-Z2",input$z2,".csv"), stringsAsFactors=F, check.names=F)
       file$Dates=ymd(file$Dates)
       file=file[file$Gauge==input$StreamflowSelectA,]
       fileA=file
@@ -1120,7 +1130,7 @@ shinyApp(
       file=fileA()
        p1 <-plot_ly(file, x=~Dates, y=~ks, name = "ks, top bucket conductivity", type="scatter", mode="lines",
                    line = list(color="red",width=1.5)) %>%
-        layout(title = paste0("ks, top bucket conductivity ",input$StreamflowSelectA),
+        layout(title = paste0("ks, top bucket conductivity ",input$StreamflowSelectA," DSR:",input$srpercent,"% Z1:",input$z1,"% Z2:",input$z2,"%"),
                xaxis = list(title=""),
                yaxis = list(title= "ks (mm)"))
       p1
@@ -1131,7 +1141,7 @@ shinyApp(
       file=fileA()
       p2 <-plot_ly(file, x=~Dates, y=~kd, name = "kd, bottom bucket conductivity", type="scatter", mode="lines",
                    line = list(color="red",width=1.5)) %>%
-        layout(title = paste0("kd, bottom bucket conductivity ",input$StreamflowSelectA),
+        layout(title = paste0("kd, bottom bucket conductivity ",input$StreamflowSelectA," DSR:",input$srpercent,"% Z1:",input$z1,"% Z2:",input$z2,"%"),
                xaxis = list(title=""),
                yaxis = list(title= "kd (mm)"))
       p2
@@ -1205,6 +1215,12 @@ shinyApp(
           colnames(table) <- c("Nrun",as.vector(data[,1]))
           
           write.csv(table,paste0(getwd(),"//KeyModelInputs.csv"),row.names=F)
+          
+          output$textWEAPKeyEnsemble <- renderText({ 
+            runs <- nrow(table)
+            paste0("Your WEAP model will need to run ", runs," times")
+          })
+          
           data
           
         } else {
@@ -1220,6 +1236,12 @@ shinyApp(
         if (!is.null(inFile2)) {
           data <- read.csv(inFile2$datapath, stringsAsFactors=F, check.names=F)
           write.csv(data,paste0(getwd(),"//KeyModelInputs.csv"),row.names=F)
+          
+          output$textWEAPKeyEnsemble <- renderText({ 
+            runs <- nrow(data)
+            paste0("Your WEAP model will need to run ", runs," times")
+          })
+          
           data
         } else {
           return(NULL)
@@ -1239,13 +1261,6 @@ shinyApp(
       read.csv(inFile$datapath, stringsAsFactors=F, check.names=F)
     })
     
-    output$textWEAPKeyEnsemble <- renderText({ 
-      if(is.null(input$WEAPKeyEnsemble)){return("The WEAP model will be run 0 times")}
-      inFile <- input$WEAPKeyEnsemble
-      data <- read.csv(inFile$datapath, stringsAsFactors=F, check.names=F)
-      runs <- prod(data$Variations)
-      paste0("Your WEAP model will need to run ", runs," times")
-    })
     
     output$tableWEAPKeyExport <- renderDataTable({
       inFile <- input$WEAPKeyExport
@@ -1271,7 +1286,7 @@ shinyApp(
     })
     
     output$textWEAPKeyGaugesCatchments <- renderText({ 
-      if(is.null(input$WEAPKeyGaugesCatchments)){return("Calibration analisis will be made in 0 streamflowgauges")}
+      if(is.null(input$WEAPKeyGaugesCatchments)){return("Calibration analysis will be made in 0 streamflowgauges")}
       inFile <- input$WEAPKeyGaugesCatchments
       data <- read.csv(inFile$datapath, stringsAsFactors=F, check.names=F)
       runs <- length(unique(data$Gauge))
@@ -2701,6 +2716,8 @@ shinyApp(
       input$datest
     })
     
+    output$textRunactmetrics <- renderText({("Press button to calculate")})
+    
     observeEvent(input$actmetrics,{
       
       if (length(list.files(getwd(),pattern ="ResultsWB-")>0) && file.exists(paste0(getwd(),"//KeyModelInputs.csv"))){
@@ -2852,6 +2869,9 @@ shinyApp(
           paste0("Runs are between ",min(keysset[,1]), " and ", max(keysset[,1])) 
         })
         
+        output$textRunactmetrics <- renderText({
+          paste0("The file SummaryGOF_",as.character(input$datest[1]),"-",as.character(input$datest[2]),".csv was created")
+          })
         
       } 
     })
