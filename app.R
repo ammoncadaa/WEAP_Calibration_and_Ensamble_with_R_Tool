@@ -223,7 +223,7 @@ shinyApp(
                                      hr(),
                                      actionButton("actionA", label = "Run WEAP and Extract streamflow"),
                                      hr(),
-                                     h5("When you click on -Run WEAP and Extract streamflow-, the calclations will begin and a progress bar at the bottom right corner of the tool interface will tell you the progress percentage of the calculations. You will also see that the result files appear within the working directoy."),
+                                     h5("When you click on -Run WEAP and Extract streamflow-, the calculations will begin and a progress bar at the bottom right corner of the tool interface will tell you the progress percentage of the calculations. You will also see that the result files appear within the working directoy."),
                                      hr(),
                                      textOutput("textRunEnsembleA"),
                                      textOutput("textRunEnsembleA1")
@@ -247,17 +247,17 @@ shinyApp(
                            wellPanel(
                              h2("6. View results", style = "color:green"),
                              hr(),
+                             h3("Ratio of Observed Streamflow to Precipitation", style = "color:green"),
                              uiOutput("StreamflowA"),
-                             hr(),
-                             h4("Ratio of Observed Streamflow to Precipitation", style = "color:green"),
                              wellPanel(
                                plotlyOutput("Q_Pmonthly")),
                              wellPanel(
                                plotlyOutput("Q_Pboxplot")),
                              hr(),
-                             h4("Conductivity", style = "color:green"),
+                             h3("Conductivity", style = "color:green"),
                              wellPanel(
                                dataTableOutput("kestimate")),
+                             uiOutput("StreamflowAA"),
                              wellPanel(
                                plotlyOutput("kestimateGraphks")),
                              wellPanel(
@@ -789,6 +789,18 @@ shinyApp(
       }
     })
     
+    output$StreamflowA <- renderUI({
+      gauges="Run WEAP and Extract streamflow first (section 1 to 3)"
+      selectInput("StreamflowSelectA", "Streamflow Gauge",gauges)
+      
+    })
+
+    output$StreamflowAA <- renderUI({
+      gauges="Calculate conductivity first (section 4)"
+      selectInput("StreamflowSelectAA", "Streamflow Gauge",gauges)
+      
+    })
+    
     output$textRunEnsembleA <- renderText({("Press button to run. Run time will appear here when finished.")})
     
     output$textRunEnsembleAConduc <- renderText({("Press button to calculate")})
@@ -798,18 +810,6 @@ shinyApp(
       if (is.null(inFile))
         return(NULL)
       read.csv(inFile$datapath, stringsAsFactors=F, check.names=F)
-    })
-    
-    output$StreamflowA <- renderUI({
-        inFile <- input$WEAPKeyGaugesCatchmentsA
-      if (!is.null(inFile)) {
-        filek=read.csv(inFile$datapath, stringsAsFactors=F, check.names=F)
-        gauges=unique(filek[,1])
-        selectInput("StreamflowSelectA", "Streamflow Gauge",gauges)
-      } else {
-        gauges="Upload WEAPKeyGaugesCatchments.csv file"
-        selectInput("StreamflowSelectA", "Streamflow Gauge",gauges)
-      }
     })
     
     output$textWEAPKeyGaugesCatchmentsA <- renderText({ 
@@ -1017,6 +1017,12 @@ shinyApp(
       output$textRunEnsembleA <- renderText({format(as.difftime(difftime(Sys.time(),start), format = "%H:%M")) })
       output$textRunEnsembleA1 <- renderText({paste0("Results imported and save within the working directory") })
       
+      output$StreamflowA <- renderUI({
+          gauges=unique(resultsWB[,3])
+          selectInput("StreamflowSelectA", "Streamflow Gauge",gauges)
+      })
+      
+      
     })
     
     observeEvent(input$actionAConduc,{ 
@@ -1083,20 +1089,27 @@ shinyApp(
         write.csv(table,paste0(getwd(),"\\Resultsk_Summary","-DSR",input$srpercent,"-Z1",input$z1,"-Z2",input$z2,".csv"),row.names=F) 
         
         output$textRunEnsembleAConduc <- renderText({ paste0("Initial Conductivity was calculated for "," DSR: ",input$srpercent," Z1: ",input$z1," Z2: ",input$z2, ". Check the -SEI tool Results- folder within your working directory")  })
-      }
+      
+        table <- read.csv(paste0(getwd(),"\\Resultsk_Summary","-DSR",input$srpercent,"-Z1",input$z1,"-Z2",input$z2,".csv"), stringsAsFactors=F, check.names=F)
+        table
+        output$kestimate <- renderDataTable({
+          table
+        })
+        
+        output$StreamflowAA <- renderUI({
+          gauges=unique(table[,1])
+          selectInput("StreamflowSelectAA", "Streamflow Gauge",gauges)
+        })
+        
+        
+        }
       
     })
-
-    table <- reactive({
-      table <- read.csv(paste0(getwd(),"\\Resultsk_Summary","-DSR",input$srpercent,"-Z1",input$z1,"-Z2",input$z2,".csv"), stringsAsFactors=F, check.names=F)
-      table
-    })
-    
-    output$kestimate <- renderDataTable({
-      tabe()
-    })
-     
-    fileB <- reactive({
+ 
+    observeEvent(input$StreamflowSelectA,{ 
+      
+      if (file.exists(paste0(getwd(),"\\ResultsGauges.csv"))){
+        
         file <- read.csv(paste0(getwd(),"\\ResultsGauges.csv"), stringsAsFactors=F, check.names=F)
         colnames(file)=c("Year",
                          "Time step",
@@ -1116,80 +1129,75 @@ shinyApp(
         file <- aggregate(file[,1:(ncol(file)-1)], by=list(YearMonth=file$YearMonth),sum,na.rm=F)
         file$Dates=ymd(myDates)
         file$Q_P=round(file$Observed/file$Precipitation*100,2)
-        fileB=file
-        fileB
+        #fileB=file
+        #fileB
+        
+        output$Q_Pmonthly <- renderPlotly({
+          # file=fileB()
+          p <-plot_ly(file, x=~Dates, y=~Precipitation, name = "Precipitation", type="bar",text=~paste0("Precipitation = ", Precipitation)) %>%
+            add_trace(y=~Observed, name="Observed Streamflow", type="scatter", mode="line", text=~paste0("Observed = ", Observed)) %>%
+            add_trace(x = ~Dates, y = ~Q_P, name = "% Observed streamflow/Precipitation", type="scatter", mode="line", text=~paste0("% Observed streamflow/Precipitation = ", Q_P), yaxis = "y2") %>%
+            layout(yaxis2 = list(overlaying = "y", side = "right", title = "Observed streamflow/Precipitation (%)"), 
+                   title = paste0("Monthly Precipitation and Observed streamflow ",input$StreamflowSelectA),
+                   xaxis = list(title="Dates"),
+                   yaxis = list(title= "Observed streamflow and Precipitation (mm)"))
+          p
+          
+          
+        })
+        
+        output$Q_Pboxplot <- renderPlotly({
+          # file=fileB()
+          file$Month=file$YearMonth%%100
+          file1 <- aggregate(file[,c(2,3,5)], by=list(Month=file$Month),mean,na.rm=T)
+          final_df=merge(file1,file,all.x = TRUE,all.y = TRUE,by="Month")
+          p <-plot_ly(final_df, x = ~Month, y = ~Q_P.x, name = "% Observed streamflow/Precipitation", type="scatter", mode="line", text=~paste0("% Observed streamflow/Precipitation = ",  Q_P.x))  %>% 
+            add_trace(x = ~Month, y = ~Q_P.y, type="box", name="% Observed streamflow/Precipitation",  text=~paste0("% Observed streamflow/Precipitation = ", Q_P.y)) %>% 
+            layout( title = paste0("Monthly Observed streamflow/Precipitation (%) ",input$StreamflowSelectA),
+                    xaxis = list(title="Month"),
+                    yaxis = list(title= "Observed streamflow/Precipitation (%)"))
+          p
+        }) 
+        
+      }
     })
     
-    fileA <- reactive({
+    observeEvent(input$StreamflowSelectAA,{ 
+      
+      if (file.exists(paste0(getwd(),"\\Resultsk","-DSR",input$srpercent,"-Z1",input$z1,"-Z2",input$z2,".csv"))){
+      
       file <- read.csv(paste0(getwd(),"\\Resultsk","-DSR",input$srpercent,"-Z1",input$z1,"-Z2",input$z2,".csv"), stringsAsFactors=F, check.names=F)
       file$Dates=ymd(file$Dates)
-      file=file[file$Gauge==input$StreamflowSelectA,]
-      fileA=file
-      fileA
-    })
-    
-    output$kestimateGraphks <- renderPlotly({
-      file=fileA()
-       p1 <-plot_ly(file, x=~Dates, y=~ks, name = "ks, top bucket conductivity", type="scatter", mode="lines",
-                   line = list(color="red",width=1.5)) %>%
-        layout(title = paste0("ks, top bucket conductivity ",input$StreamflowSelectA," DSR:",input$srpercent,"% Z1:",input$z1,"% Z2:",input$z2,"%"),
-               xaxis = list(title=""),
-               yaxis = list(title= "ks (mm)"))
-      p1
+      file=file[file$Gauge==input$StreamflowSelectAA,]
+      #fileA=file
+      #fileA
       
-    })
-    
-    output$kestimateGraphkd <- renderPlotly({
-      file=fileA()
-      p2 <-plot_ly(file, x=~Dates, y=~kd, name = "kd, bottom bucket conductivity", type="scatter", mode="lines",
-                   line = list(color="red",width=1.5)) %>%
-        layout(title = paste0("kd, bottom bucket conductivity ",input$StreamflowSelectA," DSR:",input$srpercent,"% Z1:",input$z1,"% Z2:",input$z2,"%"),
-               xaxis = list(title=""),
-               yaxis = list(title= "kd (mm)"))
-      p2
+      output$kestimateGraphks <- renderPlotly({
+        #file=fileA()
+        p1 <-plot_ly(file, x=~Dates, y=~ks, name = "ks, top bucket conductivity", type="scatter", mode="lines",
+                     line = list(color="red",width=1.5)) %>%
+          layout(title = paste0("ks, top bucket conductivity ",input$StreamflowSelectAA," DSR:",input$srpercent,"% Z1:",input$z1,"% Z2:",input$z2,"%"),
+                 xaxis = list(title=""),
+                 yaxis = list(title= "ks (mm)"))
+        p1
+        
+      })
       
-    })
-    
-    output$Q_Pmonthly <- renderPlotly({
-      file=fileB()
-       p <-plot_ly(file, x=~Dates, y=~Precipitation, name = "Precipitation", type="bar",text=~paste0("Precipitation = ", Precipitation)) %>%
-        add_trace(y=~Observed, name="Observed Streamflow", type="scatter", mode="line", text=~paste0("Observed = ", Observed)) %>%
-        add_trace(x = ~Dates, y = ~Q_P, name = "% Observed streamflow/Precipitation", type="scatter", mode="line", text=~paste0("% Observed streamflow/Precipitation = ", Q_P), yaxis = "y2") %>%
-        layout(yaxis2 = list(overlaying = "y", side = "right", title = "Observed streamflow/Precipitation (%)"), 
-               title = paste0("Monthly Precipitation and Observed streamflow ",input$StreamflowSelectA),
-               xaxis = list(title="Dates"),
-               yaxis = list(title= "Observed streamflow and Precipitation (mm)"))
-      p
-      
-      
-    })
-    
-    output$Q_Pboxplot <- renderPlotly({
-      
-      file=fileB()
-       
-      if (nrow(file)==1){
-        file1=data.frame(matrix(NA,ncol=4,nrow = 1))
-        colnames(file1)=data.frame("Month" ,
-                                   "Observed" ,
-                                   "Precipitation",
-                                   "Q_P"   )
-      } else {
-        file$Month=file$YearMonth%%100
-        file1 <- aggregate(file[,c(2,3,5)], by=list(Month=file$Month),mean,na.rm=T)
+      output$kestimateGraphkd <- renderPlotly({
+        #file=fileA()
+        p2 <-plot_ly(file, x=~Dates, y=~kd, name = "kd, bottom bucket conductivity", type="scatter", mode="lines",
+                     line = list(color="red",width=1.5)) %>%
+          layout(title = paste0("kd, bottom bucket conductivity ",input$StreamflowSelectAA," DSR:",input$srpercent,"% Z1:",input$z1,"% Z2:",input$z2,"%"),
+                 xaxis = list(title=""),
+                 yaxis = list(title= "kd (mm)"))
+        p2
+        
+      })
       }
       
-      final_df=merge(file1,file,all.x = TRUE,all.y = TRUE,by="Month")
-      
-      p <-plot_ly(final_df, x = ~Month, y = ~Q_P.x, name = "% Observed streamflow/Precipitation", type="scatter", mode="line", text=~paste0("% Observed streamflow/Precipitation = ",  Q_P.x))  %>% 
-        add_trace(x = ~Month, y = ~Q_P.y, type="box", name="% Observed streamflow/Precipitation",  text=~paste0("% Observed streamflow/Precipitation = ", Q_P.y)) %>% 
-        layout( title = paste0("Monthly Observed streamflow/Precipitation (%) ",input$StreamflowSelectA),
-                xaxis = list(title="Month"),
-                yaxis = list(title= "Observed streamflow/Precipitation (%)"))
-      p
-      
-      
-    }) 
+    })
+    
+     ##
     
     observeEvent(input$WEAPKeyEnsemble,{
       output$tableWEAPKeyEnsemble <- renderDataTable({
