@@ -609,39 +609,12 @@ shinyApp(
                   wellPanel(
                     h3("3. See filtered performance metrics", style = "color:green"),
                     wellPanel(
-                      tabsetPanel(type="tabs",
-                                  tabPanel("Filtered GOF Graphs",
-                                           wellPanel(
-                                             fluidRow(
-                                               column(3,
-                                                      plotlyOutput("GOFtMAE")),
-                                               column(3,
-                                                      plotlyOutput("GOFtNRMSE")),
-                                               column(3,
-                                                      plotlyOutput("GOFtPBIAS")),
-                                               column(3,
-                                                      plotlyOutput("GOFtNSE"))
-                                             )),
-                                           hr(),
-                                           wellPanel(
-                                             fluidRow(
-                                               
-                                               column(3,
-                                                      plotlyOutput("GOFtd")),
-                                               column(3,
-                                                      plotlyOutput("GOFtR2")),
-                                               column(3,
-                                                      plotlyOutput("GOFtKGE")),
-                                               column(3,
-                                                      plotlyOutput("GOFtVE"))
-                                             ))
-                                  ),
-                                  tabPanel("Filtered GOF table",
-                                           column(12,
-                                                  DT::dataTableOutput("metricsruns"),style = "overflow-x: scroll;" 
-                                           ))
-                      ))
+                      column(12,
+                             DT::dataTableOutput("metricsruns"),style = "overflow-x: scroll;" 
+                      )
+                      )
                   ),
+                  hr(),
                   wellPanel(
                     fluidRow(
                       h3("4. Visualize results for a specified run", style = "color:green"),
@@ -663,8 +636,34 @@ shinyApp(
                              fluidRow(
                                
                                wellPanel(
+                                 h4("the -Filtered GOF Graphs- tab shows only the filtered GOFs of the selected gauge. The graphs shown in the -Streamflow- tab and the -Water Balance- tab are for the selected run and the selected gauge."),
                                  tabsetPanel(type="tabs",
-	 	
+                                             tabPanel("Filtered GOF Graphs",
+                                                      wellPanel(
+                                                        fluidRow(
+                                                          column(3,
+                                                                 plotlyOutput("GOFtMAE")),
+                                                          column(3,
+                                                                 plotlyOutput("GOFtNRMSE")),
+                                                          column(3,
+                                                                 plotlyOutput("GOFtPBIAS")),
+                                                          column(3,
+                                                                 plotlyOutput("GOFtNSE"))
+                                                        )),
+                                                      hr(),
+                                                      wellPanel(
+                                                        fluidRow(
+                                                          
+                                                          column(3,
+                                                                 plotlyOutput("GOFtd")),
+                                                          column(3,
+                                                                 plotlyOutput("GOFtR2")),
+                                                          column(3,
+                                                                 plotlyOutput("GOFtKGE")),
+                                                          column(3,
+                                                                 plotlyOutput("GOFtVE"))
+                                                        ))
+                                             ),
                                              tabPanel("Streamflow",
                                                       fluidRow(
                                                         
@@ -1087,13 +1086,16 @@ shinyApp(
       }
       
     })
- 
-    output$kestimate <- renderDataTable({
+
+    table <- reactive({
       table <- read.csv(paste0(getwd(),"\\Resultsk_Summary","-DSR",input$srpercent,"-Z1",input$z1,"-Z2",input$z2,".csv"), stringsAsFactors=F, check.names=F)
       table
     })
     
-    
+    output$kestimate <- renderDataTable({
+      tabe()
+    })
+     
     fileB <- reactive({
         file <- read.csv(paste0(getwd(),"\\ResultsGauges.csv"), stringsAsFactors=F, check.names=F)
         colnames(file)=c("Year",
@@ -1189,7 +1191,6 @@ shinyApp(
       
     }) 
     
-    
     observeEvent(input$WEAPKeyEnsemble,{
       output$tableWEAPKeyEnsemble <- renderDataTable({
         inFile1 <- input$WEAPKeyEnsemble
@@ -1260,7 +1261,6 @@ shinyApp(
       
       read.csv(inFile$datapath, stringsAsFactors=F, check.names=F)
     })
-    
     
     output$tableWEAPKeyExport <- renderDataTable({
       inFile <- input$WEAPKeyExport
@@ -2877,21 +2877,13 @@ shinyApp(
     })
     
     metricssub <- reactive({
-      
       nset <- input$nse
       nrmset <- input$nrmse
       biast <- input$bias
       
-       
-      if (file.exists(paste0(getwd(),"\\SummaryGOF_",as.character(input$datest[1]),"-",as.character(input$datest[2]),".csv"))){
-        metricsall <- read.csv(paste0(getwd(),"\\SummaryGOF_",as.character(input$datest[1]),"-",as.character(input$datest[2]),".csv"),check.names=F,stringsAsFactors = F)
-        metricssub <- metricsall[which(metricsall[,16] >= nset & metricsall[,14] <= nrmset & abs(metricsall[,15]) <= biast),c(1,2,13:ncol(metricsall))]
-       }else {
-        metricssub <- as.data.frame(matrix(NA,nrow=1,ncol=1))
-        colnames(metricssub)="Run -2. Calibration Ensemble- section and calculate performance metrics first (step 1 within this section)."
-        }
-      
-      metricssub
+     metricsall <- read.csv(paste0(getwd(),"\\SummaryGOF_",as.character(input$datest[1]),"-",as.character(input$datest[2]),".csv"),check.names=F,stringsAsFactors = F)
+     metricssub <- metricsall[which(metricsall[,16] >= nset & metricsall[,14] <= nrmset & abs(metricsall[,15]) <= biast),c(1,2,13:ncol(metricsall))]
+     metricssub
       
     })
     output$metricsruns <- renderDataTable({
@@ -3135,8 +3127,6 @@ shinyApp(
     })
     
     output$GOFtMAE = renderPlotly({
-      
-      if (file.exists(paste0(getwd(),"\\SummaryGOF_",as.character(input$datest[1]),"-",as.character(input$datest[2]),".csv"))){
         file=metricssub()
         file=file[file$Gauge==input$StreamflowSelectt,]
         data=file
@@ -3147,14 +3137,10 @@ shinyApp(
                  xaxis = list(title="Type"),
                  yaxis = list(title="MAE"))
         
-        d
-      }
-      
+        d     
     })  
     output$GOFtNRMSE = renderPlotly({
-      
-      if (file.exists(paste0(getwd(),"\\SummaryGOF_",as.character(input$datest[1]),"-",as.character(input$datest[2]),".csv"))){
-        file=metricssub()
+         file=metricssub()
         file=file[file$Gauge==input$StreamflowSelectt,]
         data=file
         
@@ -3165,12 +3151,8 @@ shinyApp(
                  yaxis = list(title="NRMSE"))
         
         d
-      }
-      
     })  
     output$GOFtPBIAS = renderPlotly({
-      
-      if (file.exists(paste0(getwd(),"\\SummaryGOF_",as.character(input$datest[1]),"-",as.character(input$datest[2]),".csv"))){
         file=metricssub()
         file=file[file$Gauge==input$StreamflowSelectt,]
         data=file
@@ -3182,12 +3164,9 @@ shinyApp(
                  yaxis = list(title="PBIAS"))
         
         d
-      }
       
     })  
     output$GOFtNSE = renderPlotly({
-      
-      if (file.exists(paste0(getwd(),"\\SummaryGOF_",as.character(input$datest[1]),"-",as.character(input$datest[2]),".csv"))){
         file=metricssub()
         file=file[file$Gauge==input$StreamflowSelectt,]
         data=file
@@ -3199,12 +3178,9 @@ shinyApp(
                  yaxis = list(title="NSE"))
         
         d
-      }
       
     })  
     output$GOFtd = renderPlotly({
-      
-      if (file.exists(paste0(getwd(),"\\SummaryGOF_",as.character(input$datest[1]),"-",as.character(input$datest[2]),".csv"))){
         file=metricssub()
         file=file[file$Gauge==input$StreamflowSelectt,]
         data=file
@@ -3216,12 +3192,9 @@ shinyApp(
                  yaxis = list(title="d"))
         
         d
-      }
       
     })  
     output$GOFtR2 = renderPlotly({
-      
-      if (file.exists(paste0(getwd(),"\\SummaryGOF_",as.character(input$datest[1]),"-",as.character(input$datest[2]),".csv"))){
         file=metricssub()
         file=file[file$Gauge==input$StreamflowSelectt,]
         data=file
@@ -3233,12 +3206,8 @@ shinyApp(
                  yaxis = list(title="R2"))
         
         d
-      }
-      
     })  
     output$GOFtKGE = renderPlotly({
-      
-      if (file.exists(paste0(getwd(),"\\SummaryGOF_",as.character(input$datest[1]),"-",as.character(input$datest[2]),".csv"))){
         file=metricssub()
         file=file[file$Gauge==input$StreamflowSelectt,]
         data=file
@@ -3250,12 +3219,9 @@ shinyApp(
                  yaxis = list(title="KGE"))
         
         d
-      }
       
     })  
     output$GOFtVE = renderPlotly({
-      
-      if (file.exists(paste0(getwd(),"\\SummaryGOF_",as.character(input$datest[1]),"-",as.character(input$datest[2]),".csv"))){
         file=metricssub()
         file=file[file$Gauge==input$StreamflowSelectt,]
         data=file
@@ -3267,7 +3233,6 @@ shinyApp(
                  yaxis = list(title="VE"))
         
         d
-      }
       
     })  
     
