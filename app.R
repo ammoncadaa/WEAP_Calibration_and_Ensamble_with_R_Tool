@@ -246,6 +246,9 @@ shinyApp(
                     column(8,
                            wellPanel(
                              h2("6. View results", style = "color:green"),
+                             #hr(),
+                             h4("If the tool was used before and the results were already calculated (section 1 to 4), the button -Update results- will load the -ResultsGauges.csv-, -Resultsk_Summary-DSR_-Z1_-Z2_.csv- and -Resultsk-DSR_-Z1_-Z2_.csv- files. Graphs will be shown."),
+                             actionButton("actionUpdate", label = "Update results"),
                              hr(),
                              h3("Ratio of Observed Streamflow to Precipitation", style = "color:green"),
                              uiOutput("StreamflowA"),
@@ -789,17 +792,6 @@ shinyApp(
       }
     })
     
-    output$StreamflowA <- renderUI({
-      gauges="Run WEAP and Extract streamflow first (section 1 to 3)"
-      selectInput("StreamflowSelectA", "Streamflow Gauge",gauges)
-      
-    })
-
-    output$StreamflowAA <- renderUI({
-      gauges="Calculate conductivity first (section 4)"
-      selectInput("StreamflowSelectAA", "Streamflow Gauge",gauges)
-      
-    })
     
     output$textRunEnsembleA <- renderText({("Press button to run. Run time will appear here when finished.")})
     
@@ -1091,7 +1083,6 @@ shinyApp(
         output$textRunEnsembleAConduc <- renderText({ paste0("Initial Conductivity was calculated for "," DSR: ",input$srpercent," Z1: ",input$z1," Z2: ",input$z2, ". Check the -SEI tool Results- folder within your working directory")  })
       
         table <- read.csv(paste0(getwd(),"\\Resultsk_Summary","-DSR",input$srpercent,"-Z1",input$z1,"-Z2",input$z2,".csv"), stringsAsFactors=F, check.names=F)
-        table
         output$kestimate <- renderDataTable({
           table
         })
@@ -1105,7 +1096,34 @@ shinyApp(
         }
       
     })
- 
+    
+    observeEvent(input$actionUpdate,{
+      
+      if (file.exists(paste0(getwd(),"\\ResultsGauges.csv")) && file.exists(paste0(getwd(),"\\Resultsk_Summary","-DSR",input$srpercent,"-Z1",input$z1,"-Z2",input$z2,".csv"))){
+        
+      table <- read.csv(paste0(getwd(),"\\Resultsk_Summary","-DSR",input$srpercent,"-Z1",input$z1,"-Z2",input$z2,".csv"), stringsAsFactors=F, check.names=F)
+      file <- read.csv(paste0(getwd(),"\\ResultsGauges.csv"), stringsAsFactors=F, check.names=F)
+      
+      output$StreamflowA <- renderUI({
+        
+        gauges=unique(file[,3])
+        selectInput("StreamflowSelectA", "Streamflow Gauge",gauges)
+      })
+      
+      output$StreamflowAA <- renderUI({
+        gauges=unique(table[,1])
+        selectInput("StreamflowSelectAA", "Streamflow Gauge",gauges)
+      })
+      
+      output$kestimate <- renderDataTable({
+        table
+      })
+      
+      
+      }
+      
+    })
+
     observeEvent(input$StreamflowSelectA,{ 
       
       if (file.exists(paste0(getwd(),"\\ResultsGauges.csv"))){
