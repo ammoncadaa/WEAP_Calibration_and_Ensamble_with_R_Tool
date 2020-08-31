@@ -110,7 +110,7 @@ shinyApp(
                       The name of the files does not need to be the same. However, column names of each file must be the same."),
                                  br("Templates of the input files can be downloaded from:"),
                                  tags$div(class = "submit",
-                                          tags$a(href = "https://www.dropbox.com/sh/onodjgt4pj5ggca/AADScBw10VDCyfsh8BnHhVCCa?dl=0", 
+                                          tags$a(href = "https://github.com/ammoncadaa/WEAP_Calibration_and_Ensamble_with_R_Tool", 
                                                  "Download template files", 
                                                  target="_blank")
                                  ),
@@ -1020,13 +1020,7 @@ shinyApp(
     observeEvent(input$actionAConduc,{ 
       
       if (file.exists(paste0(getwd(),"\\ResultsGauges.csv"))) {
-        sy <- input$startA
-        ey <- input$endA
-        ts <- input$tsA
-        
-        years <- seq(as.numeric(sy),as.numeric(ey))
-        rows <- (as.numeric(ey)-as.numeric(sy)+1)*as.numeric(ts)
-        
+       
         obs <- read.csv(paste0(getwd(),"//ResultsGauges.csv"), stringsAsFactors=F, check.names=F)
         obs=obs[,-6]
         colnames(obs)=c("Year",
@@ -1035,6 +1029,15 @@ shinyApp(
                         "Observed",
                         "Area",
                         "Dates")
+        
+        
+        sy <- min(obs$Year)
+        ey <- max(obs$Year)
+        ts <- max(obs$`Time step`)
+        
+        years <- seq(as.numeric(sy),as.numeric(ey))
+        rows <- (as.numeric(ey)-as.numeric(sy)+1)*as.numeric(ts)
+        
         obs$ks=NA
         obs$kd=NA
         
@@ -1091,6 +1094,43 @@ shinyApp(
           gauges=unique(table[,1])
           selectInput("StreamflowSelectAA", "Streamflow Gauge",gauges)
         })
+        
+        if (file.exists(paste0(getwd(),"\\Resultsk","-DSR",input$srpercent,"-Z1",input$z1,"-Z2",input$z2,".csv"))){
+          
+          file <- read.csv(paste0(getwd(),"\\Resultsk","-DSR",input$srpercent,"-Z1",input$z1,"-Z2",input$z2,".csv"), stringsAsFactors=F, check.names=F)
+          file$Dates=ymd(file$Dates)
+          file=file[file$Gauge==input$StreamflowSelectAA,]
+          #fileA=file
+          #fileA
+          
+          output$kestimateGraphks <- renderPlotly({
+            #file=fileA()
+            if (file.exists(paste0(getwd(),"\\Resultsk","-DSR",input$srpercent,"-Z1",input$z1,"-Z2",input$z2,".csv"))){
+              
+              p1 <-plot_ly(file, x=~Dates, y=~ks, name = "ks, top bucket conductivity", type="scatter", mode="lines",
+                           line = list(color="red",width=1.5)) %>%
+                layout(title = paste0("ks, top bucket conductivity ",input$StreamflowSelectAA," DSR:",input$srpercent,"% Z1:",input$z1,"% Z2:",input$z2,"%"),
+                       xaxis = list(title=""),
+                       yaxis = list(title= "ks (mm)"))
+              p1
+            }
+            
+          })
+          
+          output$kestimateGraphkd <- renderPlotly({
+            #file=fileA()
+            if (file.exists(paste0(getwd(),"\\Resultsk","-DSR",input$srpercent,"-Z1",input$z1,"-Z2",input$z2,".csv"))){
+              
+              p2 <-plot_ly(file, x=~Dates, y=~kd, name = "kd, bottom bucket conductivity", type="scatter", mode="lines",
+                           line = list(color="red",width=1.5)) %>%
+                layout(title = paste0("kd, bottom bucket conductivity ",input$StreamflowSelectAA," DSR:",input$srpercent,"% Z1:",input$z1,"% Z2:",input$z2,"%"),
+                       xaxis = list(title=""),
+                       yaxis = list(title= "kd (mm)"))
+              p2
+            }
+          })
+        }
+        
         
         
         }
@@ -1180,7 +1220,11 @@ shinyApp(
       }
     })
     
-    observeEvent(input$StreamflowSelectAA,{ 
+    observeEvent(
+      {input$StreamflowSelectAA 
+       input$srpercent 
+       input$z1 
+       input$z2},{ 
       
       if (file.exists(paste0(getwd(),"\\Resultsk","-DSR",input$srpercent,"-Z1",input$z1,"-Z2",input$z2,".csv"))){
       
@@ -1192,24 +1236,29 @@ shinyApp(
       
       output$kestimateGraphks <- renderPlotly({
         #file=fileA()
+        if (file.exists(paste0(getwd(),"\\Resultsk","-DSR",input$srpercent,"-Z1",input$z1,"-Z2",input$z2,".csv"))){
+          
         p1 <-plot_ly(file, x=~Dates, y=~ks, name = "ks, top bucket conductivity", type="scatter", mode="lines",
                      line = list(color="red",width=1.5)) %>%
           layout(title = paste0("ks, top bucket conductivity ",input$StreamflowSelectAA," DSR:",input$srpercent,"% Z1:",input$z1,"% Z2:",input$z2,"%"),
                  xaxis = list(title=""),
                  yaxis = list(title= "ks (mm)"))
         p1
+        }
         
       })
       
       output$kestimateGraphkd <- renderPlotly({
         #file=fileA()
-        p2 <-plot_ly(file, x=~Dates, y=~kd, name = "kd, bottom bucket conductivity", type="scatter", mode="lines",
+        if (file.exists(paste0(getwd(),"\\Resultsk","-DSR",input$srpercent,"-Z1",input$z1,"-Z2",input$z2,".csv"))){
+          
+          p2 <-plot_ly(file, x=~Dates, y=~kd, name = "kd, bottom bucket conductivity", type="scatter", mode="lines",
                      line = list(color="red",width=1.5)) %>%
           layout(title = paste0("kd, bottom bucket conductivity ",input$StreamflowSelectAA," DSR:",input$srpercent,"% Z1:",input$z1,"% Z2:",input$z2,"%"),
                  xaxis = list(title=""),
                  yaxis = list(title= "kd (mm)"))
         p2
-        
+        }
       })
       }
       
