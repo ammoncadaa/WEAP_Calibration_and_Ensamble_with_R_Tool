@@ -38,6 +38,7 @@ set Br1=Br.ReachAbove
 
 Next
 
+oFile.close
 
 
 
