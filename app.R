@@ -1003,9 +1003,7 @@ shinyApp(
                      gc()
                      
                    })
-      
-      
-      
+
       output$textRunEnsembleA <- renderText({format(as.difftime(difftime(Sys.time(),start), format = "%H:%M")) })
       output$textRunEnsembleA1 <- renderText({paste0("Results imported and save within the working directory") })
       
@@ -1013,8 +1011,7 @@ shinyApp(
           gauges=unique(resultsWB[,3])
           selectInput("StreamflowSelectA", "Streamflow Gauge",gauges)
       })
-      
-      
+    
     })
     
     observeEvent(input$actionAConduc,{ 
