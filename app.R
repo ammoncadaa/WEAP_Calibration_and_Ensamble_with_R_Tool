@@ -997,6 +997,59 @@ shinyApp(
                      resultsWB = cbind(resultsWB,myDates)
                      write.csv(resultsWB,paste0(getwd(),"\\ResultsGauges.csv"),row.names=F) 
                    
+                     file <- read.csv(paste0(getwd(),"\\ResultsGauges.csv"), stringsAsFactors=F, check.names=F)
+                     colnames(file)=c("Year",
+                                      "Time step",
+                                      "Gauge",
+                                      "Observed",
+                                      "Area",
+                                      "Precipitation",
+                                      "Dates")
+                     file$Dates=ymd(file$Dates)
+                     file$YearMonth=year(file$Dates)*100+month(file$Dates)
+                     file$Precipitation<- file$Precipitation/file$Area*1000
+                     file$Observed <- file$Observed/file$Area*1000
+                     
+                     years <- seq(as.numeric(year(min(file$Dates))),as.numeric(year(max(file$Dates))))
+                     myDates=seq(as.Date(paste0(year(min(file$Dates)),"-01-01")), to=as.Date(paste0(year(max(file$Dates)),"-12-31")),by="month")
+                     
+                     gauges=unique(file$Gauge)
+                     file1=file
+                     
+                     file2=as.data.frame(matrix(NA,ncol=6,nrow=1))
+                     colnames(file2)=c("YearMonth",     "Observed",      "Precipitation", "Dates",         "Q_P","Gauge") 
+                     file2$Dates=as.Date(file2$Dates)
+                     
+                     file3=as.data.frame(matrix(NA,ncol=5,nrow=1))
+                     colnames(file3)=c("Month",         "Observed",      "Precipitation", "Q_P","Gauge")   
+                     
+                     for (i in 1:length(gauges)){
+                       file=file1
+                       file=file[which(file$Gauge==gauges[i]),]
+                       file=file[,c("Observed","Precipitation","YearMonth")]
+                       file <- aggregate(file[,1:(ncol(file)-1)], by=list(YearMonth=file$YearMonth),sum,na.rm=F)
+                       file$Dates=ymd(myDates)
+                       file$Q_P=round(file$Observed/file$Precipitation*100,2)
+                       file$Gauge=gauges[i]
+                       #fileB=file
+                       #fileB
+                       file2=rbind(file2,file)
+                       
+                       file$Month=file$YearMonth%%100
+                       file <- aggregate(file[,c(2,3,5)], by=list(Month=file$Month),mean,na.rm=T)
+                       file$Gauge=gauges[i]
+                       file3=rbind(file3,file)
+                       
+                     }
+                     
+                     file=file2[-1,]
+                     file2=file2[-1,-1]
+                     file2=file2[,c(5,3,1,2,4)]
+                     write.csv(file2,paste0(getwd(),"\\Results_Q_P_monthlyTimeserie.csv"),row.names=F) 
+                     
+                     file3=file3[-1,c(5,1,2,3,4)]
+                     write.csv(file3,paste0(getwd(),"\\Results_Q_P_monthlySummary.csv"),row.names=F) 
+                     
                      
                      WEAP$SaveArea()
                      rm(WEAP)
@@ -1079,6 +1132,26 @@ shinyApp(
         
         write.csv(obs[,c(-4,-5)],paste0(getwd(),"\\Resultsk","-DSR",input$srpercent,"-Z1",input$z1,"-Z2",input$z2,".csv"),row.names=F) 
         write.csv(table,paste0(getwd(),"\\Resultsk_Summary","-DSR",input$srpercent,"-Z1",input$z1,"-Z2",input$z2,".csv"),row.names=F) 
+        
+        list=list.files(getwd(),pattern = "Resultsk_Summary-DSR")
+        list
+        list1=list
+        list1=gsub(".csv","",list1,fixed = TRUE)
+        list1=gsub("Resultsk_Summary-","",list1,fixed = TRUE)
+        
+        file1=as.data.frame(matrix(NA,ncol=6,nrow=1))
+        colnames(file1)=c("Gauge" ,                "Min Ks, top bucket" ,   "Max Ks, top bucket" ,   "Min Kd, bottom bucket" ,"Max Kd, bottom bucket","Parameters")
+        
+        for (i in 1:length(list)){
+          
+          file <- read.csv(paste0(getwd(),"\\",list[i]), stringsAsFactors=F, check.names=F)
+          file$Parameters=list1[i]
+          file1=rbind(file1,file)
+        }
+        
+        file1=file1[-1,]
+        file1=file1[order(file1$Gauge),]
+        write.csv(file1,paste0(getwd(),"\\Resultsk_SummaryALL.csv"),row.names=F) 
         
         output$textRunEnsembleAConduc <- renderText({ paste0("Initial Conductivity was calculated for "," DSR: ",input$srpercent," Z1: ",input$z1," Z2: ",input$z2, ". Check the -SEI tool Results- folder within your working directory")  })
       
@@ -1177,16 +1250,20 @@ shinyApp(
         file$YearMonth=year(file$Dates)*100+month(file$Dates)
         file$Precipitation<- file$Precipitation/file$Area*1000
         file$Observed <- file$Observed/file$Area*1000
-        file=file[which(file$Gauge==input$StreamflowSelectA),]
+        
         years <- seq(as.numeric(year(min(file$Dates))),as.numeric(year(max(file$Dates))))
         myDates=seq(as.Date(paste0(year(min(file$Dates)),"-01-01")), to=as.Date(paste0(year(max(file$Dates)),"-12-31")),by="month")
+        
+       
+        file=file[which(file$Gauge==input$StreamflowSelectA),]
+        #file=file[which(file$Gauge==unique(file$Gauge)[1]),]
+        
         file=file[,c("Observed","Precipitation","YearMonth")]
         file <- aggregate(file[,1:(ncol(file)-1)], by=list(YearMonth=file$YearMonth),sum,na.rm=F)
         file$Dates=ymd(myDates)
         file$Q_P=round(file$Observed/file$Precipitation*100,2)
-        #fileB=file
-        #fileB
-        
+          
+          
         output$Q_Pmonthly <- renderPlotly({
           # file=fileB()
           p <-plot_ly(file, x=~Dates, y=~Precipitation, name = "Precipitation", type="bar",text=~paste0("Precipitation = ", Precipitation)) %>%
@@ -1200,7 +1277,7 @@ shinyApp(
           
           
         })
-        
+
         output$Q_Pboxplot <- renderPlotly({
           # file=fileB()
           file$Month=file$YearMonth%%100
