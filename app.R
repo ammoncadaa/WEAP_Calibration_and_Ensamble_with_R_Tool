@@ -86,7 +86,7 @@ shinyApp(
                                  em(strong(br(code("Version 2.0 (2020)")))),
                                  em(br("Developed by Angelica Moncada (SEI-LAC Water Group member). The version 1.0 was updated for exploring calibrating ensemble results of multiple gauges with one or 
                                         more upstream catchments on a model with any time step. Now, it extracts all the water balance variables automatically and allows to extract additional variables. Some additional graphs were added and a new 
-                                        section was included for customizing and exploring graphs by using a results of the tool or
+                                        section was included for customizing and exploring graphs by using the results of the tool or
                             any file with time series data. This version was built under the R version 4.0.2")),
                                  br(strong("Contact: angelica.moncada@sei.org; angelicammoncada@hotmail.com; angelicammoncada@gmail.com")),
                                  hr(),
@@ -2472,9 +2472,9 @@ shinyApp(
     })
     
     file <- reactive({
-       file <- read.csv(paste0(getwd(),"//ResultsWB-",runID(),".csv"), stringsAsFactors=F, check.names=F)
+      file <- read.csv(paste0(getwd(),"//ResultsWB-",runID(),".csv"), stringsAsFactors=F, check.names=F)
       file$Dates=ymd(file$Dates)
-       file=file[file$Gauge==input$StreamflowSelect,]
+      file=file[file$Gauge==input$StreamflowSelect,]
       file$YearMonth=year(file$Dates)*100+month(file$Dates)
       file$Month=month(file$Dates)
       file <- file[which(file$Dates >= input$dates[1] & file$Dates <= input$dates[2]),]
@@ -2484,37 +2484,63 @@ shinyApp(
     
     output$metrics <- renderDataTable({
       file <- file()
+      file$Dates=ymd(file$Dates)
+      file$YearMonth=year(file$Dates)*100+month(file$Dates)
+      file$Month=month(file$Dates)
       filesub=file
       
       runID=runID()
       keysset <- read.csv(paste0(getwd(),"//KeyModelInputs.csv"),stringsAsFactors =F,check.names=F)
       runs <- nrow(keysset)
       
-      errorEvaluar=c(2, 5, 6, 9, 12, 17, 19, 20)
+      #errorEvaluar=c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20)
+      errorEvaluar=c(2, 5, 6, 9, 10,11,12, 13, 14, 17,18, 19, 20)
       names_error=c("ME"  ,    "MAE"  ,   "MSE" ,    "RMSE" ,   "NRMSE %" ,"PBIAS %", "RSR"   ,  "rSD"  ,   "NSE" ,   
                     "mNSE" ,   "rNSE"  ,  "d"  ,     "md"    ,  "rd"   ,   "cp"    ,  "r"  ,     "R2"    ,  "bR2",    
                     "KGE" ,    "VE" ) 
+      #names_error[errorEvaluar]
       
-      metricsALL <- as.data.frame(matrix(NA,nrow=1,ncol=(9+ncol(keysset)+length(errorEvaluar))))
-      colnames(metricsALL) <- c("Gauge","Run ID",colnames(keysset),names_error[errorEvaluar],"PeriodGOF","TotalRunoff / Precipitation %","BaseFlow / TotalRunoff %", "SurfaceRunoff / TotalRunoff %","Evapotranspiration / Precipitation %","Period %","Type")
-   
+      names_errorLOG=paste(rep("log10",length(names_error)),names_error) #"logNSE" 
+      
+      metricsALL <- as.data.frame(matrix(NA,nrow=1,ncol=(12+ncol(keysset)-1+length(errorEvaluar)*2)))
+      colnames(metricsALL) <- c("Gauge","Run ID",names_error[errorEvaluar],names_errorLOG[errorEvaluar],"Qmin obs/Qmin sim %","Qmean obs/Qmean sim %","Qmax obs/Qmax sim %","PeriodGOF","TotalRunoff / Precipitation %","BaseFlow / TotalRunoff %", "SurfaceRunoff / TotalRunoff %","Evapotranspiration / Precipitation %","Type","Period",colnames(keysset)[2:ncol(keysset)])
+      
+      #1.	me, Mean Error
+      #2.	mae, Mean Absolute Error
+      #3.	mse, Mean Squared Error
+      #4.	rmse, Root Mean Square Error
+      #5.	nrmse, Normalized Root Mean Square Error ( -100% <= nrms <= 100% )
+      #6.	PBIAS, Percent Bias
+      #7.	RSR, Ratio of RMSE to the Standard Deviation of the Observations, RSR = rms / sd(obs). ( 0 <= RSR <= +Inf )
+      #8.	rSD, Ratio of Standard Deviations, rSD = sd(sim) / sd(obs)
+      #9.	NSE, Nash-Sutcliffe Efficiency ( -Inf <= NSE <= 1 )
+      #10.	mNSE, Modified Nash-Sutcliffe Efficiency
+      #11.	rNSE, Relative Nash-Sutcliffe Efficiency
+      #12.	d, Index of Agreement ( 0 <= d <= 1 )
+      #13.	md, Modified Index of Agreement
+      #14.	rd, Relative Index of Agreement
+      #15.	cp, Persistence Index ( 0 <= PI <= 1 )
+      #16.	r, Pearson Correlation coefficient ( -1 <= r <= 1 )
+      #17.	R2, Coefficient of Determination ( 0 <= R2 <= 1 ). 
+      #8.	bR2, R2 multiplied by the coefficient of the regression line between sim and obs ( 0 <= bR2 <= 1 )
+      #19.	KGE, Kling-Gupta efficiency between sim and obs ( 0 <= KGE <= 1 )
+      #20.	VE, Volumetric efficiency between sim and obs  ( -Inf <= VE <= 1)
+      
       uniqueGauges=unique(file$Gauge)
       
-      metrics=as.data.frame(matrix(nrow=length(uniqueGauges),ncol=(8+ncol(keysset)+length(errorEvaluar))))
-      colnames(metrics) <- c("Gauge","Run ID",colnames(keysset),names_error[errorEvaluar],"PeriodGOF","TotalRunoff / Precipitation %","BaseFlow / TotalRunoff %", "SurfaceRunoff / TotalRunoff %","Evapotranspiration / Precipitation %","Period %")
+      metrics=as.data.frame(matrix(nrow=length(uniqueGauges),ncol=(10+length(errorEvaluar)*2)))
+      colnames(metrics) <- c("Gauge","Run ID",names_error[errorEvaluar],names_errorLOG[errorEvaluar],"Qmin obs/Qmin sim %","Qmean obs/Qmean sim %","Qmax obs/Qmax sim %","PeriodGOF","TotalRunoff / Precipitation %","BaseFlow / TotalRunoff %", "SurfaceRunoff / TotalRunoff %","Evapotranspiration / Precipitation %")
       
       metrics[,1]=uniqueGauges
       metrics[,2]=runID
       
-      for (j in 3:(4+length(3:ncol(keysset)))){
-        metrics[,j]=as.numeric(keysset[which(keysset$Nrun==runID),j-2])
-      }
       metrics1=metrics
       metrics2=metrics
       
       for (g in 1:length(uniqueGauges)){
         
         filesub=file[file$Gauge==uniqueGauges[g],]
+        filesub <- filesub[which(filesub$Dates >= input$dates[1] & filesub$Dates <= input$dates[2]),]
         
         Filemonthly <- aggregate(filesub[,c("Modeled","Precipitation","Evapotranspiration","Surface_Runoff", "Base_Flow")], by=list(YearMonth=filesub$YearMonth),sum,na.rm=F)
         Filemonthly$N=1
@@ -2523,8 +2549,8 @@ shinyApp(
         Filemonthly$BaseFlow_TotalRunoff=round(Filemonthly$Base_Flow/Filemonthly$Modeled*100,1)
         Filemonthly$SurfaceRunoff_TotalRunoff=round(Filemonthly$Surface_Runoff/Filemonthly$Modeled*100,1)
         Filemonthly$Evapotranspiration_Precipitation=round(Filemonthly$Evapotranspiration/Filemonthly$Precipitation*100,1)
-        Filemonthly$Period=paste0(as.character(as.Date(filesub$Dates[1]))," - ",as.character(as.Date(filesub$Dates[nrow(filesub)]))," N(",nrow(filesub),")")
-        metrics[g,23:27]=Filemonthly[1,7:11]
+        metrics[g,"Period"]=paste0(as.character(as.Date(filesub$Dates[1]))," - ",as.character(as.Date(filesub$Dates[nrow(filesub)]))," N(",nrow(filesub),")")
+        metrics[g,(7+length(errorEvaluar)*2):(7+2*length(errorEvaluar)+3)]=Filemonthly[1,7:10]
         
         total=nrow(filesub)
         filesub1=filesub[1:round(total*0.7,0),]
@@ -2541,8 +2567,8 @@ shinyApp(
         Filemonthly$BaseFlow_TotalRunoff=round(Filemonthly$Base_Flow/Filemonthly$Modeled*100,1)
         Filemonthly$SurfaceRunoff_TotalRunoff=round(Filemonthly$Surface_Runoff/Filemonthly$Modeled*100,1)
         Filemonthly$Evapotranspiration_Precipitation=round(Filemonthly$Evapotranspiration/Filemonthly$Precipitation*100,1)
-        Filemonthly$Period=paste0(as.character(as.Date(filesub$Dates[1]))," - ",as.character(as.Date(filesub$Dates[nrow(filesub)]))," N(",nrow(filesub),")")
-        metrics1[g,23:27]=Filemonthly[1,7:11]
+        metrics1[g,"Period"]=paste0(as.character(as.Date(filesub$Dates[1]))," - ",as.character(as.Date(filesub$Dates[nrow(filesub)]))," N(",nrow(filesub),")")
+        metrics1[g,(7+length(errorEvaluar)*2):(7+2*length(errorEvaluar)+3)]=Filemonthly[1,7:10]
         filesub=filesub2
         Filemonthly <- aggregate(filesub[,c("Modeled","Precipitation","Evapotranspiration","Surface_Runoff", "Base_Flow")], by=list(YearMonth=filesub$YearMonth),sum,na.rm=F)
         Filemonthly$N=1
@@ -2551,19 +2577,33 @@ shinyApp(
         Filemonthly$BaseFlow_TotalRunoff=round(Filemonthly$Base_Flow/Filemonthly$Modeled*100,1)
         Filemonthly$SurfaceRunoff_TotalRunoff=round(Filemonthly$Surface_Runoff/Filemonthly$Modeled*100,1)
         Filemonthly$Evapotranspiration_Precipitation=round(Filemonthly$Evapotranspiration/Filemonthly$Precipitation*100,1)
-        Filemonthly$Period=paste0(as.character(as.Date(filesub$Dates[1]))," - ",as.character(as.Date(filesub$Dates[nrow(filesub)]))," N(",nrow(filesub),")")
-        metrics2[g,23:27]=Filemonthly[1,7:11]
+        metrics2[g,"Period"]=paste0(as.character(as.Date(filesub$Dates[1]))," - ",as.character(as.Date(filesub$Dates[nrow(filesub)]))," N(",nrow(filesub),")")
+        metrics2[g,(7+length(errorEvaluar)*2):(7+2*length(errorEvaluar)+3)]=Filemonthly[1,7:10]
         
-        filesub=na.exclude(file[file$Gauge==uniqueGauges[g],])
+        filesub=file[file$Gauge==uniqueGauges[g],]
+        filesub <- filesub[which(filesub$Dates >= input$dates[1] & filesub$Dates <= input$dates[2]),]
+        filesub=na.exclude(filesub[filesub$Gauge==uniqueGauges[g],])
         r=nrow(filesub)
         DatesRegister=paste0(as.character(as.Date(filesub$Dates[1]))," - ",as.character(as.Date(filesub$Dates[nrow(filesub)]))," N(",r,")")
+        filesub$Modeled[which(filesub$Modeled ==0)]=NA
+        filesub$Observed[which(filesub$Observed ==0)]=NA
         modeled <- filesub[filesub$Gauge==uniqueGauges[g],]$Modeled
         observed <- filesub[filesub$Gauge==uniqueGauges[g],]$Observed
+        
         if (sum(modeled)!=0 && sum(observed,na.rm=TRUE)!=0) {
-          error=gof(modeled,observed,digits=5,na.rm=TRUE)
-          metrics[g,(3+ncol(keysset)):(ncol(metrics)-6)]=round(error[errorEvaluar],3)
-        } else {metrics[g,(3+ncol(keysset)):(ncol(metrics)-6)]=NA}
+          error=gof(modeled,observed,na.rm=TRUE)
+          metrics[g,3:(2+length(errorEvaluar))]=round(error[errorEvaluar],3)
+          errorLOG=gof(log(modeled,10),log(observed,10),digits=5,na.rm=TRUE)
+          metrics[g,(3+length(errorEvaluar)):(2+2*length(errorEvaluar))]=round(errorLOG[errorEvaluar],3)
+          #NSEdf[g,2]=round(nse(observed,modeled),3)
+        } else {
+          metrics[g,3:(2+length(errorEvaluar))]=NA
+          metrics[g,(3+length(errorEvaluar)):(2+2*length(errorEvaluar))]=NA
+        }
         metrics$PeriodGOF[g]=DatesRegister
+        metrics[g,2+length(errorEvaluar)*2+1]=min(na.exclude(filesub$Observed))/min( na.exclude(filesub$Modeled))*100   
+        metrics[g,2+length(errorEvaluar)*2+2]=mean(na.exclude(filesub$Observed))/mean( na.exclude(filesub$Modeled))*100   
+        metrics[g,2+length(errorEvaluar)*2+3]=max(na.exclude(filesub$Observed))/max( na.exclude(filesub$Modeled))*100   
         
         total=nrow(filesub)
         filesub1=filesub[1:round(total*0.7,0),]
@@ -2577,33 +2617,58 @@ shinyApp(
         modeled <- filesub[filesub$Gauge==uniqueGauges[g],]$Modeled
         observed <- filesub[filesub$Gauge==uniqueGauges[g],]$Observed
         if (sum(modeled)!=0 && sum(observed,na.rm=TRUE)!=0) {
-          error=gof(modeled,observed,digits=5,na.rm=TRUE)
-          metrics1[g,(3+ncol(keysset)):(ncol(metrics)-6)]=round(error[errorEvaluar],2)
-        } else {metrics1[g,(3+ncol(keysset)):(ncol(metrics)-6)]=NA}
+          error=gof(modeled,observed,na.rm=TRUE)
+          metrics1[g,3:(2+length(errorEvaluar))]=round(error[errorEvaluar],3)
+          errorLOG=gof(log(modeled,10),log(observed,10),digits=5,na.rm=TRUE)
+          metrics1[g,(3+length(errorEvaluar)):(2+2*length(errorEvaluar))]=round(errorLOG[errorEvaluar],3)
+        } else {
+          metrics1[g,3:(2+length(errorEvaluar))]=NA
+          metrics1[g,(3+length(errorEvaluar)):(2+2*length(errorEvaluar))]=NA
+        }
         metrics1$PeriodGOF[g]=DatesRegister1
+        metrics1[g,2+length(errorEvaluar)*2+1]=min(na.exclude(filesub$Observed))/min( na.exclude(filesub$Modeled))*100   
+        metrics1[g,2+length(errorEvaluar)*2+2]=mean(na.exclude(filesub$Observed))/mean( na.exclude(filesub$Modeled))*100   
+        metrics1[g,2+length(errorEvaluar)*2+3]=max(na.exclude(filesub$Observed))/max( na.exclude(filesub$Modeled))*100   
         
         filesub=filesub2
         modeled <- filesub[filesub$Gauge==uniqueGauges[g],]$Modeled
         observed <- filesub[filesub$Gauge==uniqueGauges[g],]$Observed
         if (sum(modeled)!=0 && sum(observed,na.rm=TRUE)!=0) {
-          error=gof(modeled,observed,digits=5,na.rm=TRUE)
-          metrics2[g,(3+ncol(keysset)):(ncol(metrics)-6)]=round(error[errorEvaluar],2)
-        } else {metrics2[g,(3+ncol(keysset)):(ncol(metrics)-6)]=NA}
+          error=gof(modeled,observed,na.rm=TRUE)
+          metrics2[g,3:(2+length(errorEvaluar))]=round(error[errorEvaluar],3)
+          errorLOG=gof(log(modeled,10),log(observed,10),digits=5,na.rm=TRUE)
+          metrics2[g,(3+length(errorEvaluar)):(2+2*length(errorEvaluar))]=round(errorLOG[errorEvaluar],3)
+        } else {
+          metrics2[g,3:(2+length(errorEvaluar))]=NA
+          metrics2[g,(3+length(errorEvaluar)):(2+2*length(errorEvaluar))]=NA
+        }
         metrics2$PeriodGOF[g]=DatesRegister2
+        metrics2[g,2+length(errorEvaluar)*2+1]=min(na.exclude(filesub$Observed))/min( na.exclude(filesub$Modeled))*100   
+        metrics2[g,2+length(errorEvaluar)*2+2]=mean(na.exclude(filesub$Observed))/mean( na.exclude(filesub$Modeled))*100   
+        metrics2[g,2+length(errorEvaluar)*2+3]=max(na.exclude(filesub$Observed))/max( na.exclude(filesub$Modeled))*100   
+        
       }
+      
       metrics$Type="All"
       metrics1$Type="Calibration (70%)"
       metrics2$Type="Validation (30%)"
-      metricsALL=rbind(metricsALL,metrics,metrics1,metrics2)
+      
+      metrics=rbind(metrics,metrics1,metrics2)
+      n=ncol(metrics)+1
+      c=2
+      for (j in n:(n-2+ncol(keysset))){
+        metrics[,j]=as.numeric(keysset[which(keysset[,1]==runID),c])
+        c=c+1
+      }
+      
+      colnames(metrics)[n:(n-2+ncol(keysset))]=colnames(keysset)[2:ncol(keysset)]
+      metricsALL=rbind(metricsALL,metrics)
       
       metricsALL=metricsALL[-1,]
-      metricsALL=metricsALL[,-2]
-
-      
-      metrics=metricsALL[,c(1,(ncol(keysset)+2):ncol(metricsALL))]
       metrics
       
     })
+    
     output$Q <- renderPlotly({
       
       file <- file()
@@ -2878,13 +2943,38 @@ shinyApp(
         listResults=gsub(".csv","",listResults,fixed = TRUE)
         listResults=unique(as.numeric(listResults))
         
-        errorEvaluar=c(2, 5, 6, 9, 12, 17, 19, 20)
+        #errorEvaluar=c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20)
+        errorEvaluar=c(2, 5, 6, 9, 10,11,12, 13, 14, 17,18, 19, 20)
         names_error=c("ME"  ,    "MAE"  ,   "MSE" ,    "RMSE" ,   "NRMSE %" ,"PBIAS %", "RSR"   ,  "rSD"  ,   "NSE" ,   
                       "mNSE" ,   "rNSE"  ,  "d"  ,     "md"    ,  "rd"   ,   "cp"    ,  "r"  ,     "R2"    ,  "bR2",    
                       "KGE" ,    "VE" ) 
+        #names_error[errorEvaluar]
         
-        metricsALL <- as.data.frame(matrix(NA,nrow=1,ncol=(9+ncol(keysset)+length(errorEvaluar))))
-        colnames(metricsALL) <- c("Gauge","Run ID",colnames(keysset),names_error[errorEvaluar],"PeriodGOF","TotalRunoff / Precipitation %","BaseFlow / TotalRunoff %", "SurfaceRunoff / TotalRunoff %","Evapotranspiration / Precipitation %","Period %","Type")
+        names_errorLOG=paste(rep("log10",length(names_error)),names_error) #"logNSE" 
+        
+        metricsALL <- as.data.frame(matrix(NA,nrow=1,ncol=(12+ncol(keysset)-1+length(errorEvaluar)*2)))
+        colnames(metricsALL) <- c("Gauge","Run ID",names_error[errorEvaluar],names_errorLOG[errorEvaluar],"Qmin obs/Qmin sim %","Qmean obs/Qmean sim %","Qmax obs/Qmax sim %","PeriodGOF","TotalRunoff / Precipitation %","BaseFlow / TotalRunoff %", "SurfaceRunoff / TotalRunoff %","Evapotranspiration / Precipitation %","Type","Period",colnames(keysset)[2:ncol(keysset)])
+        
+        #1.	me, Mean Error
+        #2.	mae, Mean Absolute Error
+        #3.	mse, Mean Squared Error
+        #4.	rmse, Root Mean Square Error
+        #5.	nrmse, Normalized Root Mean Square Error ( -100% <= nrms <= 100% )
+        #6.	PBIAS, Percent Bias
+        #7.	RSR, Ratio of RMSE to the Standard Deviation of the Observations, RSR = rms / sd(obs). ( 0 <= RSR <= +Inf )
+        #8.	rSD, Ratio of Standard Deviations, rSD = sd(sim) / sd(obs)
+        #9.	NSE, Nash-Sutcliffe Efficiency ( -Inf <= NSE <= 1 )
+        #10.	mNSE, Modified Nash-Sutcliffe Efficiency
+        #11.	rNSE, Relative Nash-Sutcliffe Efficiency
+        #12.	d, Index of Agreement ( 0 <= d <= 1 )
+        #13.	md, Modified Index of Agreement
+        #14.	rd, Relative Index of Agreement
+        #15.	cp, Persistence Index ( 0 <= PI <= 1 )
+        #16.	r, Pearson Correlation coefficient ( -1 <= r <= 1 )
+        #17.	R2, Coefficient of Determination ( 0 <= R2 <= 1 ). 
+        #8.	bR2, R2 multiplied by the coefficient of the regression line between sim and obs ( 0 <= bR2 <= 1 )
+        #19.	KGE, Kling-Gupta efficiency between sim and obs ( 0 <= KGE <= 1 )
+        #20.	VE, Volumetric efficiency between sim and obs  ( -Inf <= VE <= 1)
         
         iprogress=1 
         withProgress(message = 'Progress of GOF Calculations:', value = 0, 
@@ -2893,31 +2983,33 @@ shinyApp(
                          
                          incProgress(1/runs, detail = paste0("Calculation of ",nrow(keysset),": ", round(iprogress/runs*100,0),"%"))
                          
-                         RUNID=i
-                         runID=i
+                         NID=listResults[i]
+                         RUNID=listResults[i]
+                         runID=listResults[i]
+                         
                          file=read.csv(paste0(getwd(),"\\ResultsWB-",RUNID,".csv"), stringsAsFactors=F, check.names=F)
+                         
                          file$Dates=ymd(file$Dates)
                          file$YearMonth=year(file$Dates)*100+month(file$Dates)
                          file$Month=month(file$Dates)
+                         
                          filesub <- file[which(file$Dates >= input$datest[1] & file$Dates <= input$datest[2]),]
                          
                          uniqueGauges=unique(file$Gauge)
                          
-                         metrics=as.data.frame(matrix(nrow=length(uniqueGauges),ncol=(8+ncol(keysset)+length(errorEvaluar))))
-                         colnames(metrics) <- c("Gauge","Run ID",colnames(keysset),names_error[errorEvaluar],"PeriodGOF","TotalRunoff / Precipitation %","BaseFlow / TotalRunoff %", "SurfaceRunoff / TotalRunoff %","Evapotranspiration / Precipitation %","Period %")
+                         metrics=as.data.frame(matrix(nrow=length(uniqueGauges),ncol=(10+length(errorEvaluar)*2)))
+                         colnames(metrics) <- c("Gauge","Run ID",names_error[errorEvaluar],names_errorLOG[errorEvaluar],"Qmin obs/Qmin sim %","Qmean obs/Qmean sim %","Qmax obs/Qmax sim %","PeriodGOF","TotalRunoff / Precipitation %","BaseFlow / TotalRunoff %", "SurfaceRunoff / TotalRunoff %","Evapotranspiration / Precipitation %")
                          
                          metrics[,1]=uniqueGauges
                          metrics[,2]=runID
                          
-                         for (j in 3:(4+length(3:ncol(keysset)))){
-                           metrics[,j]=as.numeric(keysset[which(keysset$Nrun==runID),j-2])
-                         }
                          metrics1=metrics
                          metrics2=metrics
                          
                          for (g in 1:length(uniqueGauges)){
                            
                            filesub=file[file$Gauge==uniqueGauges[g],]
+                           filesub <- filesub[which(filesub$Dates >= input$datest[1] & filesub$Dates <= input$datest[2]),]
                            
                            Filemonthly <- aggregate(filesub[,c("Modeled","Precipitation","Evapotranspiration","Surface_Runoff", "Base_Flow")], by=list(YearMonth=filesub$YearMonth),sum,na.rm=F)
                            Filemonthly$N=1
@@ -2926,8 +3018,8 @@ shinyApp(
                            Filemonthly$BaseFlow_TotalRunoff=round(Filemonthly$Base_Flow/Filemonthly$Modeled*100,1)
                            Filemonthly$SurfaceRunoff_TotalRunoff=round(Filemonthly$Surface_Runoff/Filemonthly$Modeled*100,1)
                            Filemonthly$Evapotranspiration_Precipitation=round(Filemonthly$Evapotranspiration/Filemonthly$Precipitation*100,1)
-                           Filemonthly$Period=paste0(as.character(as.Date(filesub$Dates[1]))," - ",as.character(as.Date(filesub$Dates[nrow(filesub)]))," N(",nrow(filesub),")")
-                           metrics[g,23:27]=Filemonthly[1,7:11]
+                           metrics[g,"Period"]=paste0(as.character(as.Date(filesub$Dates[1]))," - ",as.character(as.Date(filesub$Dates[nrow(filesub)]))," N(",nrow(filesub),")")
+                           metrics[g,(7+length(errorEvaluar)*2):(7+2*length(errorEvaluar)+3)]=Filemonthly[1,7:10]
                            
                            total=nrow(filesub)
                            filesub1=filesub[1:round(total*0.7,0),]
@@ -2944,8 +3036,8 @@ shinyApp(
                            Filemonthly$BaseFlow_TotalRunoff=round(Filemonthly$Base_Flow/Filemonthly$Modeled*100,1)
                            Filemonthly$SurfaceRunoff_TotalRunoff=round(Filemonthly$Surface_Runoff/Filemonthly$Modeled*100,1)
                            Filemonthly$Evapotranspiration_Precipitation=round(Filemonthly$Evapotranspiration/Filemonthly$Precipitation*100,1)
-                           Filemonthly$Period=paste0(as.character(as.Date(filesub$Dates[1]))," - ",as.character(as.Date(filesub$Dates[nrow(filesub)]))," N(",nrow(filesub),")")
-                           metrics1[g,23:27]=Filemonthly[1,7:11]
+                           metrics1[g,"Period"]=paste0(as.character(as.Date(filesub$Dates[1]))," - ",as.character(as.Date(filesub$Dates[nrow(filesub)]))," N(",nrow(filesub),")")
+                           metrics1[g,(7+length(errorEvaluar)*2):(7+2*length(errorEvaluar)+3)]=Filemonthly[1,7:10]
                            filesub=filesub2
                            Filemonthly <- aggregate(filesub[,c("Modeled","Precipitation","Evapotranspiration","Surface_Runoff", "Base_Flow")], by=list(YearMonth=filesub$YearMonth),sum,na.rm=F)
                            Filemonthly$N=1
@@ -2954,19 +3046,33 @@ shinyApp(
                            Filemonthly$BaseFlow_TotalRunoff=round(Filemonthly$Base_Flow/Filemonthly$Modeled*100,1)
                            Filemonthly$SurfaceRunoff_TotalRunoff=round(Filemonthly$Surface_Runoff/Filemonthly$Modeled*100,1)
                            Filemonthly$Evapotranspiration_Precipitation=round(Filemonthly$Evapotranspiration/Filemonthly$Precipitation*100,1)
-                           Filemonthly$Period=paste0(as.character(as.Date(filesub$Dates[1]))," - ",as.character(as.Date(filesub$Dates[nrow(filesub)]))," N(",nrow(filesub),")")
-                           metrics2[g,23:27]=Filemonthly[1,7:11]
+                           metrics2[g,"Period"]=paste0(as.character(as.Date(filesub$Dates[1]))," - ",as.character(as.Date(filesub$Dates[nrow(filesub)]))," N(",nrow(filesub),")")
+                           metrics2[g,(7+length(errorEvaluar)*2):(7+2*length(errorEvaluar)+3)]=Filemonthly[1,7:10]
                            
-                           filesub=na.exclude(file[file$Gauge==uniqueGauges[g],])
+                           filesub=file[file$Gauge==uniqueGauges[g],]
+                           filesub <- filesub[which(filesub$Dates >= input$datest[1] & filesub$Dates <= input$datest[2]),]
+                           filesub=na.exclude(filesub[filesub$Gauge==uniqueGauges[g],])
                            r=nrow(filesub)
                            DatesRegister=paste0(as.character(as.Date(filesub$Dates[1]))," - ",as.character(as.Date(filesub$Dates[nrow(filesub)]))," N(",r,")")
+                           filesub$Modeled[which(filesub$Modeled ==0)]=NA
+                           filesub$Observed[which(filesub$Observed ==0)]=NA
                            modeled <- filesub[filesub$Gauge==uniqueGauges[g],]$Modeled
                            observed <- filesub[filesub$Gauge==uniqueGauges[g],]$Observed
+                      
                            if (sum(modeled)!=0 && sum(observed,na.rm=TRUE)!=0) {
-                             error=gof(modeled,observed,digits=5,na.rm=TRUE)
-                             metrics[g,(3+ncol(keysset)):(ncol(metrics)-6)]=round(error[errorEvaluar],3)
-                           } else {metrics[g,(3+ncol(keysset)):(ncol(metrics)-6)]=NA}
+                             error=gof(modeled,observed,na.rm=TRUE)
+                             metrics[g,3:(2+length(errorEvaluar))]=round(error[errorEvaluar],3)
+                             errorLOG=gof(log(modeled,10),log(observed,10),digits=5,na.rm=TRUE)
+                             metrics[g,(3+length(errorEvaluar)):(2+2*length(errorEvaluar))]=round(errorLOG[errorEvaluar],3)
+                             #NSEdf[g,2]=round(nse(observed,modeled),3)
+                           } else {
+                             metrics[g,3:(2+length(errorEvaluar))]=NA
+                             metrics[g,(3+length(errorEvaluar)):(2+2*length(errorEvaluar))]=NA
+                           }
                            metrics$PeriodGOF[g]=DatesRegister
+                           metrics[g,2+length(errorEvaluar)*2+1]=min(na.exclude(filesub$Observed))/min( na.exclude(filesub$Modeled))*100   
+                           metrics[g,2+length(errorEvaluar)*2+2]=mean(na.exclude(filesub$Observed))/mean( na.exclude(filesub$Modeled))*100   
+                           metrics[g,2+length(errorEvaluar)*2+3]=max(na.exclude(filesub$Observed))/max( na.exclude(filesub$Modeled))*100   
                            
                            total=nrow(filesub)
                            filesub1=filesub[1:round(total*0.7,0),]
@@ -2980,25 +3086,53 @@ shinyApp(
                            modeled <- filesub[filesub$Gauge==uniqueGauges[g],]$Modeled
                            observed <- filesub[filesub$Gauge==uniqueGauges[g],]$Observed
                            if (sum(modeled)!=0 && sum(observed,na.rm=TRUE)!=0) {
-                             error=gof(modeled,observed,digits=5,na.rm=TRUE)
-                             metrics1[g,(3+ncol(keysset)):(ncol(metrics)-6)]=round(error[errorEvaluar],2)
-                           } else {metrics1[g,(3+ncol(keysset)):(ncol(metrics)-6)]=NA}
+                             error=gof(modeled,observed,na.rm=TRUE)
+                             metrics1[g,3:(2+length(errorEvaluar))]=round(error[errorEvaluar],3)
+                             errorLOG=gof(log(modeled,10),log(observed,10),digits=5,na.rm=TRUE)
+                             metrics1[g,(3+length(errorEvaluar)):(2+2*length(errorEvaluar))]=round(errorLOG[errorEvaluar],3)
+                           } else {
+                             metrics1[g,3:(2+length(errorEvaluar))]=NA
+                             metrics1[g,(3+length(errorEvaluar)):(2+2*length(errorEvaluar))]=NA
+                           }
                            metrics1$PeriodGOF[g]=DatesRegister1
+                           metrics1[g,2+length(errorEvaluar)*2+1]=min(na.exclude(filesub$Observed))/min( na.exclude(filesub$Modeled))*100   
+                           metrics1[g,2+length(errorEvaluar)*2+2]=mean(na.exclude(filesub$Observed))/mean( na.exclude(filesub$Modeled))*100   
+                           metrics1[g,2+length(errorEvaluar)*2+3]=max(na.exclude(filesub$Observed))/max( na.exclude(filesub$Modeled))*100   
                            
                            filesub=filesub2
                            modeled <- filesub[filesub$Gauge==uniqueGauges[g],]$Modeled
                            observed <- filesub[filesub$Gauge==uniqueGauges[g],]$Observed
                            if (sum(modeled)!=0 && sum(observed,na.rm=TRUE)!=0) {
-                             error=gof(modeled,observed,digits=5,na.rm=TRUE)
-                             metrics2[g,(3+ncol(keysset)):(ncol(metrics)-6)]=round(error[errorEvaluar],2)
-                           } else {metrics2[g,(3+ncol(keysset)):(ncol(metrics)-6)]=NA}
+                             error=gof(modeled,observed,na.rm=TRUE)
+                             metrics2[g,3:(2+length(errorEvaluar))]=round(error[errorEvaluar],3)
+                             errorLOG=gof(log(modeled,10),log(observed,10),digits=5,na.rm=TRUE)
+                             metrics2[g,(3+length(errorEvaluar)):(2+2*length(errorEvaluar))]=round(errorLOG[errorEvaluar],3)
+                           } else {
+                             metrics2[g,3:(2+length(errorEvaluar))]=NA
+                             metrics2[g,(3+length(errorEvaluar)):(2+2*length(errorEvaluar))]=NA
+                           }
                            metrics2$PeriodGOF[g]=DatesRegister2
+                           metrics2[g,2+length(errorEvaluar)*2+1]=min(na.exclude(filesub$Observed))/min( na.exclude(filesub$Modeled))*100   
+                           metrics2[g,2+length(errorEvaluar)*2+2]=mean(na.exclude(filesub$Observed))/mean( na.exclude(filesub$Modeled))*100   
+                           metrics2[g,2+length(errorEvaluar)*2+3]=max(na.exclude(filesub$Observed))/max( na.exclude(filesub$Modeled))*100   
+                           
                          }
                          
                          metrics$Type="All"
                          metrics1$Type="Calibration (70%)"
                          metrics2$Type="Validation (30%)"
-                         metricsALL=rbind(metricsALL,metrics,metrics1,metrics2)
+                         
+                         metrics=rbind(metrics,metrics1,metrics2)
+                         n=ncol(metrics)+1
+                         c=2
+                         for (j in n:(n-2+ncol(keysset))){
+                           metrics[,j]=as.numeric(keysset[which(keysset[,1]==runID),c])
+                           c=c+1
+                         }
+                         
+                         colnames(metrics)[n:(n-2+ncol(keysset))]=colnames(keysset)[2:ncol(keysset)]
+                         metricsALL=rbind(metricsALL,metrics)
+                         
                          
                          iprogress=iprogress+1
                        }
@@ -3006,7 +3140,6 @@ shinyApp(
                      })
         
         metricsALL=metricsALL[-1,]
-        metricsALL=metricsALL[,-2]
         write.csv(metricsALL,paste0(getwd(),"\\SummaryGOF_",as.character(input$datest[1]),"-",as.character(input$datest[2]),".csv"),row.names=F) 
         
         
@@ -3031,7 +3164,8 @@ shinyApp(
       biast <- input$bias
       
      metricsall <- read.csv(paste0(getwd(),"\\SummaryGOF_",as.character(input$datest[1]),"-",as.character(input$datest[2]),".csv"),check.names=F,stringsAsFactors = F)
-     metricssub <- metricsall[which(metricsall[,16] >= nset & metricsall[,14] <= nrmset & abs(metricsall[,15]) <= biast),c(1,2,13:ncol(metricsall))]
+     #metricsall <- read.csv(paste0(getwd(),"\\SummaryGOF_2014-01-01-2018-12-31.csv"),check.names=F,stringsAsFactors = F)
+     metricssub <- metricsall[which(metricsall$NSE >= nset & metricsall$`NRMSE %` <= nrmset & abs(metricsall$`PBIAS %`) <= biast),c(1:38)]
      metricssub
       
     })
