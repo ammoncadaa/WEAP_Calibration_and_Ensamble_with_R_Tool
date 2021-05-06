@@ -3,13 +3,12 @@
 ## R version 4.0.2 ##
 
 rm(list=ls()) 
-list.of.packages <- c("data.table") 
-new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
-if(length(new.packages)) install.packages(new.packages)
 
 list.of.packages <- c("glue","bindrcpp","deSolve","DT","plotly", "prodlim","hydroGOF","RDCOMClient","lintr","shiny","shinydashboard","shinyFiles","lubridate","shinyWidgets") 
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
+
+#devtools::install_github("omegahat/RDCOMClient")
 
 library(lintr)
 library(shiny)
