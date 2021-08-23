@@ -1,9 +1,7 @@
-﻿     CLS
+﻿CLS
 
-Set WEAP_App = CreateObject("WEAP.WEAPApplication")
 Set fso = CreateObject("Scripting.FileSystemObject")
-
-rootDirectory = WEAP_App.ActiveAreaDirectory
+rootDirectory = WEAP.ActiveAreaDirectory
 folderToBeCreated = "WEAPKeyGaugeBranches"
 path = rootDirectory & "\"  & folderToBeCreated
 BuildFullPath path
@@ -24,17 +22,16 @@ sline= "Gauge Name"  & ","  &  "Observed Branch"   & ","  &  "Modeled Branch"
 oFile.WriteLine sLine
 End if
 
-i=1
 For each Br in WEAP.Branches
 
 if Br.TypeID= 20 then
 
 set Br1=Br.ReachAbove
 
-    sLine = Br.Name  & ","  &  Br.FullName & ":Streamflow[M^3]"   & ","  &  Br1.ReachBelow.FullName & ":Streamflow[M^3]"
-    oFile.WriteLine sLine
-    i=1+i
-    End if
+sLine = Br.Name  & ","  &  Br.FullName & ":Streamflow[M^3]"   & ","  &  Br1.ReachBelow.FullName & ":Streamflow[M^3]"
+oFile.WriteLine sLine
+i=1+i
+End if
 
 Next
 
