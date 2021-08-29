@@ -15,12 +15,12 @@ End Sub
 
 myFile = path & "\" & "WEAPKeyGaugeBranches" & ".csv"
 Set oFile = fso.CreateTextFile(myFile)
-if fso.FileExists(outfile1) then
-set  oFile=fso.OpenTextFile(outfile1, 8)
-else
+REM if fso.FileExists(myFile) then
+REM set  oFile=fso.OpenTextFile(myFile, 8)
+REM else
 sline= "Gauge Name"  & ","  &  "Observed Branch"   & ","  &  "Modeled Branch"
 oFile.WriteLine sLine
-End if
+REM End if
 
 For each Br in WEAP.Branches
 
