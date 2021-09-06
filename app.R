@@ -827,7 +827,7 @@ shinyApp(
       Warea <- input$wareaA
       Scen <- input$ScenA
       ts <- input$tsA
-      
+
       WEAP <- COMCreate("WEAP.WEAPApplication") 
       
       Sys.sleep(3)
@@ -977,6 +977,7 @@ shinyApp(
                      
                      rowWB=1
                      for (g in 1:length(uniqueGauges)) {
+                       KeyGaugesCatchmentssub=KeyGaugesCatchments[KeyGaugesCatchments$Gauge==uniqueGauges[g],]
                        Gaugessub=Gauges[Gauges$Gauge==uniqueGauges[g],]
                        Gaugessub$`Observed [M^3]`=gsub(-9999,NA,Gaugessub$`Observed [M^3]`,fixed = TRUE)
                        resultsWB[rowWB:(rowWB+rows-1),1] <- as.numeric(Gaugessub$Year)
@@ -984,8 +985,10 @@ shinyApp(
                        resultsWB[rowWB:(rowWB+rows-1),3] <- uniqueGauges[g]
                        resultsWB[rowWB:(rowWB+rows-1),4] <- as.numeric(Gaugessub$`Observed [M^3]`)
                        
-                       for (c in 1:length(NamecatchG)) {
-                         Catchssub=Catchs[Catchs$Catchment==NamecatchG[c],]
+                       NamecatchGsub=unique(KeyGaugesCatchmentssub$Catchment)
+                       
+                       for (c in 1:length(NamecatchGsub)) {
+                         Catchssub=Catchs[Catchs$Catchment==NamecatchGsub[c],]
                          resultsWB[rowWB:(rowWB+rows-1),5]=as.numeric(resultsWB[rowWB:(rowWB+rows-1),5])+as.numeric(Catchssub[,4])
                          resultsWB[rowWB:(rowWB+rows-1),6]=as.numeric(resultsWB[rowWB:(rowWB+rows-1),6])+as.numeric(Catchssub[,5])
                        }
@@ -3053,8 +3056,8 @@ shinyApp(
                            filesub=na.exclude(filesub[filesub$Gauge==uniqueGauges[g],])
                            r=nrow(filesub)
                            DatesRegister=paste0(as.character(as.Date(filesub$Dates[1]))," - ",as.character(as.Date(filesub$Dates[nrow(filesub)]))," N(",r,")")
-                           filesub$Modeled[which(filesub$Modeled ==0)]=NA
-                           filesub$Observed[which(filesub$Observed ==0)]=NA
+                           #filesub$Modeled[which(filesub$Modeled ==0)]=NA
+                           #filesub$Observed[which(filesub$Observed ==0)]=NA
                            modeled <- filesub[filesub$Gauge==uniqueGauges[g],]$Modeled
                            observed <- filesub[filesub$Gauge==uniqueGauges[g],]$Observed
                       
