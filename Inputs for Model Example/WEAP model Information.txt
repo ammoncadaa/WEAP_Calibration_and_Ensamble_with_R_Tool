@@ -12,5 +12,3 @@ TimeStep per year:
 
 Scenario:
 Reference
-
-if you run ScriptWEAPKeyGaugeBranches.vbs in your WEAP area you will get WEAPKeyGaugeBranches.csv within the folder WEAPKeyGaugeBranches created in your WEAP area folder.   
