@@ -22,8 +22,12 @@ if(!require("hydroGOF")) install.packages("hydroGOF"); library("hydroGOF")
 if(!require("RDCOMClient")) install.packages("RDCOMClient"); library("RDCOMClient")
 if(!require("DT")) install.packages("DT"); library("DT")
 if(!require("deSolve")) install.packages("deSolve"); library("deSolve")
-if (!require("shinyjs")) install.packages("shinyjs"); library("shinyjs")
-if (!require("dplyr")) install.packages("dplyr"); library("dplyr")
+if(!require("shinyjs")) install.packages("shinyjs"); library("shinyjs")
+if(!require("dplyr")) install.packages("dplyr"); library("dplyr")
+if(!require("reshape2")) install.packages("reshape2"); library("reshape2")
+if(!require("ggplot2")) install.packages("ggplot2"); library("ggplot2")
+if(!require("hydroTSM")) install.packages("hydroTSM"); library("hydroTSM")
+if(!require("tidyr")) install.packages("tidyr"); library("tidyr")
 
 
 GraphOptions=c(   "bar",
@@ -84,7 +88,7 @@ shinyApp(
                             )
                             ),
                             hr(),
-                            wellPanel(
+                            wellPanel(style = "background: white",
                               h3("1. Set the name of the WEAP model on which the analyzes will be executed", style = "color:green"),
                               h5("WEAP will open and close to verify that the model exists.", style = "color:green"),
                               fluidRow(
@@ -130,7 +134,7 @@ shinyApp(
                                  em(strong(br(code("Version 3.0 (2022)")))),
                                  em(br("Developed by Angelica Moncada (SEI-LAC Water Group member). Version 2.0 was updated to extract all the water balance variables automatically by using a script as an event 
                                        directly in WEAP. Most of the input files of version 2.0 are now generated automatically. The function to extract additional variables was deactivated because extracting WEAP 
-                                       results through R is not efficient. This version was built under the R version 4.1.1")),
+                                       results through R is not efficient. A button to save summary graphs was added. This version was built under the R version 4.1.1")),
                                  br("Contact: angelica.moncada@sei.org; angelicammoncada@hotmail.com; angelicammoncada@gmail.com"),
                                  hr(),
                                  em(strong(br(code("This program is free software: you can redistribute it and/or modify
@@ -193,7 +197,8 @@ shinyApp(
                   hr(),
                   fluidRow(
                     column(4,
-                          wellPanel(h2("1.  Run WEAP.", style = "color:green"),
+                          wellPanel(style = "background: white",
+                                    h2("1.  Run WEAP.", style = "color:green"),
                                      hr(),
                                      actionButton("actionA", label = " Run WEAP and Extract precipitation and streamflow",icon("play"), 
                                                   style="color: #fff; background-color: #00A65A; border-color: #00A65A; width:100%;white-space:normal;font-size:.9vw;"),
@@ -203,7 +208,8 @@ shinyApp(
                                      h5(strong(htmlOutput("textRunEnsembleA"))),
                                     h5(strong(htmlOutput("textRunEnsembleA1")))
                            ),
-                           wellPanel(h2("2.  User-defined values for estimating the initial conductivity", style = "color:green"),
+                           wellPanel(style = "background: white",
+                                     h2("2.  User-defined values for estimating the initial conductivity", style = "color:green"),
                                      hr(),
                                      h5("Default values are already set. Update these to reflect the reality of your particular basin."),
                                      numericInput('srpercent','3.1. How much of the streamflow is direct surface runoff (excluding base flow)? (DSR, %)',value=20),
@@ -217,7 +223,7 @@ shinyApp(
                            )
                     ),
                     column(8,
-                           wellPanel(
+                           wellPanel(style = "background: white",
                              h2("3. Explore results", style = "color:green"),
                              hr(),
                              h3("Ratio of Observed Streamflow to Precipitation", style = "color:green"),
@@ -230,7 +236,8 @@ shinyApp(
                              h3("Conductivity", style = "color:green"),
                              h5(strong(htmlOutput("textRunEnsembleAConduc1"))),
                              wellPanel(style = "background: white",
-                                DT::dataTableOutput("kestimate"),style = "overflow-x: scroll;"
+                               
+                                div(style = 'overflow-x: scroll',DT::dataTableOutput("kestimate",width = "100%")),
                                 ),
                              wellPanel(style = "background: white",
                                plotlyOutput("kestimateGraphks")),
@@ -295,16 +302,16 @@ shinyApp(
                                want, but you need to have in mind the calculation time. If you upload a the -KeyModelInputs.csv-, it will be use directly.", style = "color:red")
                                      )
                             ),
-                            br("Templates of the input files can be downloaded from:"),
+                            h4(br("Templates of the input files can be downloaded from:"),
                             tags$div(class = "submit",
                                      tags$a(href = "https://github.com/ammoncadaa/WEAP_Calibration_and_Ensamble_with_R_Tool", 
                                             "Download template files", 
                                             target="_blank")
-                            ),
+                            )),
                             
                   ),
                   hr(),
-                  wellPanel(
+                  wellPanel(style = "background: white",
                     h2("1.  WEAP Ensemble file (Optional, Read Intructions).", style = "color:green"),
                     hr(),
                     h5("Choose to create an ensemble file from a list of WEAP key branches and its min, max and variations values organized by rows (WEAPKeyEnsemble.csv) or uploading the ensemble file which contains the list of runs whith the WEAP key branches organized by columns (KeyModelInputs.csv)."),
@@ -337,12 +344,14 @@ shinyApp(
                     hr(),
                     h5("When the file is imported, it will appear here below:"),
                     hr(),
-                    wellPanel(
-                      DT::dataTableOutput("tableWEAPKeyEnsemble"),style = "overflow-x: scroll;"
+                    wellPanel(style = "background: white",
+                              div(style = 'overflow-x: scroll',DT::dataTableOutput("tableWEAPKeyEnsemble",width = "100%")),
+                     
                     )
                     ),
                   hr(),
-                  wellPanel(h2("2. Run analysis.", style = "color:green"),
+                  wellPanel(style = "background: white",
+                            h2("2. Run analysis.", style = "color:green"),
                             hr(),
                             actionButton("action", label = "Run Ensemble",icon("play"), 
                                          style="color: #fff; background-color: #00A65A; border-color: #00A65A; width:100%;white-space:normal;font-size:.9vw;"),
@@ -420,16 +429,36 @@ shinyApp(
                             hr(),
                             h4(strong("Follow each of the numbered items within this tab.")
                             )),
+                  hr(),
+                  wellPanel(style = "background: white",
+                    h3("Save summary graphs. Results will be a subset considering the set dates.", style = "color:green"),
+                    fluidRow(
+                      column(3,
+                             selectInput("titlesg", "Titles of graphs",c("English", "Spanish"),selected = "English")
+                             ),
+                      column(4,
+                             uiOutput("daterangegraph")
+                      ),
+                      column(4,
+                             actionButton("graphs", label = "Save summary graphs (sim vs obs).",icon("play"), 
+                                          style="color: #fff; background-color: #00A65A; border-color: #00A65A; width:100%;white-space:normal;font-size:.9vw;"),
+                             )
+                    ),
+                    h5(strong(htmlOutput("textRunEnsemblegraph"))),
+                                        
+                  ),
+                  hr(),
                   wellPanel(style = "background: white",
                     h3("1. Select Gauge", style = "color:green"),
                     uiOutput("Streamflow"),
                     #verbatimTextOutput("keys"),
                     hr(),
-                    wellPanel(
-                      DT::dataTableOutput("metricsp"),style = "overflow-x: scroll;" 
+                    wellPanel(style = "background: white",
+                      
+                      div(style = 'overflow-x: scroll',DT::dataTableOutput("metricsp",width = "100%")),
                     ),
-                    wellPanel(
-                           DT::dataTableOutput("metrics"),style = "overflow-x: scroll;" 
+                    wellPanel(style = "background: white",
+                              div(style = 'overflow-x: scroll',DT::dataTableOutput("metrics",width = "100%")),
                     )
                     
                   ),
@@ -437,7 +466,8 @@ shinyApp(
                   wellPanel(style = "background: white",
                   fluidRow(
                     column(3,
-                           wellPanel(h3("2. Select value of parameters", style = "color:green"),
+                           wellPanel(style = "background: white",
+                                     h3("2. Select value of parameters", style = "color:green"),
                                      hr(),
                                      uiOutput("daterange"),
                                      hr(),
@@ -447,7 +477,7 @@ shinyApp(
                            )),
                     column(9,
                            
-                           wellPanel(
+                           wellPanel(style = "background: white",
                              tags$style(HTML("
 .tabbable > .nav > li > a                  {background-color: #c1dbc8;  color:#46484a}
 .tabbable > .nav > li[class=active]    > a {background-color: #00A65A; color:white}
@@ -467,8 +497,9 @@ shinyApp(
                                                             plotlyOutput("WBmonthly")),
                                                   wellPanel(style = "background: white",
                                                             plotlyOutput("WBmonthlyB")),
-                                                  wellPanel(
-                                                    DT::dataTableOutput("WBtable"),style = "overflow-x: scroll;" 
+                                                  wellPanel(style = "background: white",
+                                                            div(style = 'overflow-x: scroll',DT::dataTableOutput("WBtable",width = "100%")),
+                                                            
                                                   ),
                                                   wellPanel(style = "background: white",
                                                             plotlyOutput("WBSM")),
@@ -541,6 +572,25 @@ shinyApp(
                                     hr(),
                                     h4(strong("Follow each of the numbered items within this tab.")
                                     )),
+                          hr(),
+                          wellPanel(style = "background: white",
+                                    h3("Save summary graphs. Results will be a subset considering the set dates.", style = "color:green"),
+                                    fluidRow(
+                                      column(3,
+                                             selectInput("titlesg1", "Titles of graphs",c("English", "Spanish"),selected = "English")
+                                      ),
+                                      column(4,
+                                             uiOutput("daterangegraph1")
+                                      ),
+                                      column(4,
+                                             actionButton("graphs1", label = "Save summary graphs (sim vs obs).",icon("play"), 
+                                                          style="color: #fff; background-color: #00A65A; border-color: #00A65A; width:100%;white-space:normal;font-size:.9vw;"),
+                                      )
+                                    ),
+                                    h5(strong(htmlOutput("textRunEnsemblegraph1"))),
+                                    
+                          ),
+                          hr(),
                           wellPanel(style = "background: white",
                                     h3("1. Select Gauge, run, and dates", style = "color:green"),
                                     fluidRow(
@@ -556,11 +606,13 @@ shinyApp(
                                     ),
                                     #verbatimTextOutput("keys"),
                                     hr(),
-                                    wellPanel(
-                                      DT::dataTableOutput("metricsp1"),style = "overflow-x: scroll;" 
+                                    wellPanel(style = "background: white",
+                                      
+                                      div(style = 'overflow-x: scroll',DT::dataTableOutput("metricsp1",width = "100%")),
                                     ),
-                                    wellPanel(
-                                      DT::dataTableOutput("metrics1"),style = "overflow-x: scroll;" 
+                                    wellPanel(style = "background: white",
+                                              div(style = 'overflow-x: scroll',DT::dataTableOutput("metrics1",width = "100%")),
+                                             
                                     )
                                     
                           ),
@@ -586,7 +638,8 @@ shinyApp(
                                                          wellPanel(style = "background: white",
                                                                    plotlyOutput("WBmonthlyB1")),
                                                          wellPanel(
-                                                           DT::dataTableOutput("WBtable1"),style = "overflow-x: scroll;" 
+                                                           div(style = 'overflow-x: scroll',DT::dataTableOutput("WBtable1",width = "100%")),
+                                                           
                                                          ),
                                                          wellPanel(style = "background: white",
                                                                    plotlyOutput("WBSM1")),
@@ -623,7 +676,7 @@ shinyApp(
                             )
                   ),
                   hr(),
-                  wellPanel(
+                  wellPanel(style = "background: white",
                     fluidRow(
                       column(5,
                              h3("1. Calculate performance metrics within the indicated date range", style = "color:green"),
@@ -650,7 +703,7 @@ shinyApp(
                              )))),
                   hr(),
                   h3("3. Filtered performance metrics", style = "color:green"),
-                  wellPanel(
+                  wellPanel(style = "background: white",
                     fluidRow(
                       column(6,
                              plotlyOutput("GOF_1")),
@@ -658,7 +711,7 @@ shinyApp(
                              plotlyOutput("GOF_2"))
                     )),
                   hr(),
-                  wellPanel(
+                  wellPanel(style = "background: white",
                     fluidRow(
                       column(6,
                              plotlyOutput("GOF_3")),
@@ -666,7 +719,7 @@ shinyApp(
                              plotlyOutput("GOF_4"))
                     )),
                   hr(),
-                  wellPanel(
+                  wellPanel(style = "background: white",
                     fluidRow(
                       column(6,
                              plotlyOutput("GOF_5")),
@@ -674,7 +727,7 @@ shinyApp(
                              plotlyOutput("GOF_6"))
                     )),
                   hr(),
-                  wellPanel(
+                  wellPanel(style = "background: white",
                     fluidRow(
                       column(6,
                              plotlyOutput("GOF_7")),
@@ -682,7 +735,7 @@ shinyApp(
                              plotlyOutput("GOF_8"))
                     )),
                   hr(),
-                  wellPanel(
+                  wellPanel(style = "background: white",
                     fluidRow(
                       column(6,
                              plotlyOutput("GOF_9")),
@@ -690,7 +743,7 @@ shinyApp(
                              plotlyOutput("GOF_10"))
                     )),
                   hr(),
-                  wellPanel(
+                  wellPanel(style = "background: white",
                     fluidRow(
                       column(6,
                              plotlyOutput("GOF_11")),
@@ -698,8 +751,9 @@ shinyApp(
                              plotlyOutput("GOF_12"))
                     )),
                   hr(),
-                  wellPanel(
-                    DT::dataTableOutput("GOFmetricsruns"),style = "overflow-x: scroll;" 
+                  wellPanel(style = "background: white",
+                    
+                    div(style = 'overflow-x: scroll',DT::dataTableOutput("GOFmetricsruns",width = "100%")),
                   )
                   # hr(),
                   # h3("4. All performance metrics", style = "color:green"),
@@ -735,8 +789,9 @@ shinyApp(
                     uiOutput("UploadedFileCsv"),
                     hr(),
                     h5("When the file is imported, it will appear here below:"),
-                    wellPanel(
-                      DT::dataTableOutput("tableUploadedFile"),style = "overflow-x: scroll;" ,
+                    wellPanel(style = "background: white",
+                              div(style = 'overflow-x: scroll',DT::dataTableOutput("tableUploadedFile",width = "100%")),
+                              
                     ),
                     hr(),
                     h2("3. Choose de type of graph", style = "color:green"),
@@ -768,8 +823,9 @@ shinyApp(
                     hr(),
                     h5("The plotted data is:"),
                     hr(),
-                    wellPanel(
-                      DT::dataTableOutput("tableplotfile"),style = "overflow-x: scroll;"  
+                    wellPanel(style = "background: white",
+                      
+                      div(style = 'overflow-x: scroll',DT::dataTableOutput("tableplotfile",width = "100%")),
                     )
                     
                     
@@ -901,12 +957,43 @@ shinyApp(
                 file$Dates=ymd(file$Dates)
                 starty <- min(file$Dates)
                 endy <- max(file$Dates)
-                dateRangeInput("dates",label="Select date range for which to calculate performance metrics)",start=starty,end=endy,min=starty,max=endy,separator = " - ", format = "dd/mm/yyyy")
+                dateRangeInput("dates",label="Select date range to calculate performance metrics",start=starty,end=endy,min=starty,max=endy,separator = " - ", format = "dd/mm/yyyy")
               } else {
-                dateRangeInput("dates",label="Select date range for which to calculate performance metrics)",start=ymd("1900-01-01"),end=ymd("1900-01-01"),min=ymd("1900-01-01"),max=ymd("1900-01-01"),separator = " - ", format = "dd/mm/yyyy")
+                dateRangeInput("dates",label="Select date range to calculate performance metrics",start=ymd("1900-01-01"),end=ymd("1900-01-01"),min=ymd("1900-01-01"),max=ymd("1900-01-01"),separator = " - ", format = "dd/mm/yyyy")
               }
             })
-          
+            
+            output$daterangegraph <- renderUI({
+              if (length(list.files(pattern ="ResultsWB-")>0)){
+                listResults=list.files(pattern ="ResultsWB-")
+                listResults=gsub("ResultsWB-","",listResults,fixed = TRUE)
+                listResults=gsub(".csv","",listResults,fixed = TRUE)
+                listResults=unique(as.numeric(listResults))
+                file <- read.csv(paste0("ResultsWB-",min(listResults),".csv"), stringsAsFactors=F, check.names=F)
+                file$Dates=ymd(file$Dates)
+                starty <- min(file$Dates)
+                endy <- max(file$Dates)
+                dateRangeInput("datesgraph",label="Select date range to calculate performance metrics and save graphs",start=starty,end=endy,min=starty,max=endy,separator = " - ", format = "dd/mm/yyyy")
+              } else {
+                dateRangeInput("datesgraph",label="Select date range to calculate performance metrics and save graphs",start=ymd("1900-01-01"),end=ymd("1900-01-01"),min=ymd("1900-01-01"),max=ymd("1900-01-01"),separator = " - ", format = "dd/mm/yyyy")
+              }
+            })
+            output$daterangegraph1 <- renderUI({
+              if (length(list.files(pattern ="ResultsWB-")>0)){
+                listResults=list.files(pattern ="ResultsWB-")
+                listResults=gsub("ResultsWB-","",listResults,fixed = TRUE)
+                listResults=gsub(".csv","",listResults,fixed = TRUE)
+                listResults=unique(as.numeric(listResults))
+                file <- read.csv(paste0("ResultsWB-",min(listResults),".csv"), stringsAsFactors=F, check.names=F)
+                file$Dates=ymd(file$Dates)
+                starty <- min(file$Dates)
+                endy <- max(file$Dates)
+                dateRangeInput("datesgraph1",label="Select date range to calculate performance metrics and save graphs",start=starty,end=endy,min=starty,max=endy,separator = " - ", format = "dd/mm/yyyy")
+              } else {
+                dateRangeInput("datesgraph1",label="Select date range to calculate performance metrics and save graphs",start=ymd("1900-01-01"),end=ymd("1900-01-01"),min=ymd("1900-01-01"),max=ymd("1900-01-01"),separator = " - ", format = "dd/mm/yyyy")
+              }
+            })
+            
             output$Streamflow1 <- renderUI({
               if (length(list.files(pattern ="ResultsWB-")>0)){
                 listResults=list.files(pattern ="ResultsWB-")
@@ -931,9 +1018,9 @@ shinyApp(
                 file$Dates=ymd(file$Dates)
                 starty <- min(file$Dates)
                 endy <- max(file$Dates)
-                dateRangeInput("dates1",label="Select date range for which to calculate performance metrics)",start=starty,end=endy,min=starty,max=endy,separator = " - ", format = "dd/mm/yyyy")
+                dateRangeInput("dates1",label="Select date range to calculate performance metrics",start=starty,end=endy,min=starty,max=endy,separator = " - ", format = "dd/mm/yyyy")
               } else {
-                dateRangeInput("dates1",label="Select date range for which to calculate performance metrics)",start=ymd("1900-01-01"),end=ymd("1900-01-01"),min=ymd("1900-01-01"),max=ymd("1900-01-01"),separator = " - ", format = "dd/mm/yyyy")
+                dateRangeInput("dates1",label="Select date range to calculate performance metrics",start=ymd("1900-01-01"),end=ymd("1900-01-01"),min=ymd("1900-01-01"),max=ymd("1900-01-01"),separator = " - ", format = "dd/mm/yyyy")
               }
             })
             
@@ -947,9 +1034,9 @@ shinyApp(
                 file$Dates=ymd(file$Dates)
                 starty <- min(file$Dates)
                 endy <- max(file$Dates)
-                dateRangeInput("datest",label="Select date range for which to calculate performance metrics)",start=starty,end=endy,min=starty,max=endy,separator = " - ", format = "dd/mm/yyyy")
+                dateRangeInput("datest",label="Select date range to calculate performance metrics",start=starty,end=endy,min=starty,max=endy,separator = " - ", format = "dd/mm/yyyy")
               } else {
-                dateRangeInput("datest",label="Select date range for which to calculate performance metrics)",start=ymd("1900-01-01"),end=ymd("1900-01-01"),min=ymd("1900-01-01"),max=ymd("1900-01-01"),separator = " - ", format = "dd/mm/yyyy")
+                dateRangeInput("datest",label="Select date range to calculate performance metrics",start=ymd("1900-01-01"),end=ymd("1900-01-01"),min=ymd("1900-01-01"),max=ymd("1900-01-01"),separator = " - ", format = "dd/mm/yyyy")
               }
             })
             
@@ -1045,7 +1132,7 @@ shinyApp(
       })
     
     observeEvent(input$actionA,{ 
-      
+      try({
       Model=VAL$Model
       if (Model==1){
         start = Sys.time()
@@ -1069,29 +1156,7 @@ shinyApp(
                        
                        incProgress(1/5)
                        
-                       years <- seq(as.numeric(sy)+1,as.numeric(ey))
-                       rows <- length(years)*as.numeric(ts)
                        sy=as.numeric(sy)+1
-                       
-                       if (ts==365){
-                         myDates=data.frame(seq(as.Date(paste0(sy,"-01-01")), to=as.Date(paste0(ey,"-12-31")),by="day"))
-                         names(myDates)= "Dates"
-                         myDates <- myDates[!(format(myDates$Dates,"%m") == "02" & format(myDates$Dates, "%d") == "29"), ,drop = FALSE]
-                       }else if (ts==12){
-                         myDates=data.frame(seq(as.Date(paste0(sy,"-01-01")), to=as.Date(paste0(ey,"-12-31")),by="month"))
-                         names(myDates)= "Dates"
-                       }else{
-                         d=seq(from=0, by=round(365/ts),length.out = ts)
-                         myDates=data.frame(as.Date(paste0(sy,"-01-01"))+d)
-                         names(myDates)= "Dates"
-                         if (length(years)>1){
-                           for (i in years[2:length(years)]){
-                             myDates1==data.frame(as.Date(paste0(i,"-01-01"))+d)
-                             names(myDates1)= "Dates"
-                             myDates=rbind(myDates,myDates1) 
-                           }
-                         }
-                       }
                        
                        WEAP[["ActiveScenario"]] <- "Current Accounts"
                        
@@ -1167,11 +1232,35 @@ shinyApp(
                        
                        resultsWBC=read.csv(paste0(RUNID,"_",Scen,"_WaterBalance.csv"), stringsAsFactors=F, check.names=F)
                        cols=c("Year","Time step", "Catchment","Area Calculated[M^2]", "Observed Precipitation[M^3]")
+                       #cols=c("Year","Time step", "Catchment","Area", "Precipitation")
                        resultsWBC=resultsWBC[,cols]
+                       #colnames(resultsWBC)=c("Year","Time step", "Catchment","Area Calculated[M^2]", "Observed Precipitation[M^3]")
                        
                        resultsWBG[resultsWBG==-9999]= NA
                        resultsWBC[resultsWBC==-9999]= NA
                        resultsWBG[resultsWBG$`Observed [M^3]`==0,"Observed [M^3]"]= NA
+                       
+                       days=read.csv("WEAPdays.csv",stringsAsFactors = F, check.names=F)
+                       days1=unique(resultsWBG[,c("Year","Time step")])
+                       days=merge(days,days1,by="Time step")
+                       days=days[order(days$Year,days$`Time step`),]
+                       days$Dates=NA
+                       days$Dates[1]=as.Date(paste0(days$Year[1],"/01/01"))
+                       days$Dates=as.Date(days$Dates)      
+                       for (d in 2:nrow(days)) {
+                         drow=as.Date(days$Dates[d-1]+days$Days[d])
+                         if ((month(as.Date(days$Dates[d-1]+days$Days[d]))*100+day(as.Date(days$Dates[d-1]+days$Days[d])))==229){
+                           days$Dates[d]=as.Date(days$Dates[d-1]+days$Days[d]+1)
+                         }else {
+                           days$Dates[d]=as.Date(days$Dates[d-1]+days$Days[d])
+                         }
+                         if(year(days$Dates[d])!=days$Year[d]){
+                           days$Dates[d]=as.Date(paste0(days$Year[d],"/12/31"))
+                         }
+                         
+                       }
+                       days$Dates=as.Date(days$Dates)      
+                       rownames(days)=NULL
                        
                        cols=c("Year",
                               "Time step",
@@ -1204,13 +1293,16 @@ shinyApp(
                          resultsWBC_g1=resultsWBC_g1[,cols]
                          #str(resultsWBC_g1)
                          resultsWBC_g1=resultsWBC_g1[order(resultsWBC_g1$Gauge,resultsWBC_g1$Year,resultsWBC_g1$`Time step`),]
+                         
                          resultsWB=rbind(resultsWB,resultsWBC_g1)
                          
                        }
                        
                        incProgress(1/5)
                        
-                       resultsWB = cbind(resultsWB,myDates)
+                       
+                       resultsWB = merge(resultsWB,days,by=c("Year","Time step"))
+                       resultsWB = resultsWB[order(resultsWB$Gauge,resultsWB$Dates),]
                        write.csv(resultsWB,paste0("ResultsGauges.csv"),row.names=F) 
                        
                        file <- resultsWB
@@ -1222,6 +1314,7 @@ shinyApp(
                                         "Observed",
                                         "Area",
                                         "Precipitation",
+                                        "Days",
                                         "Dates")
                        file$Dates=ymd(file$Dates)
                        file$YearMonth=year(file$Dates)*100+month(file$Dates)
@@ -1236,18 +1329,15 @@ shinyApp(
                        
                        file1=file
                        
-                       file2=as.data.frame(matrix(NA,ncol=6,nrow=1))
-                       colnames(file2)=c("YearMonth",     "Observed",      "Precipitation", "Dates",         "Q_P","Gauge") 
-                       file2$Dates=as.Date(file2$Dates)
+                       file2=NULL
                        
-                       file3=as.data.frame(matrix(NA,ncol=5,nrow=1))
-                       colnames(file3)=c("Month",         "Observed",      "Precipitation", "Q_P","Gauge")   
+                       file3=NULL
                        
                        for (i in 1:length(gauges)){
                          file=file1
                          file=file[which(file$Gauge==gauges[i]),]
                          file=file[,c("Observed","Precipitation","YearMonth")]
-                         file <- aggregate(file[,1:(ncol(file)-1)], by=list(YearMonth=file$YearMonth),sum,na.rm=F)
+                         file <- aggregate(file[,c("Observed","Precipitation")], by=list(YearMonth=file$YearMonth),sum,na.rm=F)
                          file$Dates=ymd(myDates)
                          file$Q_P=round(file$Observed/file$Precipitation*100,2)
                          file$Gauge=gauges[i]
@@ -1256,18 +1346,16 @@ shinyApp(
                          file2=rbind(file2,file)
                          
                          file$Month=file$YearMonth%%100
-                         file <- aggregate(file[,c(2,3,5)], by=list(Month=file$Month),mean,na.rm=T)
+                         file <- aggregate(file[,c("Observed","Precipitation","Q_P" )], by=list(Month=file$Month),mean,na.rm=T)
                          file$Gauge=gauges[i]
                          file3=rbind(file3,file)
                          
                        }
                        
-                       file=file2[-1,]
-                       file2=file2[-1,-1]
-                       file2=file2[,c(5,3,1,2,4)]
+                       file2=file2[,c("Gauge" ,"Precipitation","Observed","Q_P","Dates")]
                        write.csv(file2,paste0("Results_Q_P_monthlyTimeserie.csv"),row.names=F) 
                        
-                       file3=file3[-1,c(5,1,2,3,4)]
+                       file3=file3[,c("Gauge" ,"Precipitation","Observed","Q_P","Month")]
                        write.csv(file3,paste0("Results_Q_P_monthlySummary.csv"),row.names=F) 
                        
                        
@@ -1321,6 +1409,7 @@ shinyApp(
                                     "Observed",
                                     "Area",
                                     "Precipitation",
+                                    "Days",
                                     "Dates")
 
           ResultsGauges$Dates=ymd(ResultsGauges$Dates)
@@ -1330,7 +1419,6 @@ shinyApp(
           
           years <- seq(as.numeric(year(min(ResultsGauges$Dates))),as.numeric(year(max(ResultsGauges$Dates))))
           myDates=seq(as.Date(paste0(year(min(ResultsGauges$Dates)),"-01-01")), to=as.Date(paste0(year(max(ResultsGauges$Dates)),"-12-31")),by="month")
-          
           
           #gs=sort(unique(ResultsGauges$Gauge))[1]
           ResultsGauges=ResultsGauges[which(ResultsGauges$Gauge==gs),]
@@ -1371,7 +1459,7 @@ shinyApp(
           }) 
           
           #obs <- read.csv(paste0("ResultsGauges.csv"), stringsAsFactors=F, check.names=F)
-          obs=obs[,-6]
+          obs=obs[,c(-6,-7)]
           colnames(obs)=c("Year",
                           "Time step",
                           "Gauge",
@@ -1383,17 +1471,13 @@ shinyApp(
           ey <- max(obs$Year)
           ts <- max(obs$`Time step`)
           
-          years <- seq(as.numeric(sy),as.numeric(ey))
-          rows <- (as.numeric(ey)-as.numeric(sy)+1)*as.numeric(ts)
           
           obs$ks=NA
           obs$kd=NA
           
           table <- data.frame(matrix(NA,ncol=5, nrow=length(unique(obs$Gauge))))
           colnames(table)=c("Gauge","Min Ks, top bucket","Max Ks, top bucket","Min Kd, bottom bucket","Max Kd, bottom bucket")
-          
-          row=1
-          
+            
           srpercent=as.numeric(input$srpercent)
           z1=as.numeric(input$z1)
           z2=as.numeric(input$z2)
@@ -1401,12 +1485,13 @@ shinyApp(
           # srpercent=20
           # z1=30
           # z2=30
+
           
           for (i in 1:length(unique(obs$Gauge))){
             
             table[i,1]=unique(obs$Gauge)[i]
             
-            flows=obs[obs$Gauge==table[i,1],]
+            flows=obs[obs$Gauge==unique(obs$Gauge)[i],]
             flows$Dates <- ymd(flows$Dates)
             
             high <- max(flows$Observed,na.rm=T) 
@@ -1430,9 +1515,8 @@ shinyApp(
             table[i,4] <- round(min(flows$kd),2) 
             table[i,5] <- round(max(flows$kd),2)
             
-            obs[(row):(i*rows),7]=flows$ks
-            obs[(row):(i*rows),8]=flows$kd
-            row=row+rows
+            obs[obs$Gauge==unique(obs$Gauge)[i],7]=flows$ks
+            obs[obs$Gauge==unique(obs$Gauge)[i],8]=flows$kd
             
           }
           
@@ -1445,9 +1529,7 @@ shinyApp(
           list1=gsub(".csv","",list1,fixed = TRUE)
           list1=gsub("Resultsk_Summary-","",list1,fixed = TRUE)
           
-          file1=as.data.frame(matrix(NA,ncol=6,nrow=1))
-          colnames(file1)=c("Gauge" ,                "Min Ks, top bucket" ,   "Max Ks, top bucket" ,   "Min Kd, bottom bucket" ,"Max Kd, bottom bucket","Parameters")
-          
+          file1=NULL
           for (i in 1:length(list)){
             
             file <- read.csv(paste0("",list[i]), stringsAsFactors=F, check.names=F)
@@ -1455,7 +1537,6 @@ shinyApp(
             file1=rbind(file1,file)
           }
           
-          file1=file1[-1,]
           file1=file1[order(file1$Gauge),]
           write.csv(file1,paste0("Resultsk_SummaryALL.csv"),row.names=F) 
           
@@ -1498,17 +1579,18 @@ shinyApp(
             
             file$Dates=ymd(file$Dates)
             #file=file[file$Gauge==unique(file$Gauge)[1],]
-            file=file[file$Gauge==gs,]
+            #file=file[file$Gauge==gs,]
             #fileA=file
             #fileA
+            file$Gauge=as.factor(file$Gauge)
             
             output$kestimateGraphks <- renderPlotly({
               
               if (file.exists(paste0("Resultsk","-DSR",srpercent,"-Z1",z1,"-Z2",z2,".csv"))){
-                text=paste0(gs," - ks, top bucket conductivity ",gs," DSR:",srpercent,"% Z1:",z1,"% Z2:",z2,"%")
+                text=paste0("ks, top bucket conductivity "," DSR:",srpercent,"% Z1:",z1,"% Z2:",z2,"%")
                 #text=""
-                p1 <-plot_ly(file, x=~Dates, y=~ks, name = "ks, top bucket conductivity", type="scatter", mode="lines",
-                             line = list(color="red",width=1.5)) %>%
+                p1 <-plot_ly(file, x=~Dates, y=~ks, type="scatter", mode="lines",color = ~Gauge,
+                             line = list(color= ~Gauge,width=1.5)) %>%
                   layout(title =text ,
                          xaxis = list(title=""),
                          yaxis = list(title= "ks (mm)"))
@@ -1520,14 +1602,16 @@ shinyApp(
             output$kestimateGraphkd <- renderPlotly({
               
               if (file.exists(paste0("Resultsk","-DSR",srpercent,"-Z1",z1,"-Z2",z2,".csv"))){
-                text=paste0(gs," - kd, bottom bucket conductivity ",gs," DSR:",srpercent,"% Z1:",z1,"% Z2:",z2,"%")
-                p2 <-plot_ly(file, x=~Dates, y=~kd, name = "kd, bottom bucket conductivity", type="scatter", mode="lines",
-                             line = list(color="red",width=1.5)) %>%
-                  layout(title = text,
+                text=paste0("kd, bottom bucket conductivity "," DSR:",srpercent,"% Z1:",z1,"% Z2:",z2,"%")
+                #text=""
+                p2 <-plot_ly(file, x=~Dates, y=~kd, type="scatter", mode="lines",color = ~Gauge,
+                             line = list(color= ~Gauge,width=1.5)) %>%
+                  layout(title =text ,
                          xaxis = list(title=""),
-                         yaxis = list(title= "kd (mm)"))
+                         yaxis = list(title= "ks (mm)"))
                 p2
               }
+
             })
           }
           
@@ -1537,25 +1621,28 @@ shinyApp(
         
                      })
         }
-      
+      })               
     })
     
     observeEvent(input$StreamflowSelectA,{
       
+      req(input$StreamflowSelectA)
       Model=VAL$Model1
-      
+      try({
       if (file.exists(paste0("ResultsGauges.csv")) && Model==1) {
         
         gs=input$StreamflowSelectA
         
-        ResultsGauges <- read.csv(paste0("ResultsGauges.csv"), stringsAsFactors=F, check.names=F)
+        ResultsGauges=read.csv(paste0("ResultsGauges.csv"), stringsAsFactors=F, check.names=F)
         obs=ResultsGauges
+        
         colnames(ResultsGauges)=c("Year",
                                   "Time step",
                                   "Gauge",
                                   "Observed",
                                   "Area",
                                   "Precipitation",
+                                  "Days",
                                   "Dates")
         
         ResultsGauges$Dates=ymd(ResultsGauges$Dates)
@@ -1565,7 +1652,6 @@ shinyApp(
         
         years <- seq(as.numeric(year(min(ResultsGauges$Dates))),as.numeric(year(max(ResultsGauges$Dates))))
         myDates=seq(as.Date(paste0(year(min(ResultsGauges$Dates)),"-01-01")), to=as.Date(paste0(year(max(ResultsGauges$Dates)),"-12-31")),by="month")
-        
         
         #gs=sort(unique(ResultsGauges$Gauge))[1]
         ResultsGauges=ResultsGauges[which(ResultsGauges$Gauge==gs),]
@@ -1605,20 +1691,19 @@ shinyApp(
           p
         }) 
         
+        
       }
-      
+      })
     })
     
     observeEvent(list(input$StreamflowSelectA,input$srpercent,input$z1,input$z2),{
-      
+       
       Model=VAL$Model1
-      
+      try({
       if (file.exists(paste0("ResultsGauges.csv")) && Model==1) {
         
-        gs=input$StreamflowSelectA
-        
         obs <- read.csv(paste0("ResultsGauges.csv"), stringsAsFactors=F, check.names=F)
-        obs=obs[,-6]
+        obs=obs[,c(-6,-7)]
         colnames(obs)=c("Year",
                         "Time step",
                         "Gauge",
@@ -1630,16 +1715,12 @@ shinyApp(
         ey <- max(obs$Year)
         ts <- max(obs$`Time step`)
         
-        years <- seq(as.numeric(sy),as.numeric(ey))
-        rows <- (as.numeric(ey)-as.numeric(sy)+1)*as.numeric(ts)
         
         obs$ks=NA
         obs$kd=NA
         
         table <- data.frame(matrix(NA,ncol=5, nrow=length(unique(obs$Gauge))))
         colnames(table)=c("Gauge","Min Ks, top bucket","Max Ks, top bucket","Min Kd, bottom bucket","Max Kd, bottom bucket")
-        
-        row=1
         
         srpercent=as.numeric(input$srpercent)
         z1=as.numeric(input$z1)
@@ -1649,11 +1730,12 @@ shinyApp(
         # z1=30
         # z2=30
         
+        
         for (i in 1:length(unique(obs$Gauge))){
           
           table[i,1]=unique(obs$Gauge)[i]
           
-          flows=obs[obs$Gauge==table[i,1],]
+          flows=obs[obs$Gauge==unique(obs$Gauge)[i],]
           flows$Dates <- ymd(flows$Dates)
           
           high <- max(flows$Observed,na.rm=T) 
@@ -1677,9 +1759,8 @@ shinyApp(
           table[i,4] <- round(min(flows$kd),2) 
           table[i,5] <- round(max(flows$kd),2)
           
-          obs[(row):(i*rows),7]=flows$ks
-          obs[(row):(i*rows),8]=flows$kd
-          row=row+rows
+          obs[obs$Gauge==unique(obs$Gauge)[i],7]=flows$ks
+          obs[obs$Gauge==unique(obs$Gauge)[i],8]=flows$kd
           
         }
         
@@ -1692,9 +1773,7 @@ shinyApp(
         list1=gsub(".csv","",list1,fixed = TRUE)
         list1=gsub("Resultsk_Summary-","",list1,fixed = TRUE)
         
-        file1=as.data.frame(matrix(NA,ncol=6,nrow=1))
-        colnames(file1)=c("Gauge" ,                "Min Ks, top bucket" ,   "Max Ks, top bucket" ,   "Min Kd, bottom bucket" ,"Max Kd, bottom bucket","Parameters")
-        
+        file1=NULL
         for (i in 1:length(list)){
           
           file <- read.csv(paste0("",list[i]), stringsAsFactors=F, check.names=F)
@@ -1702,7 +1781,6 @@ shinyApp(
           file1=rbind(file1,file)
         }
         
-        file1=file1[-1,]
         file1=file1[order(file1$Gauge),]
         write.csv(file1,paste0("Resultsk_SummaryALL.csv"),row.names=F) 
         
@@ -1734,6 +1812,8 @@ shinyApp(
           table=table[order(table$Gauge),]
           DT::datatable(table, rownames= FALSE)
           
+          
+          
         })
         
         if (file.exists(paste0("Resultsk","-DSR",srpercent,"-Z1",z1,"-Z2",z2,".csv")) && Model==1){
@@ -1743,17 +1823,18 @@ shinyApp(
           
           file$Dates=ymd(file$Dates)
           #file=file[file$Gauge==unique(file$Gauge)[1],]
-          file=file[file$Gauge==gs,]
+          #file=file[file$Gauge==gs,]
           #fileA=file
           #fileA
+          file$Gauge=as.factor(file$Gauge)
           
           output$kestimateGraphks <- renderPlotly({
             
             if (file.exists(paste0("Resultsk","-DSR",srpercent,"-Z1",z1,"-Z2",z2,".csv"))){
-              text=paste0(gs," - ks, top bucket conductivity ",gs," DSR:",srpercent,"% Z1:",z1,"% Z2:",z2,"%")
+              text=paste0("ks, top bucket conductivity "," DSR:",srpercent,"% Z1:",z1,"% Z2:",z2,"%")
               #text=""
-              p1 <-plot_ly(file, x=~Dates, y=~ks, name = "ks, top bucket conductivity", type="scatter", mode="lines",
-                           line = list(color="red",width=1.5)) %>%
+              p1 <-plot_ly(file, x=~Dates, y=~ks, type="scatter", mode="lines",color = ~Gauge,
+                           line = list(color= ~Gauge,width=1.5)) %>%
                 layout(title =text ,
                        xaxis = list(title=""),
                        yaxis = list(title= "ks (mm)"))
@@ -1765,19 +1846,24 @@ shinyApp(
           output$kestimateGraphkd <- renderPlotly({
             
             if (file.exists(paste0("Resultsk","-DSR",srpercent,"-Z1",z1,"-Z2",z2,".csv"))){
-              text=paste0(gs," - kd, bottom bucket conductivity ",gs," DSR:",srpercent,"% Z1:",z1,"% Z2:",z2,"%")
-              p2 <-plot_ly(file, x=~Dates, y=~kd, name = "kd, bottom bucket conductivity", type="scatter", mode="lines",
-                           line = list(color="red",width=1.5)) %>%
-                layout(title = text,
+              text=paste0("kd, bottom bucket conductivity "," DSR:",srpercent,"% Z1:",z1,"% Z2:",z2,"%")
+              #text=""
+              p2 <-plot_ly(file, x=~Dates, y=~kd, type="scatter", mode="lines",color = ~Gauge,
+                           line = list(color= ~Gauge,width=1.5)) %>%
+                layout(title =text ,
                        xaxis = list(title=""),
-                       yaxis = list(title= "kd (mm)"))
+                       yaxis = list(title= "ks (mm)"))
               p2
             }
+            
           })
         }
         
+        
+        
+        
       }
-      
+      })               
     })
     ###################################### 
     
@@ -1871,6 +1957,7 @@ shinyApp(
       
       Model=VAL$Model #&& 
       
+      try({
       if (Model==1){
         withProgress(message = 'Calculation in progress',
                      detail = 'This may take a while...', value = 0, {
@@ -1902,30 +1989,8 @@ shinyApp(
                        WEAP[["EndYear"]] <- ey
                        WEAP[["Verbose"]] <- 0
                        
-                       years <- seq(as.numeric(sy)+1,as.numeric(ey))
-                       rows <- length(years)*as.numeric(ts)
                        sy=as.numeric(sy)+1
-                       
-                       if (ts==365){
-                         myDates=data.frame(seq(as.Date(paste0(sy,"-01-01")), to=as.Date(paste0(ey,"-12-31")),by="day"))
-                         names(myDates)= "Dates"
-                         myDates <- myDates[!(format(myDates$Dates,"%m") == "02" & format(myDates$Dates, "%d") == "29"), ,drop = FALSE]
-                       }else if (ts==12){
-                         myDates=data.frame(seq(as.Date(paste0(sy,"-01-01")), to=as.Date(paste0(ey,"-12-31")),by="month"))
-                         names(myDates)= "Dates"
-                       }else{
-                         d=seq(from=0, by=round(365/ts),length.out = ts)
-                         myDates=data.frame(as.Date(paste0(sy,"-01-01"))+d)
-                         names(myDates)= "Dates"
-                         if (length(years)>1){
-                           for (i in years[2:length(years)]){
-                             myDates1==data.frame(as.Date(paste0(i,"-01-01"))+d)
-                             names(myDates1)= "Dates"
-                             myDates=rbind(myDates,myDates1) 
-                           }
-                         }
-                       }
-                       
+
                        WEAP[["ActiveScenario"]] <- "Current Accounts"
                        
                        C = "Num"  
@@ -2074,7 +2139,30 @@ shinyApp(
                              
                            }
                            
-                           resultsWB = cbind(resultsWB,myDates)
+                           days=read.csv("WEAPdays.csv",stringsAsFactors = F, check.names=F)
+                           days1=unique(resultsWB[,c("Year","Time step")])
+                           days=merge(days,days1,by="Time step")
+                           days=days[order(days$Year,days$`Time step`),]
+                           days$Dates=NA
+                           days$Dates[1]=as.Date(paste0(days$Year[1],"/01/01"))
+                           days$Dates=as.Date(days$Dates)      
+                           for (d in 2:nrow(days)) {
+                             drow=as.Date(days$Dates[d-1]+days$Days[d])
+                             if ((month(as.Date(days$Dates[d-1]+days$Days[d]))*100+day(as.Date(days$Dates[d-1]+days$Days[d])))==229){
+                               days$Dates[d]=as.Date(days$Dates[d-1]+days$Days[d]+1)
+                             }else {
+                               days$Dates[d]=as.Date(days$Dates[d-1]+days$Days[d])
+                             }
+                             if(year(days$Dates[d])!=days$Year[d]){
+                               days$Dates[d]=as.Date(paste0(days$Year[d],"/12/31"))
+                             }
+                             
+                           }
+                           days$Dates=as.Date(days$Dates)      
+                           rownames(days)=NULL
+                           
+                           resultsWB = merge(resultsWB,days,by=c("Year","Time step"))
+                           resultsWB=resultsWB[order(resultsWB$Gauge,resultsWB$Year,resultsWB$`Time step`),]
                            write.csv(resultsWB,paste0("ResultsWB-",RUNID,".csv"),row.names=F) 
                            incProgress(1/(3*runs+2))
                          }
@@ -2098,7 +2186,7 @@ shinyApp(
                          incProgress(1/(3*runs+2))
                          
                          
-                         dir_outg = dir_outg = VAL$dir_outg
+                         dir_outg = VAL$dir_outg
                          
                          files=c(paste0(RUNID,"_",Scen,"_WaterBalance.csv"),paste0(RUNID,"_",Scen,"_ResultsGauges.csv"),"WEAPKeyGaugeBranches.csv","WEAPKeyGaugesCatchments.csv","WEAPdays.csv")
                          current.folder <- paste0(WEAP$AreasDirectory(),Warea)
@@ -2193,7 +2281,32 @@ shinyApp(
                            
                          }
                          
-                         resultsWB = cbind(resultsWB,myDates)
+                         days=read.csv("WEAPdays.csv",stringsAsFactors = F, check.names=F)
+                         days1=unique(resultsWB[,c("Year","Time step")])
+                         days=merge(days,days1,by="Time step")
+                         days=days[order(days$Year,days$`Time step`),]
+                         days$Dates=NA
+                         days$Dates[1]=as.Date(paste0(days$Year[1],"/01/01"))
+                         days$Dates=as.Date(days$Dates)      
+                         for (d in 2:nrow(days)) {
+                           drow=as.Date(days$Dates[d-1]+days$Days[d])
+                           if ((month(as.Date(days$Dates[d-1]+days$Days[d]))*100+day(as.Date(days$Dates[d-1]+days$Days[d])))==229){
+                             days$Dates[d]=as.Date(days$Dates[d-1]+days$Days[d]+1)
+                           }else {
+                             days$Dates[d]=as.Date(days$Dates[d-1]+days$Days[d])
+                           }
+                           if(year(days$Dates[d])!=days$Year[d]){
+                             days$Dates[d]=as.Date(paste0(days$Year[d],"/12/31"))
+                           }
+                           
+                         }
+                         days$Dates=as.Date(days$Dates)      
+                         rownames(days)=NULL   
+                         
+                         
+                         resultsWB = merge(resultsWB,days,by=c("Year","Time step"))
+                         resultsWB=resultsWB[order(resultsWB$Gauge,resultsWB$Year,resultsWB$`Time step`),]
+                         
                          write.csv(resultsWB,paste0("ResultsWB-",RUNID,".csv"),row.names=F) 
                          incProgress(1/(3*runs+2))
                          VAL$Model3=0
@@ -2247,9 +2360,40 @@ shinyApp(
                              file$Dates=ymd(file$Dates)
                              starty <- min(file$Dates)
                              endy <- max(file$Dates)
-                             dateRangeInput("dates",label="Select date range for which to calculate performance metrics)",start=starty,end=endy,min=starty,max=endy,separator = " - ", format = "dd/mm/yyyy")
+                             dateRangeInput("dates",label="Select date range to calculate performance metrics",start=starty,end=endy,min=starty,max=endy,separator = " - ", format = "dd/mm/yyyy")
                            } else {
-                             dateRangeInput("dates",label="Select date range for which to calculate performance metrics)",start=ymd("1900-01-01"),end=ymd("1900-01-01"),min=ymd("1900-01-01"),max=ymd("1900-01-01"),separator = " - ", format = "dd/mm/yyyy")
+                             dateRangeInput("dates",label="Select date range to calculate performance metrics",start=ymd("1900-01-01"),end=ymd("1900-01-01"),min=ymd("1900-01-01"),max=ymd("1900-01-01"),separator = " - ", format = "dd/mm/yyyy")
+                           }
+                         })
+                         
+                         output$daterangegraph <- renderUI({
+                           if (length(list.files(pattern ="ResultsWB-")>0)){
+                             listResults=list.files(pattern ="ResultsWB-")
+                             listResults=gsub("ResultsWB-","",listResults,fixed = TRUE)
+                             listResults=gsub(".csv","",listResults,fixed = TRUE)
+                             listResults=unique(as.numeric(listResults))
+                             file <- read.csv(paste0("ResultsWB-",min(listResults),".csv"), stringsAsFactors=F, check.names=F)
+                             file$Dates=ymd(file$Dates)
+                             starty <- min(file$Dates)
+                             endy <- max(file$Dates)
+                             dateRangeInput("datesgraph",label="Select date range to calculate performance metrics and save graphs",start=starty,end=endy,min=starty,max=endy,separator = " - ", format = "dd/mm/yyyy")
+                           } else {
+                             dateRangeInput("datesgraph",label="Select date range to calculate performance metrics and save graphs",start=ymd("1900-01-01"),end=ymd("1900-01-01"),min=ymd("1900-01-01"),max=ymd("1900-01-01"),separator = " - ", format = "dd/mm/yyyy")
+                           }
+                         })
+                         output$daterangegraph1 <- renderUI({
+                           if (length(list.files(pattern ="ResultsWB-")>0)){
+                             listResults=list.files(pattern ="ResultsWB-")
+                             listResults=gsub("ResultsWB-","",listResults,fixed = TRUE)
+                             listResults=gsub(".csv","",listResults,fixed = TRUE)
+                             listResults=unique(as.numeric(listResults))
+                             file <- read.csv(paste0("ResultsWB-",min(listResults),".csv"), stringsAsFactors=F, check.names=F)
+                             file$Dates=ymd(file$Dates)
+                             starty <- min(file$Dates)
+                             endy <- max(file$Dates)
+                             dateRangeInput("datesgraph1",label="Select date range to calculate performance metrics and save graphs",start=starty,end=endy,min=starty,max=endy,separator = " - ", format = "dd/mm/yyyy")
+                           } else {
+                             dateRangeInput("datesgraph1",label="Select date range to calculate performance metrics and save graphs",start=ymd("1900-01-01"),end=ymd("1900-01-01"),min=ymd("1900-01-01"),max=ymd("1900-01-01"),separator = " - ", format = "dd/mm/yyyy")
                            }
                          })
                          
@@ -2309,9 +2453,9 @@ shinyApp(
                              file$Dates=ymd(file$Dates)
                              starty <- min(file$Dates)
                              endy <- max(file$Dates)
-                             dateRangeInput("dates1",label="Select date range for which to calculate performance metrics)",start=starty,end=endy,min=starty,max=endy,separator = " - ", format = "dd/mm/yyyy")
+                             dateRangeInput("dates1",label="Select date range to calculate performance metrics",start=starty,end=endy,min=starty,max=endy,separator = " - ", format = "dd/mm/yyyy")
                            } else {
-                             dateRangeInput("dates1",label="Select date range for which to calculate performance metrics)",start=ymd("1900-01-01"),end=ymd("1900-01-01"),min=ymd("1900-01-01"),max=ymd("1900-01-01"),separator = " - ", format = "dd/mm/yyyy")
+                             dateRangeInput("dates1",label="Select date range to calculate performance metrics",start=ymd("1900-01-01"),end=ymd("1900-01-01"),min=ymd("1900-01-01"),max=ymd("1900-01-01"),separator = " - ", format = "dd/mm/yyyy")
                            }
                          })
                          output$sliders1 <- renderUI({ 
@@ -2349,9 +2493,9 @@ shinyApp(
                              file$Dates=ymd(file$Dates)
                              starty <- min(file$Dates)
                              endy <- max(file$Dates)
-                             dateRangeInput("datest",label="Select date range for which to calculate performance metrics)",start=starty,end=endy,min=starty,max=endy,separator = " - ", format = "dd/mm/yyyy")
+                             dateRangeInput("datest",label="Select date range to calculate performance metrics",start=starty,end=endy,min=starty,max=endy,separator = " - ", format = "dd/mm/yyyy")
                            } else {
-                             dateRangeInput("datest",label="Select date range for which to calculate performance metrics)",start=ymd("1900-01-01"),end=ymd("1900-01-01"),min=ymd("1900-01-01"),max=ymd("1900-01-01"),separator = " - ", format = "dd/mm/yyyy")
+                             dateRangeInput("datest",label="Select date range to calculate performance metrics",start=ymd("1900-01-01"),end=ymd("1900-01-01"),min=ymd("1900-01-01"),max=ymd("1900-01-01"),separator = " - ", format = "dd/mm/yyyy")
                            }
                          })
                          
@@ -2361,6 +2505,8 @@ shinyApp(
                        
                      })
       }
+        
+      })   
       
     })
     
@@ -2472,6 +2618,7 @@ shinyApp(
         shinyjs::show("WBmonthlyB")
         shinyjs::show("WBtable")
         
+        try({
         output$metrics <- DT::renderDataTable({
           
           #file <- read.csv(paste0("ResultsWB-",1,".csv"), stringsAsFactors=F, check.names=F)
@@ -2632,12 +2779,14 @@ shinyApp(
           cols <- c("Type","Period","Gauge","Run ID","PeriodGOF",names_error[errorEvaluar],names_errorLOG[errorEvaluar],"Qmin obs/Qmin sim %","Qmean obs/Qmean sim %","Qmax obs/Qmax sim %","TotalRunoff / Precipitation %","BaseFlow / TotalRunoff %", "SurfaceRunoff / TotalRunoff %","Evapotranspiration / Precipitation %")
           metrics=metrics[,cols]
           #write.csv(metrics,paste0("SummaryGOF_",as.character(input$dates[1]),"-",as.character(input$dates[2]),".csv"),row.names=F) 
+          #write.csv(metrics,paste0("SummaryGOF_",".csv"),row.names=F) 
           
           gs=input$StreamflowSelect
           metrics=metrics[metrics$Gauge==gs,]
           DT::datatable(metrics, rownames= FALSE)
           
         })
+        })               
         
         if (file.exists(paste0("KeyModelInputs.csv"))){
           shinyjs::show("metricsp")
@@ -2655,12 +2804,13 @@ shinyApp(
         gs=input$StreamflowSelect
         #gs=unique(file$Gauge)[1]
         filesub=file[file$Gauge==gs,]
-        days=read.csv("WEAPdays.csv",stringsAsFactors = F, check.names=F)
-        filesub=merge(filesub,days,by="Time step")
+        #days=read.csv("WEAPdays.csv",stringsAsFactors = F, check.names=F)
+        #filesub=merge(filesub,days,by="Time step")
         filesub$Observed=filesub$Observed/filesub$Days/86400
         filesub$Modeled=filesub$Modeled/filesub$Days/86400
         filesub=filesub[order(filesub$Year,filesub$`Time step`),]
-
+        
+        try({
         output$Q <- renderPlotly({
 
           p <-plot_ly(filesub, x=~Dates, y=~Observed, name = "Observed", type="scatter", mode="lines",
@@ -2673,6 +2823,9 @@ shinyApp(
 
 
         })
+        })   
+        
+        try({
         output$Qmonthly <- renderPlotly({
 
           Qmonthly <- aggregate(filesub[,c("Observed","Modeled")], by=list(YearMonth=filesub$YearMonth),mean,na.rm=F)
@@ -2690,6 +2843,9 @@ shinyApp(
           pmonthly
 
         })
+        })   
+        
+        try({
         output$fdc <- renderPlotly({
 
           prob <- seq(1:100)
@@ -2707,7 +2863,8 @@ shinyApp(
             layout(title =paste0("Flow Duration Curve ",gs),yaxis = list(title="Q (M^3)"),xaxis=list(title="Probability (%)"))
           fdc
         })
-  
+        })               
+        
         file = file1
         gs=input$StreamflowSelect
         #gs=unique(file$Gauge)[1]
@@ -2720,6 +2877,7 @@ shinyApp(
         filesub$SurfaceRunoff2 <- filesub$Surface_Runof + filesub$Interflow2
         filesub$Evapotranspiration2 <- filesub$Evapotranspiration + filesub$SurfaceRunoff2
 
+        try({
         output$WB <- renderPlotly({
 
           pWB <- plot_ly(filesub, x=~Dates, y=~Precipitation, name="Precipitation", type="scatter",mode="none",fill="tozeroy",fillcolor ="white",line=list(color="black",width=0.5), text=~paste("Precip = ", Precipitation)) %>%
@@ -2731,6 +2889,8 @@ shinyApp(
 
           pWB
         })
+        })               
+        try({
         output$WBSM <- renderPlotly({
           #  p4 <-plot_ly(filesub, x=~Dates, y=filesub[,11], name="Decrease in Soil Moisture", type = "bar",
           #              line = list(color="#CF6D0C",width=1.5),text=~paste("Decrease Soil Moisture = ", filesub$`Decrease in Soil Moisture`)) %>%
@@ -2739,13 +2899,15 @@ shinyApp(
           #          xaxis = list(title="Date"),
           #          yaxis = list(title= "mm"))
           # p4
-          p5 <-plot_ly(filesub, x=~Dates, y=filesub[,19], name="Decrease in Surface Storage", type = "bar",
+          p5 <-plot_ly(filesub, x=~Dates, y=filesub[,"SM"], name="Decrease in Surface Storage", type = "bar",
                        line = list(color="#CF6D0C",width=1.5),text=~paste("Decrease Surface Storage = ", filesub$`Decrease in Surface Storage`)) %>%
             layout(title = paste0("Soil Moisture ",gs),
                    xaxis = list(title="Date"),
                    yaxis = list(title= "mm"))
           p5
         })
+        })               
+        try({
         output$WBSE <- renderPlotly({
 
           SMmonthly <- aggregate(filesub[,c("Decrease in Soil Moisture","Increase in Soil Moisture","SM")], by=list(YearMonth=filesub$YearMonth),mean,na.rm=F)
@@ -2761,10 +2923,11 @@ shinyApp(
 
 
         })
-
+        })               
+        try({
         output$WBmonthly <- renderPlotly({
 
-          wbmonthly <- aggregate(filesub[,c(6:14,19:ncol(filesub))], by=list(YearMonth=filesub$YearMonth),sum,na.rm=F)
+          wbmonthly <- aggregate(filesub[,c(6:14,20:ncol(filesub))], by=list(YearMonth=filesub$YearMonth),sum,na.rm=F)
 
           wbmonthly$Month=wbmonthly$YearMonth%%100
 
@@ -2780,7 +2943,8 @@ shinyApp(
           p2monthly
 
         })
-
+        })               
+        
 
         Filemonthly <- aggregate(filesub[,c("Precipitation","Evapotranspiration","Surface_Runoff","Interflow", "Base_Flow")], by=list(YearMonth=filesub$YearMonth),sum,na.rm=F)
         Filemonthly$Month=Filemonthly$YearMonth%%100
@@ -2796,7 +2960,7 @@ shinyApp(
         #Filemonthly=Filemonthly[,-(2:6)]
         #str(Filemonthly)
         #colnames(Filemonthly)
-
+        try({
         output$WBmonthlyB <- renderPlotly({
 
           p2monthly <- plot_ly(Filemonthly, x=~Month, y=~`TotalRunoff/Precipitation%`, name="TotalRunoff/Precipitation%", showlegend=TRUE, type="scatter",mode="line",text=~paste("TotalRunoff/Precipitation% = ", `TotalRunoff/Precipitation%`)) %>%
@@ -2809,6 +2973,8 @@ shinyApp(
           p2monthly
 
         })
+        })  
+        try({
         output$WBtable <- DT::renderDataTable({
 
           Filemonthly[,c(2:ncol(Filemonthly))] <- round(Filemonthly[,c(2:ncol(Filemonthly))],2)
@@ -2824,7 +2990,7 @@ shinyApp(
           DT::datatable(Filemonthly, options = list(lengthMenu = c(12), pageLength = 12),rownames= FALSE)
 
         })
-
+        }) 
       } else {
         shinyjs::hide("metrics")
         shinyjs::hide("metricsp")
@@ -2839,6 +3005,800 @@ shinyApp(
         shinyjs::hide("WBtable")
       }
 
+      
+    })
+    
+    observeEvent(input$graphs,{ 
+      
+      Model=VAL$Model2
+      if (Model==1){
+        start = Sys.time()
+        
+        withProgress(message = 'Calculation in progress',
+                     detail = 'This may take a while...', value = 0, {
+                       
+                       Warea <- input$warea
+                       Scen <- input$Scen
+                       ts <- input$ts
+                       
+                       #Titles="Spanish" #English 
+                       Titles=input$titlesg
+                       
+                       #file=read.csv(paste0("ResultsWB-",1,".csv"), stringsAsFactors=F, check.names=F)
+                       #yearINI= file$Dates[5]
+                       #ey= file$Dates[nrow(file)-1000]
+                       
+                       yearINI=input$datesgraph[1]
+                      
+                       ey <-input$datesgraph[2]
+                       
+                       #dir=paste0(dirname(rstudioapi::getSourceEditorContext()$path),"/Results ",Warea)
+                       dir=VAL$dir_outg
+                       
+                       if (Titles=="Spanish"){
+                         xtext="Fecha"
+                       }else if (Titles=="English") {
+                         xtext="Date"
+                       }
+                       
+                       dates=c(ymd(as.Date(yearINI)),ymd(as.Date(ey)))
+                       multiplot = function(..., plotlist=NULL, file, cols=1, layout=NULL) {
+                         # Multiple plot function
+                         #
+                         # ggplot objects can be passed in ..., or to plotlist (as a list of ggplot objects)
+                         # - cols:   Number of columns in layout
+                         # - layout: A matrix specifying the layout. If present, 'cols' is ignored.
+                         #
+                         # If the layout is something like matrix(c(1,2,3,3), nrow=2, byrow=TRUE),
+                         # then plot 1 will go in the upper left, 2 will go in the upper right, and
+                         # 3 will go all the way across the bottom.
+                         #
+                         library(grid)
+                         
+                         # Make a list from the ... arguments and plotlist
+                         plots = c(list(...), plotlist)
+                         
+                         numPlots = length(plots)
+                         
+                         # If layout is NULL, then use 'cols' to determine layout
+                         if (is.null(layout)) {
+                           # Make the panel
+                           # ncol: Number of columns of plots
+                           # nrow: Number of rows needed, calculated from # of cols
+                           layout = matrix(seq(1, cols * ceiling(numPlots/cols)),
+                                           ncol = cols, nrow = ceiling(numPlots/cols))
+                         }
+                         
+                         if (numPlots==1) {
+                           print(plots[[1]])
+                           
+                         } else {
+                           # Set up the page
+                           grid.newpage()
+                           pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+                           
+                           # Make each plot, in the correct location
+                           for (i in 1:numPlots) {
+                             # Get the i,j matrix positions of the regions that contain this subplot
+                             matchidx = as.data.frame(which(layout == i, arr.ind = TRUE))
+                             
+                             print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
+                                                             layout.pos.col = matchidx$col))
+                           }
+                         }
+                       }
+                       start = Sys.time()
+                       
+                       errorEvaluar=c(
+                         1, #1.	me, Mean Error
+                         2, #2.	mae, Mean Absolute Error
+                         # 3, #3.	mse, Mean Squared Error
+                         # 4, #4.	rmse, Root Mean Square Error
+                         5, #5.	nrmse, Normalized Root Mean Square Error ( -100% <= nrms <= 100% )
+                         6, #6.	PBIAS, Percent Bias
+                         # 7, #7.	RSR, Ratio of RMSE to the Standard Deviation of the Observations, RSR = rms / sd(obs). ( 0 <= RSR <= +Inf )
+                         # 8, #8.	rSD, Ratio of Standard Deviations, rSD = sd(sim) / sd(obs)
+                         9, #9.	NSE, Nash-Sutcliffe Efficiency ( -Inf <= NSE <= 1 )
+                         10, #10.	mNSE, Modified Nash-Sutcliffe Efficiency
+                         # 11, #11.	rNSE, Relative Nash-Sutcliffe Efficiency
+                         12,  #12.	d, Index of Agreement ( 0 <= d <= 1 )
+                         13,  #13.	md, Modified Index of Agreement 
+                         # 14,#14.	rd, Relative Index of Agreement
+                         # 15, #15.	cp, Persistence Index ( 0 <= PI <= 1 )
+                         # 16, #16.	r, Pearson Correlation coefficient ( -1 <= r <= 1 )
+                         17,  #17.	R2, Coefficient of Determination ( 0 <= R2 <= 1 ). 
+                         18,  #8.	bR2, R2 multiplied by the coefficient of the regression line between sim and obs ( 0 <= bR2 <= 1 )
+                         19, #19.	KGE, Kling-Gupta efficiency between sim and obs ( 0 <= KGE <= 1 )
+                         20 #20.	VE, Volumetric efficiency between sim and obs  ( -Inf <= VE <= 1)
+                       ) 
+                       names_error=c("ME"  ,    "MAE"  ,   "MSE" ,    "RMSE" ,   "NRMSE %" ,"PBIAS %", "RSR"   ,  "rSD"  ,   "NSE" ,   
+                                     "mNSE" ,   "rNSE"  ,  "d"  ,     "md"    ,  "rd"   ,   "cp"    ,  "r"  ,     "R2"    ,  "bR2",    
+                                     "KGE" ,    "VE" ) 
+                       names_errorg=c("ME"  ,    "MAE"  ,   "MSE" ,    "RMSE" ,   "NRMSE" ,"PBIAS", "RSR"   ,  "rSD"  ,   "NSE" ,   
+                                      "mNSE" ,   "rNSE"  ,  "d"  ,     "md"    ,  "rd"   ,   "cp"    ,  "r"  ,     "R2"    ,  "bR2",    
+                                      "KGE" ,    "VE" ) 
+                       #names_error[errorEvaluar]
+                       
+                       #procesar GOF
+                       ################################################################################################
+                       #genera archivo GOF en un rango de fechas
+                       names_errorLOG=paste(rep("log10",length(names_error)),names_error) #"logNSE" 
+                       metricsALL=NULL
+                       setwd(dir)
+                       listResults=list.files(pattern ="ResultsWB-")
+                       listResults=gsub("ResultsWB-","",listResults,fixed = TRUE)
+                       listResults=gsub(".csv","",listResults,fixed = TRUE)
+                       listResults=unique(as.numeric(listResults))
+                       listResults
+                       file=read.csv(paste0("ResultsWB-",listResults[1],".csv"), stringsAsFactors=F, check.names=F)
+                       total <-length(unique(file$Gauge))*length(listResults)
+                       truns=length(listResults)+total+2
+                       
+                       incProgress(1/truns)
+                       
+                       if (length(listResults)>0){
+                         runs <- length(listResults)
+                         pbi=0
+                         total <- runs
+                         j=1
+                         
+                         for (j in listResults){
+                           pbi=pbi+1
+                           incProgress(1/truns)
+                           print(paste0(pbi," of ", total))
+                           setwd(dir)
+                           i
+                           ########
+                           #i=1
+                           RUNID=j
+                           
+                           file=read.csv(paste0("ResultsWB-",RUNID,".csv"), stringsAsFactors=F, check.names=F)
+                           
+                           file$Dates=ymd(file$Dates)
+                           file$YearMonth=year(file$Dates)*100+month(file$Dates)
+                           file$Month=month(file$Dates)
+                           
+                           fileOrg=file
+                           
+                           filesub <- file[which(file$Dates >= dates[1] & file$Dates <= dates[2]),]
+                           #days=read.csv("WEAPdays.csv",stringsAsFactors = F, check.names=F)
+                           #filesub=merge(filesub,days,by="Time step")
+                           filesub1=filesub
+                           
+                           if (Titles=="Spanish"){
+                             text=paste0("Serie de tiempo: ","Modelado (azul) vs Observado (rojo)")
+                             
+                           }else if (Titles=="English") {
+                             text=paste0("Time serie: ","Modeled (blue) vs Observed (red)")
+                             
+                           }
+                           
+                           filesub1$Observed=filesub1$Observed/filesub1$Days/86400
+                           filesub1$Modeled=filesub1$Modeled/filesub1$Days/86400
+                           p <- ggplot(filesub1, aes(x=Dates, y=Modeled)) + 
+                             geom_line(color="blue",size=0.2)+
+                             geom_line(aes(x=Dates, y=Observed), color="red",size=0.1)+ # ,linetype = "dotted"
+                             facet_wrap( ~ Gauge, scales = "free") +
+                             ylab(paste0("[m3/s]"))+
+                             xlab(xtext)+
+                             ggtitle(text)
+                           p
+                           
+                           plotpath = paste0("Time series_sim vs obs_",RUNID,".jpg") #creates a pdf path to produce a graphic of the span of records in the Data
+                           ggsave(plotpath,width =40 , height = 22,units = "cm")
+                           
+                           
+                         }
+                         
+                       }
+                       ################################################################################################
+                       runTimeGOF=difftime(Sys.time(),start)
+                       runTimeGOF
+                       
+                       #procesaar graficas y GOF
+                       ###############################################################################################
+                       metricsALL <- NULL
+                       setwd(dir)
+                       listResults=list.files(pattern ="ResultsWB-")
+                       listResults=gsub("ResultsWB-","",listResults,fixed = TRUE)
+                       listResults=gsub(".csv","",listResults,fixed = TRUE)
+                       listResults=unique(as.numeric(listResults))
+                       listResults
+                       
+                       if (length(listResults)>0){
+                         
+                         file=read.csv(paste0("ResultsWB-",listResults[1],".csv"), stringsAsFactors=F, check.names=F)
+                         names=sort(unique(file$Gauge))
+                         total <-length(unique(file$Gauge))*length(listResults)
+                         pbi=0
+                         f=1
+                         
+                         for (f in listResults){
+                           
+                           #Graficas
+                           ##################
+                           setwd(dir)
+                           Carpeta_Out=paste0(f,"_Graphs_",paste(dates,collapse ="-"))
+                           dir.create(Carpeta_Out,showWarnings=F)
+                           dir_file=paste(c(dir,"\\",Carpeta_Out),collapse="")
+                           
+                           year1 = yearINI
+                           year2= ey
+                           
+                           RUNID=f
+                           
+                           file=read.csv(paste0("ResultsWB-",RUNID,".csv"), stringsAsFactors=F, check.names=F)
+                           file$Dates=ymd(file$Dates)
+                           file$YearMonth=year(file$Dates)*100+month(file$Dates)
+                           file$Month=month(file$Dates)
+                           filesub <- file[which(file$Dates >= dates[1] & file$Dates <= dates[2]),]
+                           
+                           days=read.csv("WEAPdays.csv",stringsAsFactors = F, check.names=F)
+                           #filesub=merge(filesub,days,by="Time step")
+                           
+                           days$Dates=NA
+                           days$Dates[1]=as.Date("1981/01/01")
+                           for (d in 2:nrow(days)) {
+                             days$Dates[d]=days$Dates[d-1]+days$Days[d]
+                           }
+                           days$Dates=as.Date(days$Dates)
+                           
+                           filesub1=filesub
+                           filesub1$Observed=filesub1$Observed/filesub1$Days/86400
+                           filesub1$Modeled=filesub1$Modeled/filesub1$Days/86400
+                           
+                           obsFile=filesub1[,c("Time step","Dates","Gauge","Observed")]
+                           simFile=filesub1[,c("Time step","Dates","Gauge","Modeled")]
+                           obsFile = obsFile %>% pivot_wider(names_from = Gauge, values_from = Observed)
+                           simFile = simFile %>% pivot_wider(names_from = Gauge, values_from = Modeled)
+                           obsFile=obsFile[order(obsFile$Dates),]
+                           simFile=simFile[order(simFile$Dates),]
+                           
+                           GofGrafica=names_errorg[errorEvaluar]
+                           GofTabla=names_error[errorEvaluar]
+                           
+                           obsv=as.data.frame(obsFile[,names])
+                           simv=as.data.frame(simFile[,names])
+                           
+                           setwd(dir_file)
+                           Carpeta_Out="SimObs_All"
+                           dir.create(Carpeta_Out,showWarnings=F)
+                           dir_file1 = paste0(dir_file,"\\",Carpeta_Out)
+                           setwd(dir_file1)
+                           
+                           
+                           filesub1=filesub1[,c("Time step","Dates","Gauge","Modeled","Observed","Year")]
+                           
+                           if (Titles=="Spanish"){
+                             text=paste0("Serie de tiempo: ","Modelado (azul) vs Observado (rojo)")
+                             
+                           }else if (Titles=="English") {
+                             text=paste0("Time serie: ","Modeled (blue) vs Observed (red)")
+                             
+                           }
+                           
+                           p <- ggplot(filesub1, aes(x=Dates, y=Modeled)) + 
+                             geom_line(color="blue",size=0.2)+
+                             geom_line(aes(x=Dates, y=Observed), color="red",size=0.1)+ # ,linetype = "dotted"
+                             facet_wrap( ~ Gauge, scales = "free") +
+                             ylab(paste0("[m3/s]"))+
+                             xlab(xtext)+
+                             ggtitle(text)
+                           p
+                           
+                           ggsave("TimeSeries.jpg",width =40 , height = 22,units = "cm")
+                           
+                           try({
+                           filesub1$monthyear=floor_date(filesub1$Dates, "month")
+                           filesub1 <- filesub1[order(filesub1$Gauge,filesub1$Dates),]
+                           
+                           df=filesub1
+                           df_d=aggregate(df[,c("Modeled","Observed")],list(Gauge=df$Gauge, `Time step`=df$`Time step`),mean, na.rm=TRUE)
+                           df_d=df_d[order(df_d$Gauge,df_d$`Time step`),]
+                           
+                           write.csv(df_d,"MultiannualTimeStepMean_LongFormat.csv",row.names=FALSE,na="")
+                           
+                           df_d = merge(df_d,days,by="Time step")
+                           df_d=df_d[order(df_d$Gauge,df_d$Dates),]
+                           #dfsim_d$date = format(dfsim_d$date, "%b %d")
+                           
+                           if (ts==365){
+                             
+                             if (Titles=="Spanish"){
+                               text=paste0("Promedio Diario Multianual: ","Modelado (azul) vs Observado (rojo)")
+                             }else if (Titles=="English") {
+                               text=paste0("Multiannual Daily Mean: ","Modeled (blue) vs Observed (red)")
+                             }
+                             
+                           } else {
+                             if (Titles=="Spanish"){
+                               text=paste0("Promedio a paso de tiempo Multianual: ","Modelado (azul) vs Observado (rojo)")
+                             }else if (Titles=="English") {
+                               text=paste0("Multiannual Time Step Mean: ","Modeled (blue) vs Observed (red)")
+                             }
+                             
+                           }
+                           
+                            
+                             p <- ggplot(df_d, aes(x=Dates, y=Modeled)) + 
+                               geom_line(color="blue",size=0.2)+
+                               geom_line(aes(x=Dates, y=Observed), color="red",size=0.1)+ # ,linetype = "dotted"
+                               facet_wrap( ~ Gauge, scales = "free") +
+                               ylab(paste0("[m3/s]"))+
+                               xlab(xtext)+
+                               ggtitle(text)
+                             p= p + scale_x_date(date_labels = "%b/%d")
+                             p
+                             ggsave("Multiannual time step Mean.jpg",width =40 , height = 22,units = "cm")
+                         })  
+                           
+                           try({
+                           df=filesub1
+                           df_m=aggregate(df[,c("Modeled","Observed")],list(Gauge=df$Gauge, monthyear=df$monthyear),mean, na.rm=TRUE)
+                           df_m$month <- month(df_m$monthyear)
+                           df_m=aggregate(df_m[,c("Modeled","Observed")],list(Gauge=df_m$Gauge, month=df_m$month),mean, na.rm=TRUE)
+                           df_m=df_m[order(df_m$Gauge,df_m$month),]
+                           write.csv(df_m,"MultiannualMonthlyMean_LongFormat.csv",row.names=FALSE,na="")
+                           
+                           Dates=seq(as.Date(paste(c(1981,"/",01,"/",01),collapse="")),as.Date(paste(c(1981,"/",12,"/",31),collapse="") ), by = "month")
+                           Dates=as.data.frame(Dates)
+                           Dates$month=month(Dates$Dates)
+                           
+                           df_m = merge(df_m,Dates,by="month")
+                           df_m=df_m[order(df_m$Gauge,df_m$month),]
+                           
+                           if (Titles=="Spanish"){
+                             text=paste0("Promedio Mensual Multianual: ","Modelado (azul) vs Observado (rojo)")
+                             
+                           }else if (Titles=="English") {
+                             text=paste0("Multiannual Monthly Mean: ","Modeled (blue) vs Observed (red)")
+                             
+                           }
+                           
+                           p <- ggplot(df_m, aes(x=Dates, y=Modeled)) + 
+                             geom_line(color="blue",size=0.2)+
+                             geom_line(aes(x=Dates, y=Observed), color="red",size=0.1)+ # ,linetype = "dotted"
+                             facet_wrap( ~ Gauge, scales = "free") +
+                             ylab(paste0("[m3/s]"))+
+                             xlab(xtext)+
+                             ggtitle(text)
+                           p= p + scale_x_date(date_labels = "%B")
+                           p 
+                           ggsave("Multiannual Monthly Mean.jpg",width =40 , height = 22,units = "cm")
+                           
+                           })
+                           
+                           try({
+                           df=filesub1
+                           df_m=aggregate(df[,c("Modeled","Observed")],list(Gauge=df$Gauge, Year=df$Year),mean, na.rm=TRUE)
+                           df_m=df_m[order(df_m$Gauge,df_m$Year),]
+                           write.csv(df_m,"AnnualMean_LongFormat.csv",row.names=FALSE,na="")
+                           
+                           Dates=seq(as.Date(paste(c(min(df_m$Year),"/",01,"/",01),collapse="")),as.Date(paste(c(max(df_m$Year),"/",12,"/",31),collapse="") ), by = "year")
+                           Dates=as.data.frame(Dates)
+                           Dates$Year=year(Dates$Dates)
+                           
+                           df_m = merge(df_m,Dates,by="Year")
+                           df_m=df_m[order(df_m$Gauge,df_m$Year),]
+                           
+                           if (Titles=="Spanish"){
+                             text=paste0("Promedio Anual: ","Modelado (azul) vs Observado (rojo)")
+                             
+                           }else if (Titles=="English") {
+                             text=paste0("Annual Mean: ","Modeled (blue) vs Observed (red)")
+                             
+                           }
+                           
+                           p <- ggplot(df_m, aes(x=Dates, y=Modeled)) + 
+                             geom_line(color="blue",size=0.2)+
+                             geom_line(aes(x=Dates, y=Observed), color="red",size=0.1)+ # ,linetype = "dotted"
+                             facet_wrap( ~ Gauge, scales = "free") +
+                             ylab(paste0("[m3/s]"))+
+                             xlab(xtext)+
+                             ggtitle(text)
+                           p= p + scale_x_date(date_labels = "%B")
+                           p 
+                           ggsave("Multiannual Monthly Mean.jpg",width =40 , height = 22,units = "cm")
+                         })
+                           
+                           ##################
+                           
+                           for (i in 1:length(names)){
+                             
+                             name <- names[i]
+                             pbi=pbi+1
+                             
+                             incProgress(1/truns)
+                             print(paste0(pbi," of ",total)) #," Estacion ", name
+                             
+                             if (length(which(is.na(obsv[,i])==TRUE))<length(obsv[,i])){
+                               
+                               obs = zoo(obsv[,i],as.Date(obsFile$Dates))
+                               sim = zoo(simv[,i],as.Date(simFile$Dates))
+                               
+                               if (ts==12){
+                                 
+                                 try({
+                                   setwd(dir_file)
+                                 Carpeta_Out="SimObs_ma"
+                                 dir.create(Carpeta_Out,showWarnings=F)
+                                 dir_file1 = paste0(dir_file,"\\",Carpeta_Out)
+                                 setwd(dir_file1)
+                                 png(file=paste0(name,"_",Carpeta_Out,".png"),width =40 , height = 22,units = "cm",res=800)
+                                 ggof(sim=sim, obs=obs, ftype="ma", FUN=mean, leg.cex=1.2,na.rm=TRUE, main = name, ylab=c("Q[m3/s]"), pch = c(20, 18),lwd = c(1, 1), gofs=GofGrafica)
+                                 #col = c("#FF3030", "black"),lwd = c(1, 1),lty = c(1, 1),  
+                                 dev.off()
+                                 })
+                                 
+                               } else if (ts==365){
+                                 
+                                 try({
+                                 setwd(dir_file)
+                                 Carpeta_Out="SimObs_dma"
+                                 dir.create(Carpeta_Out,showWarnings=F)
+                                 dir_file1 = paste0(dir_file,"\\",Carpeta_Out)
+                                 setwd(dir_file1)
+                                 png(file=paste0(name,"_",Carpeta_Out,".png"),width =40 , height = 22,units = "cm",res=800)
+                                 ggof(sim=sim, obs=obs, ftype="dma", FUN=mean, leg.cex=1.2,na.rm=TRUE, main = name, ylab=c("Q[m3/s]"), pch = c(20, 18),lwd = c(1, 1), gofs=GofGrafica)
+                                 #col = c("#FF3030", "black"),lwd = c(1, 1),lty = c(1, 1),  
+                                 dev.off()
+                                 })
+                                 
+                                 try({
+                                    setwd(dir_file)
+                                     Carpeta_Out="SimObs_seasons"
+                                     dir.create(Carpeta_Out,showWarnings=F)
+                                     dir_file1 = paste0(dir_file,"\\",Carpeta_Out)
+                                     setwd(dir_file1)
+                                     png(file=paste0(name,"_",Carpeta_Out,".png"),width =40 , height = 22,units = "cm",res=800)
+                                     ggof(sim=sim, obs=obs, ftype="seasonal", season.names=c("", "", "", ""),na.rm=TRUE,FUN=mean, leg.cex=1.2, pch = c(20, 18),main = name, ylab=c("Q[m3/s]"))
+                                     dev.off()
+                                 })
+                                 
+                                
+                               } 
+                               
+                                try({
+                                 setwd(dir_file)
+                                 Carpeta_Out="SimObs_original"
+                                 dir.create(Carpeta_Out,showWarnings=F)
+                                 dir_file1 = paste0(dir_file,"\\",Carpeta_Out)
+                                 setwd(dir_file1)
+                                 png(file=paste0(name,"_",Carpeta_Out,".png"),width =40 , height = 22,units = "cm",res=800)
+                                 ggof(sim=sim, obs=obs, FUN=mean, leg.cex=1.2,na.rm=TRUE, main = name, ylab=c("Q[m3/s]"), xlab=xtext,pch = c(20, 18),lwd = c(1, 1), gofs=GofGrafica)
+                                 #col = c("#FF3030", "black"),lwd = c(1, 1),lty = c(1, 1),  
+                                 dev.off()
+                               })
+                            
+                                try({   
+                               if (ts==365){
+                                 df <- data.frame(date = as.Date(simFile$Dates), Gauge = simv[,i],timestep=simFile$`Time step`)
+                                 df$monthyear=floor_date(df$date, "month")
+                                 
+                                 df_d=as.data.frame(df %>%
+                                                      group_by(timestep) %>%
+                                                      summarize(mean = mean(Gauge ,na.rm = TRUE)))
+                                 
+                                 
+                                 df_d = merge(df_d,days,by.x="timestep",by.y = "Time step")
+                                 df_d=df_d[order(df_d$Dates),]
+                                 
+                                 dfsim_d=df_d
+                                 
+                                 ###
+                                 df <- data.frame(date = as.Date(obsFile$Dates), Gauge = obsv[,i],timestep=obsFile$`Time step`)
+                                 df$monthyear=floor_date(df$date, "month")
+                                 
+                                 df_d=as.data.frame(df %>%
+                                                      group_by(timestep) %>%
+                                                      summarize(mean = mean(Gauge ,na.rm = TRUE)))
+                                 
+                                 
+                                 df_d = merge(df_d,days,by.x="timestep",by.y = "Time step")
+                                 df_d=df_d[order(df_d$Dates),]
+                                 
+                                 dfobs_d=df_d
+                                 
+                                 #grafica medios diarios multianuales
+                                 obs = zoo(dfobs_d[,2],dfobs_d[,4])
+                                 sim = zoo(dfsim_d[,2],dfsim_d[,4])
+                                 
+                                 if (Titles=="Spanish"){
+                                   text=paste0("Promedio Diario Multianual")
+                                 }else if (Titles=="English") {
+                                   text=paste0("Multiannual Daily Mean")
+                                 }
+                                 
+                                 setwd(dir_file)
+                                 Carpeta_Out="SimObs_MultiannualDaily"
+                                 dir.create(Carpeta_Out,showWarnings=F)
+                                 dir_file1 = paste0(dir_file,"\\",Carpeta_Out)
+                                 setwd(dir_file1)
+                                 png(file=paste0(name,"_",Carpeta_Out,".png"),width =40 , height = 22,units = "cm",res=800)
+                                 ggof(sim=sim, obs=obs, lab.fmt="%b %d", ftype="o",tick.tstep = "days", lab.tstep = "months", FUN=mean, leg.cex=1.2,na.rm=TRUE, main=paste(name,"- ",text), xlab=xtext, ylab=c("Q[m3/s]"), pch = c(20, 18),lwd = c(1, 1), gofs=GofGrafica)
+                                 dev.off()
+                                 
+                               }
+                             })
+                               
+                                try({  
+                               #sim
+                               df <- data.frame(date = as.Date(simFile$Dates), Caudal = simv[,i])
+                               df$monthyear=floor_date(df$date, "month")
+                               #tail(df)
+                               
+                               df_m=as.data.frame(df %>%
+                                                    group_by(monthyear) %>%
+                                                    summarize(mean = mean(Caudal,na.rm = TRUE)))
+                               df_m$month <- month(df_m$monthyear)
+                               df_m=as.data.frame(df_m %>%
+                                                    group_by(month) %>%
+                                                    summarize(mean = mean(mean,na.rm = TRUE)))
+                               
+                               Dates=seq(as.Date(paste(c(1981,"/",01,"/",01),collapse="")),as.Date(paste(c(1981,"/",12,"/",31),collapse="") ), by = "month")
+                               Dates=as.data.frame(Dates)
+                               Dates$month=month(Dates$Dates)
+                               
+                               df_m=merge(df_m,Dates,by="month")
+                               dfsim_m=df_m
+                               
+                               #obs
+                               df <- data.frame(date = as.Date(obsFile$Dates), Caudal = obsv[,i])
+                               df$monthyear=floor_date(df$date, "month")
+                               
+                               df_m=as.data.frame(df %>%
+                                                    group_by(monthyear) %>%
+                                                    summarize(mean = mean(Caudal,na.rm = TRUE)))
+                               df_m$month <- month(df_m$monthyear)
+                               df_m=as.data.frame(df_m %>%
+                                                    group_by(month) %>%
+                                                    summarize(mean = mean(mean,na.rm = TRUE)))
+                               
+                               Dates=seq(as.Date(paste(c(1981,"/",01,"/",01),collapse="")),as.Date(paste(c(1981,"/",12,"/",31),collapse="") ), by = "month")
+                               Dates=as.data.frame(Dates)
+                               Dates$month=month(Dates$Dates)
+                               
+                               df_m=merge(df_m,Dates,by="month")
+                               dfobs_m=df_m
+                               
+                               #grafica medios mensuales multianuales
+                               obs = zoo(dfobs_m[,2],dfobs_m[,3])
+                               sim = zoo(dfsim_m[,2],dfsim_m[,3])
+                               
+                               if (Titles=="Spanish"){
+                                 text=paste0("Promedio Mensual Multianual")
+                               }else if (Titles=="English") {
+                                 text=paste0("Multiannual Monthly Mean")
+                               }
+                               setwd(dir_file)
+                               Carpeta_Out="SimObs_MultiannualMonthly"
+                               dir.create(Carpeta_Out,showWarnings=F)
+                               dir_file1 = paste0(dir_file,"\\",Carpeta_Out)
+                               setwd(dir_file1)
+                               png(file=paste0(name,"_",Carpeta_Out,".png"),width =40 , height = 22,units = "cm",res=800)
+                               ggof(sim=sim, obs=obs, lab.fmt="%b", ftype="o",tick.tstep = "months", lab.tstep = "months", FUN=mean, leg.cex=1.2,na.rm=TRUE, main=paste(name,"- ",text), xlab=xtext, ylab=c("Q[m3/s]"), pch = c(20, 18),lwd = c(1, 1), gofs=GofGrafica)
+                               dev.off()
+                               
+                             })
+                               
+                               #residuales
+                               obs = zoo(obsv[,i],as.Date(obsFile$Dates))
+                               sim = zoo(simv[,i],as.Date(simFile$Dates))
+                               
+                               try({
+                                 setwd(dir_file)
+                               Carpeta_Out="Sim"
+                               dir.create(Carpeta_Out,showWarnings=F)
+                               dir_file1 = paste0(dir_file,"\\",Carpeta_Out)
+                               setwd(dir_file1)
+                               png(file=paste0(name,"_",Carpeta_Out,".png"),width =40 , height = 22,units = "cm",res=800)
+                               hydroplot(sim, FUN=mean,var.unit="m3/s",main=paste0(name," Simu"),xlab="",na.rm=TRUE)
+                               dev.off()
+                               })
+                               
+                               try({
+                               setwd(dir_file)
+                               Carpeta_Out="Obs"
+                               dir.create(Carpeta_Out,showWarnings=F)
+                               dir_file1 = paste0(dir_file,"\\",Carpeta_Out)
+                               setwd(dir_file1)
+                               png(file=paste0(name,"_",Carpeta_Out,".png"),width =40 , height = 22,units = "cm",res=800)
+                               hydroplot(obs, FUN=mean,var.unit="m3/s",main=paste0(name," Obs"),xlab="",na.rm=TRUE)
+                               dev.off()
+                               })
+                               
+                               try({
+                               r <- sim-obs
+                               smry(r)
+                               setwd(dir_file)
+                               Carpeta_Out="SimObs_residuals"
+                               dir.create(Carpeta_Out,showWarnings=F)
+                               dir_file1 = paste0(dir_file,"\\",Carpeta_Out)
+                               setwd(dir_file1)
+                               png(file=paste0(name,"_",Carpeta_Out,".png"),width =40 , height = 22,units = "cm",res=800)
+                               hydroplot(r, FUN=mean,var.unit="m3/s",main=paste0(name," Residual"),xlab="",na.rm=TRUE)
+                               dev.off()
+                               })
+                               #metricas en tabla
+                               
+                               metrics=NULL
+                               obs = zoo(obsv[,i],as.Date(obsFile$Dates))
+                               sim = zoo(simv[,i],as.Date(simFile$Dates))
+                               
+                               
+                               if (ts==365){
+                                 
+                                 try({
+                                 m <- gof(sim=sim, obs=obs)
+                                 m <- as.data.frame(m)
+                                 m$Metricas <- rownames(m)
+                                 m$Estacion <- name
+                                 
+                                 if (Titles=="Spanish"){
+                                   m$Tipo <- "Diario"
+                                 }else if (Titles=="English") {
+                                   m$Tipo <- "Daily"
+                                 }
+                                 
+                                 metrics=rbind(metrics,m)
+                                 })
+                                 
+                                 try({
+                                 sim = daily2monthly.zoo(sim, FUN = mean)
+                                 obs = daily2monthly.zoo(obs, FUN = mean)
+                                 m <- gof(sim=sim, obs=obs)
+                                 m <- as.data.frame(m)
+                                 m$Metricas <- rownames(m)
+                                 m$Estacion <- name
+                                 
+                                 if (Titles=="Spanish"){
+                                   m$Tipo <- "Mensual"
+                                 }else if (Titles=="English") {
+                                   m$Tipo <- "Monthly"
+                                 }
+                                 
+                                 metrics=rbind(metrics,m)
+                                 })
+                                 
+                                 try({
+                                 sim = monthly2annual(sim, FUN = mean)
+                                 obs = monthly2annual(obs, FUN = mean)
+                                 m <- gof(sim=sim, obs=obs)
+                                 m <- as.data.frame(m)
+                                 m$Metricas <- rownames(m)
+                                 m$Estacion <- name
+                                 if (Titles=="Spanish"){
+                                   m$Tipo <- "Anual"
+                                 }else if (Titles=="English") {
+                                   m$Tipo <- "Annual"
+                                 }
+                                 metrics=rbind(metrics,m)  
+                                 })
+                                 
+                                 try({
+                                 m <- gof(sim=dfsim_d[,2], obs=dfobs_d[,2])
+                                 m <- as.data.frame(m)
+                                 m$Metricas <- rownames(m)
+                                 m$Estacion <- name
+                                 if (Titles=="Spanish"){
+                                   m$Tipo <- "Medio Diario multianual"
+                                 }else if (Titles=="English") {
+                                   m$Tipo <- "Multiannual Daily Mean"
+                                 }
+                                 metrics=rbind(metrics,m)
+                                  })
+                               }
+                               
+                               if (ts==12){
+                                 try({
+                                 m <- gof(sim=sim, obs=obs)
+                                 m <- as.data.frame(m)
+                                 m$Metricas <- rownames(m)
+                                 m$Estacion <- name
+                                 if (Titles=="Spanish"){
+                                   m$Tipo <- "Mensual"
+                                 }else if (Titles=="English") {
+                                   m$Tipo <- "Monthly"
+                                 }
+                                 metrics=rbind(metrics,m)
+                               })
+                                 
+                                 try({
+                                 
+                                 sim = monthly2annual(sim, FUN = mean)
+                                 obs = monthly2annual(obs, FUN = mean)
+                                 m <- gof(sim=sim, obs=obs)
+                                 m <- as.data.frame(m)
+                                 m$Metricas <- rownames(m)
+                                 m$Estacion <- name
+                                 if (Titles=="Spanish"){
+                                   m$Tipo <- "Anual"
+                                 }else if (Titles=="English") {
+                                   m$Tipo <- "Annual"
+                                 }
+                                 metrics=rbind(metrics,m)  
+                                 })
+                               
+                                 try({
+                                   m <- gof(sim=dfsim_m[,2], obs=dfobs_m[,2])
+                               m <- as.data.frame(m)
+                               m$Metricas <- rownames(m)
+                               m$Estacion <- name
+                               if (Titles=="Spanish"){
+                                 m$Tipo <- "Medio Mensual multianual"
+                               }else if (Titles=="English") {
+                                 m$Tipo <- "Multiannual Monthly Mean"
+                               }
+                               metrics=rbind(metrics,m)
+                                 })
+                               } else {
+                                 try({
+                                   m <- gof(sim=sim, obs=obs)
+                                   m <- as.data.frame(m)
+                                   m$Metricas <- rownames(m)
+                                   m$Estacion <- name
+                                   
+                                   if (Titles=="Spanish"){
+                                     m$Tipo <- "Paso de tiempo del modelo"
+                                   }else if (Titles=="English") {
+                                     m$Tipo <- "Model Time Step"
+                                   }
+                                   
+                                   metrics=rbind(metrics,m)
+                                 })
+                               }
+                               
+                             metrics$ID=f
+                             
+                           }
+                           
+                           
+                           metricsALL=rbind(metricsALL,metrics)
+                           
+                         }
+                           try({
+                             
+                           
+                         setwd(dir)
+                         metricas <- subset(metricsALL, Metricas %in% GofTabla)
+                         colnames(metricas)=c("Valor", "GOF", "Estacion", "Tipo" ,    "Run ID"  )
+                         metricas=metricas[,c("Run ID", "Tipo","Estacion", "GOF","Valor")]
+                         
+                         if (Titles=="English") {
+                           colnames(metricas)=c("Run ID", "Type","Gauge", "GOF","Value")
+                         }
+                         
+                         write.csv(metricas, paste0("SummaryGOF2_",paste(dates,collapse ="-"),".csv"),row.names = FALSE)
+                         
+                           })
+                       }
+                       }
+                       ################################################################################################
+                       runTimeGOF2=difftime(Sys.time(),start)
+                       runTimeGOF2
+                       
+                       ##############################################################
+                       
+                       output$textRunEnsemblegraph <- renderText({
+                         outTxt = ""
+                         text=paste0("Graphs exported. Check ", dir,". Time: ")
+                         formatedFont = sprintf('<font color="%s">%s</font>',"green",text)
+                         outTxt = paste0(outTxt, formatedFont)
+                         
+                         text=format(as.difftime(difftime(Sys.time(),start), format = "%H:%M")) 
+                         formatedFont = sprintf('<font color="%s">%s</font>',"green",text)
+                         outTxt = paste0(outTxt, formatedFont)
+                         
+                         outTxt
+                         
+                         
+                       })
+
+
+                       incProgress(1/truns)
+                       
+                     })
+      }
       
     })
     ###################################### 
@@ -2908,7 +3868,8 @@ shinyApp(
         shinyjs::show("WBmonthly1")
         shinyjs::show("WBmonthlyB1")
         shinyjs::show("WBtable1")
-        
+       
+         try({
         output$metrics1 <- DT::renderDataTable({
           
           #file <- read.csv(paste0("ResultsWB-",runID,".csv"), stringsAsFactors=F, check.names=F)
@@ -3097,6 +4058,7 @@ shinyApp(
           DT::datatable(metrics, rownames= FALSE)
           
         })
+         }) 
         
         if (file.exists(paste0("KeyModelInputs.csv"))){
           shinyjs::show("metricsp1")
@@ -3113,12 +4075,13 @@ shinyApp(
         gs=input$StreamflowSelect1
         #gs=unique(file$Gauge)[1]
         filesub=file[file$Gauge==gs,]
-        days=read.csv("WEAPdays.csv",stringsAsFactors = F, check.names=F)
-        filesub=merge(filesub,days,by="Time step")
+        #days=read.csv("WEAPdays.csv",stringsAsFactors = F, check.names=F)
+        #filesub=merge(filesub,days,by="Time step")
         filesub$Observed=filesub$Observed/filesub$Days/86400
         filesub$Modeled=filesub$Modeled/filesub$Days/86400
         filesub=filesub[order(filesub$Year,filesub$`Time step`),]
         
+        try({
         output$Q1 <- renderPlotly({
           
           p <-plot_ly(filesub, x=~Dates, y=~Observed, name = "Observed", type="scatter", mode="lines",
@@ -3131,6 +4094,8 @@ shinyApp(
           
           
         })
+        }) 
+        try({
         output$Qmonthly1 <- renderPlotly({
           
           Qmonthly <- aggregate(filesub[,c("Observed","Modeled")], by=list(YearMonth=filesub$YearMonth),mean,na.rm=F)
@@ -3148,6 +4113,8 @@ shinyApp(
           pmonthly
           
         })
+        }) 
+        try({
         output$fdc1 <- renderPlotly({
           
           prob <- seq(1:100)
@@ -3165,7 +4132,8 @@ shinyApp(
             layout(title =paste0("Flow Duration Curve ",gs),yaxis = list(title="Q (M^3)"),xaxis=list(title="Probability (%)"))
           fdc  
         })
-        
+        }) 
+       
         file = file1
         gs=input$StreamflowSelect1
         #gs=unique(file$Gauge)[1]
@@ -3177,7 +4145,8 @@ shinyApp(
         filesub$Interflow2 <- filesub$Interflow+filesub$Base_Flow
         filesub$SurfaceRunoff2 <- filesub$Surface_Runof + filesub$Interflow2
         filesub$Evapotranspiration2 <- filesub$Evapotranspiration + filesub$SurfaceRunoff2
-        
+      
+    try({
         output$WB1 <- renderPlotly({
           
           pWB <- plot_ly(filesub, x=~Dates, y=~Precipitation, name="Precipitation", type="scatter",mode="none",fill="tozeroy",fillcolor ="white",line=list(color="black",width=0.5), text=~paste("Precip = ", Precipitation)) %>%
@@ -3189,6 +4158,8 @@ shinyApp(
           
           pWB
         })
+    }) 
+        try({
         output$WBSM1 <- renderPlotly({
           #  p4 <-plot_ly(filesub, x=~Dates, y=filesub[,11], name="Decrease in Soil Moisture", type = "bar",
           #              line = list(color="#CF6D0C",width=1.5),text=~paste("Decrease Soil Moisture = ", filesub$`Decrease in Soil Moisture`)) %>%
@@ -3197,13 +4168,15 @@ shinyApp(
           #          xaxis = list(title="Date"),
           #          yaxis = list(title= "mm"))
           # p4
-          p5 <-plot_ly(filesub, x=~Dates, y=filesub[,19], name="Decrease in Surface Storage", type = "bar",
+          p5 <-plot_ly(filesub, x=~Dates, y=filesub[,"SM"], name="Decrease in Surface Storage", type = "bar",
                        line = list(color="#CF6D0C",width=1.5),text=~paste("Decrease Surface Storage = ", filesub$`Decrease in Surface Storage`)) %>%
             layout(title = paste0("Soil Moisture ",gs),
                    xaxis = list(title="Date"),
                    yaxis = list(title= "mm"))
           p5
         })
+        }) 
+        try({
         output$WBSE1 <- renderPlotly({
           
           SMmonthly <- aggregate(filesub[,c("Decrease in Soil Moisture","Increase in Soil Moisture","SM")], by=list(YearMonth=filesub$YearMonth),mean,na.rm=F)
@@ -3219,10 +4192,11 @@ shinyApp(
           
           
         })
-        
+        }) 
+        try({
         output$WBmonthly1 <- renderPlotly({
           
-          wbmonthly <- aggregate(filesub[,c(6:14,19:ncol(filesub))], by=list(YearMonth=filesub$YearMonth),sum,na.rm=F)
+          wbmonthly <- aggregate(filesub[,c(6:14,20:ncol(filesub))], by=list(YearMonth=filesub$YearMonth),sum,na.rm=F)
           
           wbmonthly$Month=wbmonthly$YearMonth%%100
           
@@ -3238,7 +4212,8 @@ shinyApp(
           p2monthly
           
         })
-        
+        }) 
+
         Filemonthly <- aggregate(filesub[,c("Precipitation","Evapotranspiration","Surface_Runoff","Interflow", "Base_Flow")], by=list(YearMonth=filesub$YearMonth),sum,na.rm=F)
         Filemonthly$Month=Filemonthly$YearMonth%%100
         Filemonthly <- aggregate(Filemonthly[,c("Precipitation","Evapotranspiration","Surface_Runoff","Interflow", "Base_Flow")], by=list(Month=Filemonthly$Month),mean,na.rm=T)
@@ -3254,6 +4229,8 @@ shinyApp(
         #str(Filemonthly)
         #colnames(Filemonthly)
         
+     
+    try({
         output$WBmonthlyB1 <- renderPlotly({
           
           p2monthly <- plot_ly(Filemonthly, x=~Month, y=~`TotalRunoff/Precipitation%`, name="TotalRunoff/Precipitation%", showlegend=TRUE, type="scatter",mode="line",text=~paste("TotalRunoff/Precipitation% = ", `TotalRunoff/Precipitation%`)) %>%
@@ -3266,6 +4243,8 @@ shinyApp(
           p2monthly
           
         })
+    }) 
+        try({
         output$WBtable1 <- DT::renderDataTable({
           
           Filemonthly[,c(2:ncol(Filemonthly))] <- round(Filemonthly[,c(2:ncol(Filemonthly))],2)
@@ -3281,7 +4260,8 @@ shinyApp(
           DT::datatable(Filemonthly, options = list(lengthMenu = c(12), pageLength = 12),rownames= FALSE)
           
         })
-        
+        }) 
+       
       } else {
         shinyjs::hide("metrics1")
         shinyjs::hide("metricsp1")
@@ -3299,11 +4279,807 @@ shinyApp(
       
       
     })
+    observeEvent(input$graphs1,{ 
+      
+      Model=VAL$Model2
+      if (Model==1){
+        start = Sys.time()
+        
+        withProgress(message = 'Calculation in progress',
+                     detail = 'This may take a while...', value = 0, {
+                       
+                       
+                       
+                       Warea <- input$warea
+                       Scen <- input$Scen
+                       ts <- input$ts
+                       
+                       #Titles="Spanish" #English 
+                       Titles=input$titlesg1
+                       
+                       #file=read.csv(paste0("ResultsWB-",1,".csv"), stringsAsFactors=F, check.names=F)
+                       #yearINI= file$Dates[1]
+                       #ey= file$Dates[nrow(file)]
+                       
+                       yearINI=input$datesgraph1[1]
+                       
+                       ey <-input$datesgraph1[2]
+                       
+                       #dir=paste0(dirname(rstudioapi::getSourceEditorContext()$path),"/Results ",Warea)
+                       dir=VAL$dir_outg
+                       
+                       if (Titles=="Spanish"){
+                         xtext="Fecha"
+                       }else if (Titles=="English") {
+                         xtext="Date"
+                       }
+                       
+                       dates=c(ymd(as.Date(yearINI)),ymd(as.Date(ey)))
+                       multiplot = function(..., plotlist=NULL, file, cols=1, layout=NULL) {
+                         # Multiple plot function
+                         #
+                         # ggplot objects can be passed in ..., or to plotlist (as a list of ggplot objects)
+                         # - cols:   Number of columns in layout
+                         # - layout: A matrix specifying the layout. If present, 'cols' is ignored.
+                         #
+                         # If the layout is something like matrix(c(1,2,3,3), nrow=2, byrow=TRUE),
+                         # then plot 1 will go in the upper left, 2 will go in the upper right, and
+                         # 3 will go all the way across the bottom.
+                         #
+                         library(grid)
+                         
+                         # Make a list from the ... arguments and plotlist
+                         plots = c(list(...), plotlist)
+                         
+                         numPlots = length(plots)
+                         
+                         # If layout is NULL, then use 'cols' to determine layout
+                         if (is.null(layout)) {
+                           # Make the panel
+                           # ncol: Number of columns of plots
+                           # nrow: Number of rows needed, calculated from # of cols
+                           layout = matrix(seq(1, cols * ceiling(numPlots/cols)),
+                                           ncol = cols, nrow = ceiling(numPlots/cols))
+                         }
+                         
+                         if (numPlots==1) {
+                           print(plots[[1]])
+                           
+                         } else {
+                           # Set up the page
+                           grid.newpage()
+                           pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+                           
+                           # Make each plot, in the correct location
+                           for (i in 1:numPlots) {
+                             # Get the i,j matrix positions of the regions that contain this subplot
+                             matchidx = as.data.frame(which(layout == i, arr.ind = TRUE))
+                             
+                             print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
+                                                             layout.pos.col = matchidx$col))
+                           }
+                         }
+                       }
+                       start = Sys.time()
+                       
+                       errorEvaluar=c(
+                         1, #1.	me, Mean Error
+                         2, #2.	mae, Mean Absolute Error
+                         # 3, #3.	mse, Mean Squared Error
+                         # 4, #4.	rmse, Root Mean Square Error
+                         5, #5.	nrmse, Normalized Root Mean Square Error ( -100% <= nrms <= 100% )
+                         6, #6.	PBIAS, Percent Bias
+                         # 7, #7.	RSR, Ratio of RMSE to the Standard Deviation of the Observations, RSR = rms / sd(obs). ( 0 <= RSR <= +Inf )
+                         # 8, #8.	rSD, Ratio of Standard Deviations, rSD = sd(sim) / sd(obs)
+                         9, #9.	NSE, Nash-Sutcliffe Efficiency ( -Inf <= NSE <= 1 )
+                         10, #10.	mNSE, Modified Nash-Sutcliffe Efficiency
+                         # 11, #11.	rNSE, Relative Nash-Sutcliffe Efficiency
+                         12,  #12.	d, Index of Agreement ( 0 <= d <= 1 )
+                         13,  #13.	md, Modified Index of Agreement 
+                         # 14,#14.	rd, Relative Index of Agreement
+                         # 15, #15.	cp, Persistence Index ( 0 <= PI <= 1 )
+                         # 16, #16.	r, Pearson Correlation coefficient ( -1 <= r <= 1 )
+                         17,  #17.	R2, Coefficient of Determination ( 0 <= R2 <= 1 ). 
+                         18,  #8.	bR2, R2 multiplied by the coefficient of the regression line between sim and obs ( 0 <= bR2 <= 1 )
+                         19, #19.	KGE, Kling-Gupta efficiency between sim and obs ( 0 <= KGE <= 1 )
+                         20 #20.	VE, Volumetric efficiency between sim and obs  ( -Inf <= VE <= 1)
+                       ) 
+                       names_error=c("ME"  ,    "MAE"  ,   "MSE" ,    "RMSE" ,   "NRMSE %" ,"PBIAS %", "RSR"   ,  "rSD"  ,   "NSE" ,   
+                                     "mNSE" ,   "rNSE"  ,  "d"  ,     "md"    ,  "rd"   ,   "cp"    ,  "r"  ,     "R2"    ,  "bR2",    
+                                     "KGE" ,    "VE" ) 
+                       names_errorg=c("ME"  ,    "MAE"  ,   "MSE" ,    "RMSE" ,   "NRMSE" ,"PBIAS", "RSR"   ,  "rSD"  ,   "NSE" ,   
+                                      "mNSE" ,   "rNSE"  ,  "d"  ,     "md"    ,  "rd"   ,   "cp"    ,  "r"  ,     "R2"    ,  "bR2",    
+                                      "KGE" ,    "VE" ) 
+                       #names_error[errorEvaluar]
+                       
+                       #procesar GOF
+                       ################################################################################################
+                       #genera archivo GOF en un rango de fechas
+                       names_errorLOG=paste(rep("log10",length(names_error)),names_error) #"logNSE" 
+                       metricsALL=NULL
+                       setwd(dir)
+                       listResults=list.files(pattern ="ResultsWB-")
+                       listResults=gsub("ResultsWB-","",listResults,fixed = TRUE)
+                       listResults=gsub(".csv","",listResults,fixed = TRUE)
+                       listResults=unique(as.numeric(listResults))
+                       listResults
+                       file=read.csv(paste0("ResultsWB-",listResults[1],".csv"), stringsAsFactors=F, check.names=F)
+                       total <-length(unique(file$Gauge))*length(listResults)
+                       truns=length(listResults)+total+2
+                       
+                       incProgress(1/truns)
+                       
+                       if (length(listResults)>0){
+                         runs <- length(listResults)
+                         pbi=0
+                         total <- runs
+                         j=1
+                         
+                         for (j in listResults){
+                           pbi=pbi+1
+                           incProgress(1/truns)
+                           print(paste0(pbi," of ", total))
+                           setwd(dir)
+                           i
+                           ########
+                           #i=1
+                           RUNID=j
+                           
+                           file=read.csv(paste0("ResultsWB-",RUNID,".csv"), stringsAsFactors=F, check.names=F)
+                           
+                           file$Dates=ymd(file$Dates)
+                           file$YearMonth=year(file$Dates)*100+month(file$Dates)
+                           file$Month=month(file$Dates)
+                           
+                           fileOrg=file
+                           
+                           filesub <- file[which(file$Dates >= dates[1] & file$Dates <= dates[2]),]
+                           days=read.csv("WEAPdays.csv",stringsAsFactors = F, check.names=F)
+                           #filesub=merge(filesub,days,by="Time step")
+                           filesub1=filesub
+                           
+                           if (Titles=="Spanish"){
+                             text=paste0("Serie de tiempo: ","Modelado (azul) vs Observado (rojo)")
+                             
+                           }else if (Titles=="English") {
+                             text=paste0("Time serie: ","Modeled (blue) vs Observed (red)")
+                             
+                           }
+                           
+                           filesub1$Observed=filesub1$Observed/filesub1$Days/86400
+                           filesub1$Modeled=filesub1$Modeled/filesub1$Days/86400
+                           p <- ggplot(filesub1, aes(x=Dates, y=Modeled)) + 
+                             geom_line(color="blue",size=0.2)+
+                             geom_line(aes(x=Dates, y=Observed), color="red",size=0.1)+ # ,linetype = "dotted"
+                             facet_wrap( ~ Gauge, scales = "free") +
+                             ylab(paste0("[m3/s]"))+
+                             xlab(xtext)+
+                             ggtitle(text)
+                           p
+                           
+                           plotpath = paste0("Time series_sim vs obs_",RUNID,".jpg") #creates a pdf path to produce a graphic of the span of records in the Data
+                           ggsave(plotpath,width =40 , height = 22,units = "cm")
+                           
+                           
+                         }
+                         
+                       }
+                       ################################################################################################
+                       runTimeGOF=difftime(Sys.time(),start)
+                       runTimeGOF
+                       
+                       #procesaar graficas y GOF
+                       ###############################################################################################
+                       metricsALL <- NULL
+                       setwd(dir)
+                       listResults=list.files(pattern ="ResultsWB-")
+                       listResults=gsub("ResultsWB-","",listResults,fixed = TRUE)
+                       listResults=gsub(".csv","",listResults,fixed = TRUE)
+                       listResults=unique(as.numeric(listResults))
+                       listResults
+                       
+                       if (length(listResults)>0){
+                         
+                         file=read.csv(paste0("ResultsWB-",listResults[1],".csv"), stringsAsFactors=F, check.names=F)
+                         names=sort(unique(file$Gauge))
+                         total <-length(unique(file$Gauge))*length(listResults)
+                         pbi=0
+                         f=1
+                         
+                         for (f in listResults){
+                           
+                           #Graficas
+                           ##################
+                           setwd(dir)
+                           Carpeta_Out=paste0(f,"_Graphs_",paste(dates,collapse ="-"))
+                           dir.create(Carpeta_Out,showWarnings=F)
+                           dir_file=paste(c(dir,"\\",Carpeta_Out),collapse="")
+                           
+                           year1 = yearINI
+                           year2= ey
+                           
+                           RUNID=f
+                           
+                           file=read.csv(paste0("ResultsWB-",RUNID,".csv"), stringsAsFactors=F, check.names=F)
+                           file$Dates=ymd(file$Dates)
+                           file$YearMonth=year(file$Dates)*100+month(file$Dates)
+                           file$Month=month(file$Dates)
+                           filesub <- file[which(file$Dates >= dates[1] & file$Dates <= dates[2]),]
+                           
+                           days=read.csv("WEAPdays.csv",stringsAsFactors = F, check.names=F)
+                           #filesub=merge(filesub,days,by="Time step")
+                           
+                           days$Dates=NA
+                           days$Dates[1]=as.Date("1981/01/01")
+                           for (d in 2:nrow(days)) {
+                             days$Dates[d]=days$Dates[d-1]+days$Days[d]
+                           }
+                           days$Dates=as.Date(days$Dates)
+                           
+                           filesub1=filesub
+                           filesub1$Observed=filesub1$Observed/filesub1$Days/86400
+                           filesub1$Modeled=filesub1$Modeled/filesub1$Days/86400
+                           
+                           obsFile=filesub1[,c("Time step","Dates","Gauge","Observed")]
+                           simFile=filesub1[,c("Time step","Dates","Gauge","Modeled")]
+                           obsFile = obsFile %>% pivot_wider(names_from = Gauge, values_from = Observed)
+                           simFile = simFile %>% pivot_wider(names_from = Gauge, values_from = Modeled)
+                           obsFile=obsFile[order(obsFile$Dates),]
+                           simFile=simFile[order(simFile$Dates),]
+                           
+                           GofGrafica=names_errorg[errorEvaluar]
+                           GofTabla=names_error[errorEvaluar]
+                           
+                           obsv=as.data.frame(obsFile[,names])
+                           simv=as.data.frame(simFile[,names])
+                           
+                           setwd(dir_file)
+                           Carpeta_Out="SimObs_All"
+                           dir.create(Carpeta_Out,showWarnings=F)
+                           dir_file1 = paste0(dir_file,"\\",Carpeta_Out)
+                           setwd(dir_file1)
+                           
+                           
+                           filesub1=filesub1[,c("Time step","Dates","Gauge","Modeled","Observed","Year")]
+                           
+                           if (Titles=="Spanish"){
+                             text=paste0("Serie de tiempo: ","Modelado (azul) vs Observado (rojo)")
+                             
+                           }else if (Titles=="English") {
+                             text=paste0("Time serie: ","Modeled (blue) vs Observed (red)")
+                             
+                           }
+                           
+                           p <- ggplot(filesub1, aes(x=Dates, y=Modeled)) + 
+                             geom_line(color="blue",size=0.2)+
+                             geom_line(aes(x=Dates, y=Observed), color="red",size=0.1)+ # ,linetype = "dotted"
+                             facet_wrap( ~ Gauge, scales = "free") +
+                             ylab(paste0("[m3/s]"))+
+                             xlab(xtext)+
+                             ggtitle(text)
+                           p
+                           
+                           ggsave("TimeSeries.jpg",width =40 , height = 22,units = "cm")
+                           
+                           try({
+                             filesub1$monthyear=floor_date(filesub1$Dates, "month")
+                             filesub1 <- filesub1[order(filesub1$Gauge,filesub1$Dates),]
+                             
+                             df=filesub1
+                             df_d=aggregate(df[,c("Modeled","Observed")],list(Gauge=df$Gauge, `Time step`=df$`Time step`),mean, na.rm=TRUE)
+                             df_d=df_d[order(df_d$Gauge,df_d$`Time step`),]
+                             
+                             write.csv(df_d,"MultiannualTimeStepMean_LongFormat.csv",row.names=FALSE,na="")
+                             
+                             df_d = merge(df_d,days,by="Time step")
+                             df_d=df_d[order(df_d$Gauge,df_d$Dates),]
+                             #dfsim_d$date = format(dfsim_d$date, "%b %d")
+                             
+                             if (ts==365){
+                               
+                               if (Titles=="Spanish"){
+                                 text=paste0("Promedio Diario Multianual: ","Modelado (azul) vs Observado (rojo)")
+                               }else if (Titles=="English") {
+                                 text=paste0("Multiannual Daily Mean: ","Modeled (blue) vs Observed (red)")
+                               }
+                               
+                             } else {
+                               if (Titles=="Spanish"){
+                                 text=paste0("Promedio a paso de tiempo Multianual: ","Modelado (azul) vs Observado (rojo)")
+                               }else if (Titles=="English") {
+                                 text=paste0("Multiannual Time Step Mean: ","Modeled (blue) vs Observed (red)")
+                               }
+                               
+                             }
+                             
+                             
+                             p <- ggplot(df_d, aes(x=Dates, y=Modeled)) + 
+                               geom_line(color="blue",size=0.2)+
+                               geom_line(aes(x=Dates, y=Observed), color="red",size=0.1)+ # ,linetype = "dotted"
+                               facet_wrap( ~ Gauge, scales = "free") +
+                               ylab(paste0("[m3/s]"))+
+                               xlab(xtext)+
+                               ggtitle(text)
+                             p= p + scale_x_date(date_labels = "%b/%d")
+                             p
+                             ggsave("Multiannual time step Mean.jpg",width =40 , height = 22,units = "cm")
+                           })  
+                           
+                           try({
+                             df=filesub1
+                             df_m=aggregate(df[,c("Modeled","Observed")],list(Gauge=df$Gauge, monthyear=df$monthyear),mean, na.rm=TRUE)
+                             df_m$month <- month(df_m$monthyear)
+                             df_m=aggregate(df_m[,c("Modeled","Observed")],list(Gauge=df_m$Gauge, month=df_m$month),mean, na.rm=TRUE)
+                             df_m=df_m[order(df_m$Gauge,df_m$month),]
+                             write.csv(df_m,"MultiannualMonthlyMean_LongFormat.csv",row.names=FALSE,na="")
+                             
+                             Dates=seq(as.Date(paste(c(1981,"/",01,"/",01),collapse="")),as.Date(paste(c(1981,"/",12,"/",31),collapse="") ), by = "month")
+                             Dates=as.data.frame(Dates)
+                             Dates$month=month(Dates$Dates)
+                             
+                             df_m = merge(df_m,Dates,by="month")
+                             df_m=df_m[order(df_m$Gauge,df_m$month),]
+                             
+                             if (Titles=="Spanish"){
+                               text=paste0("Promedio Mensual Multianual: ","Modelado (azul) vs Observado (rojo)")
+                               
+                             }else if (Titles=="English") {
+                               text=paste0("Multiannual Monthly Mean: ","Modeled (blue) vs Observed (red)")
+                               
+                             }
+                             
+                             p <- ggplot(df_m, aes(x=Dates, y=Modeled)) + 
+                               geom_line(color="blue",size=0.2)+
+                               geom_line(aes(x=Dates, y=Observed), color="red",size=0.1)+ # ,linetype = "dotted"
+                               facet_wrap( ~ Gauge, scales = "free") +
+                               ylab(paste0("[m3/s]"))+
+                               xlab(xtext)+
+                               ggtitle(text)
+                             p= p + scale_x_date(date_labels = "%B")
+                             p 
+                             ggsave("Multiannual Monthly Mean.jpg",width =40 , height = 22,units = "cm")
+                             
+                           })
+                           
+                           try({
+                             df=filesub1
+                             df_m=aggregate(df[,c("Modeled","Observed")],list(Gauge=df$Gauge, Year=df$Year),mean, na.rm=TRUE)
+                             df_m=df_m[order(df_m$Gauge,df_m$Year),]
+                             write.csv(df_m,"AnnualMean_LongFormat.csv",row.names=FALSE,na="")
+                             
+                             Dates=seq(as.Date(paste(c(min(df_m$Year),"/",01,"/",01),collapse="")),as.Date(paste(c(max(df_m$Year),"/",12,"/",31),collapse="") ), by = "year")
+                             Dates=as.data.frame(Dates)
+                             Dates$Year=year(Dates$Dates)
+                             
+                             df_m = merge(df_m,Dates,by="Year")
+                             df_m=df_m[order(df_m$Gauge,df_m$Year),]
+                             
+                             if (Titles=="Spanish"){
+                               text=paste0("Promedio Anual: ","Modelado (azul) vs Observado (rojo)")
+                               
+                             }else if (Titles=="English") {
+                               text=paste0("Annual Mean: ","Modeled (blue) vs Observed (red)")
+                               
+                             }
+                             
+                             p <- ggplot(df_m, aes(x=Dates, y=Modeled)) + 
+                               geom_line(color="blue",size=0.2)+
+                               geom_line(aes(x=Dates, y=Observed), color="red",size=0.1)+ # ,linetype = "dotted"
+                               facet_wrap( ~ Gauge, scales = "free") +
+                               ylab(paste0("[m3/s]"))+
+                               xlab(xtext)+
+                               ggtitle(text)
+                             p= p + scale_x_date(date_labels = "%B")
+                             p 
+                             ggsave("Multiannual Monthly Mean.jpg",width =40 , height = 22,units = "cm")
+                           })
+                           
+                           ##################
+                           
+                           for (i in 1:length(names)){
+                             
+                             name <- names[i]
+                             pbi=pbi+1
+                             
+                             incProgress(1/truns)
+                             print(paste0(pbi," of ",total)) #," Estacion ", name
+                             
+                             if (length(which(is.na(obsv[,i])==TRUE))<length(obsv[,i])){
+                               
+                               obs = zoo(obsv[,i],as.Date(obsFile$Dates))
+                               sim = zoo(simv[,i],as.Date(simFile$Dates))
+                               
+                               if (ts==12){
+                                 
+                                 try({
+                                   setwd(dir_file)
+                                   Carpeta_Out="SimObs_ma"
+                                   dir.create(Carpeta_Out,showWarnings=F)
+                                   dir_file1 = paste0(dir_file,"\\",Carpeta_Out)
+                                   setwd(dir_file1)
+                                   png(file=paste0(name,"_",Carpeta_Out,".png"),width =40 , height = 22,units = "cm",res=800)
+                                   ggof(sim=sim, obs=obs, ftype="ma", FUN=mean, leg.cex=1.2,na.rm=TRUE, main = name, ylab=c("Q[m3/s]"), pch = c(20, 18),lwd = c(1, 1), gofs=GofGrafica)
+                                   #col = c("#FF3030", "black"),lwd = c(1, 1),lty = c(1, 1),  
+                                   dev.off()
+                                 })
+                                 
+                               } else if (ts==365){
+                                 
+                                 try({
+                                   setwd(dir_file)
+                                   Carpeta_Out="SimObs_dma"
+                                   dir.create(Carpeta_Out,showWarnings=F)
+                                   dir_file1 = paste0(dir_file,"\\",Carpeta_Out)
+                                   setwd(dir_file1)
+                                   png(file=paste0(name,"_",Carpeta_Out,".png"),width =40 , height = 22,units = "cm",res=800)
+                                   ggof(sim=sim, obs=obs, ftype="dma", FUN=mean, leg.cex=1.2,na.rm=TRUE, main = name, ylab=c("Q[m3/s]"), pch = c(20, 18),lwd = c(1, 1), gofs=GofGrafica)
+                                   #col = c("#FF3030", "black"),lwd = c(1, 1),lty = c(1, 1),  
+                                   dev.off()
+                                 })
+                                 
+                                 try({
+                                   setwd(dir_file)
+                                   Carpeta_Out="SimObs_seasons"
+                                   dir.create(Carpeta_Out,showWarnings=F)
+                                   dir_file1 = paste0(dir_file,"\\",Carpeta_Out)
+                                   setwd(dir_file1)
+                                   png(file=paste0(name,"_",Carpeta_Out,".png"),width =40 , height = 22,units = "cm",res=800)
+                                   ggof(sim=sim, obs=obs, ftype="seasonal", season.names=c("", "", "", ""),na.rm=TRUE,FUN=mean, leg.cex=1.2, pch = c(20, 18),main = name, ylab=c("Q[m3/s]"))
+                                   dev.off()
+                                 })
+                                 
+                                 
+                               } 
+                               
+                               try({
+                                 setwd(dir_file)
+                                 Carpeta_Out="SimObs_original"
+                                 dir.create(Carpeta_Out,showWarnings=F)
+                                 dir_file1 = paste0(dir_file,"\\",Carpeta_Out)
+                                 setwd(dir_file1)
+                                 png(file=paste0(name,"_",Carpeta_Out,".png"),width =40 , height = 22,units = "cm",res=800)
+                                 ggof(sim=sim, obs=obs, FUN=mean, leg.cex=1.2,na.rm=TRUE, main = name, ylab=c("Q[m3/s]"), xlab=xtext,pch = c(20, 18),lwd = c(1, 1), gofs=GofGrafica)
+                                 #col = c("#FF3030", "black"),lwd = c(1, 1),lty = c(1, 1),  
+                                 dev.off()
+                               })
+                               
+                               try({   
+                                 if (ts==365){
+                                   df <- data.frame(date = as.Date(simFile$Dates), Gauge = simv[,i],timestep=simFile$`Time step`)
+                                   df$monthyear=floor_date(df$date, "month")
+                                   
+                                   df_d=as.data.frame(df %>%
+                                                        group_by(timestep) %>%
+                                                        summarize(mean = mean(Gauge ,na.rm = TRUE)))
+                                   
+                                   
+                                   df_d = merge(df_d,days,by.x="timestep",by.y = "Time step")
+                                   df_d=df_d[order(df_d$Dates),]
+                                   
+                                   dfsim_d=df_d
+                                   
+                                   ###
+                                   df <- data.frame(date = as.Date(obsFile$Dates), Gauge = obsv[,i],timestep=obsFile$`Time step`)
+                                   df$monthyear=floor_date(df$date, "month")
+                                   
+                                   df_d=as.data.frame(df %>%
+                                                        group_by(timestep) %>%
+                                                        summarize(mean = mean(Gauge ,na.rm = TRUE)))
+                                   
+                                   
+                                   df_d = merge(df_d,days,by.x="timestep",by.y = "Time step")
+                                   df_d=df_d[order(df_d$Dates),]
+                                   
+                                   dfobs_d=df_d
+                                   
+                                   #grafica medios diarios multianuales
+                                   obs = zoo(dfobs_d[,2],dfobs_d[,4])
+                                   sim = zoo(dfsim_d[,2],dfsim_d[,4])
+                                   
+                                   if (Titles=="Spanish"){
+                                     text=paste0("Promedio Diario Multianual")
+                                   }else if (Titles=="English") {
+                                     text=paste0("Multiannual Daily Mean")
+                                   }
+                                   
+                                   setwd(dir_file)
+                                   Carpeta_Out="SimObs_MultiannualDaily"
+                                   dir.create(Carpeta_Out,showWarnings=F)
+                                   dir_file1 = paste0(dir_file,"\\",Carpeta_Out)
+                                   setwd(dir_file1)
+                                   png(file=paste0(name,"_",Carpeta_Out,".png"),width =40 , height = 22,units = "cm",res=800)
+                                   ggof(sim=sim, obs=obs, lab.fmt="%b %d", ftype="o",tick.tstep = "days", lab.tstep = "months", FUN=mean, leg.cex=1.2,na.rm=TRUE, main=paste(name,"- ",text), xlab=xtext, ylab=c("Q[m3/s]"), pch = c(20, 18),lwd = c(1, 1), gofs=GofGrafica)
+                                   dev.off()
+                                   
+                                 }
+                               })
+                               
+                               try({  
+                                 #sim
+                                 df <- data.frame(date = as.Date(simFile$Dates), Caudal = simv[,i])
+                                 df$monthyear=floor_date(df$date, "month")
+                                 #tail(df)
+                                 
+                                 df_m=as.data.frame(df %>%
+                                                      group_by(monthyear) %>%
+                                                      summarize(mean = mean(Caudal,na.rm = TRUE)))
+                                 df_m$month <- month(df_m$monthyear)
+                                 df_m=as.data.frame(df_m %>%
+                                                      group_by(month) %>%
+                                                      summarize(mean = mean(mean,na.rm = TRUE)))
+                                 
+                                 Dates=seq(as.Date(paste(c(1981,"/",01,"/",01),collapse="")),as.Date(paste(c(1981,"/",12,"/",31),collapse="") ), by = "month")
+                                 Dates=as.data.frame(Dates)
+                                 Dates$month=month(Dates$Dates)
+                                 
+                                 df_m=merge(df_m,Dates,by="month")
+                                 dfsim_m=df_m
+                                 
+                                 #obs
+                                 df <- data.frame(date = as.Date(obsFile$Dates), Caudal = obsv[,i])
+                                 df$monthyear=floor_date(df$date, "month")
+                                 
+                                 df_m=as.data.frame(df %>%
+                                                      group_by(monthyear) %>%
+                                                      summarize(mean = mean(Caudal,na.rm = TRUE)))
+                                 df_m$month <- month(df_m$monthyear)
+                                 df_m=as.data.frame(df_m %>%
+                                                      group_by(month) %>%
+                                                      summarize(mean = mean(mean,na.rm = TRUE)))
+                                 
+                                 Dates=seq(as.Date(paste(c(1981,"/",01,"/",01),collapse="")),as.Date(paste(c(1981,"/",12,"/",31),collapse="") ), by = "month")
+                                 Dates=as.data.frame(Dates)
+                                 Dates$month=month(Dates$Dates)
+                                 
+                                 df_m=merge(df_m,Dates,by="month")
+                                 dfobs_m=df_m
+                                 
+                                 #grafica medios mensuales multianuales
+                                 obs = zoo(dfobs_m[,2],dfobs_m[,3])
+                                 sim = zoo(dfsim_m[,2],dfsim_m[,3])
+                                 
+                                 if (Titles=="Spanish"){
+                                   text=paste0("Promedio Mensual Multianual")
+                                 }else if (Titles=="English") {
+                                   text=paste0("Multiannual Monthly Mean")
+                                 }
+                                 setwd(dir_file)
+                                 Carpeta_Out="SimObs_MultiannualMonthly"
+                                 dir.create(Carpeta_Out,showWarnings=F)
+                                 dir_file1 = paste0(dir_file,"\\",Carpeta_Out)
+                                 setwd(dir_file1)
+                                 png(file=paste0(name,"_",Carpeta_Out,".png"),width =40 , height = 22,units = "cm",res=800)
+                                 ggof(sim=sim, obs=obs, lab.fmt="%b", ftype="o",tick.tstep = "months", lab.tstep = "months", FUN=mean, leg.cex=1.2,na.rm=TRUE, main=paste(name,"- ",text), xlab=xtext, ylab=c("Q[m3/s]"), pch = c(20, 18),lwd = c(1, 1), gofs=GofGrafica)
+                                 dev.off()
+                                 
+                               })
+                               
+                               #residuales
+                               obs = zoo(obsv[,i],as.Date(obsFile$Dates))
+                               sim = zoo(simv[,i],as.Date(simFile$Dates))
+                               
+                               try({
+                                 setwd(dir_file)
+                                 Carpeta_Out="Sim"
+                                 dir.create(Carpeta_Out,showWarnings=F)
+                                 dir_file1 = paste0(dir_file,"\\",Carpeta_Out)
+                                 setwd(dir_file1)
+                                 png(file=paste0(name,"_",Carpeta_Out,".png"),width =40 , height = 22,units = "cm",res=800)
+                                 hydroplot(sim, FUN=mean,var.unit="m3/s",main=paste0(name," Simu"),xlab="",na.rm=TRUE)
+                                 dev.off()
+                               })
+                               
+                               try({
+                                 setwd(dir_file)
+                                 Carpeta_Out="Obs"
+                                 dir.create(Carpeta_Out,showWarnings=F)
+                                 dir_file1 = paste0(dir_file,"\\",Carpeta_Out)
+                                 setwd(dir_file1)
+                                 png(file=paste0(name,"_",Carpeta_Out,".png"),width =40 , height = 22,units = "cm",res=800)
+                                 hydroplot(obs, FUN=mean,var.unit="m3/s",main=paste0(name," Obs"),xlab="",na.rm=TRUE)
+                                 dev.off()
+                               })
+                               
+                               try({
+                                 r <- sim-obs
+                                 smry(r)
+                                 setwd(dir_file)
+                                 Carpeta_Out="SimObs_residuals"
+                                 dir.create(Carpeta_Out,showWarnings=F)
+                                 dir_file1 = paste0(dir_file,"\\",Carpeta_Out)
+                                 setwd(dir_file1)
+                                 png(file=paste0(name,"_",Carpeta_Out,".png"),width =40 , height = 22,units = "cm",res=800)
+                                 hydroplot(r, FUN=mean,var.unit="m3/s",main=paste0(name," Residual"),xlab="",na.rm=TRUE)
+                                 dev.off()
+                               })
+                               #metricas en tabla
+                               
+                               metrics=NULL
+                               obs = zoo(obsv[,i],as.Date(obsFile$Dates))
+                               sim = zoo(simv[,i],as.Date(simFile$Dates))
+                               
+                               
+                               if (ts==365){
+                                 
+                                 try({
+                                   m <- gof(sim=sim, obs=obs)
+                                   m <- as.data.frame(m)
+                                   m$Metricas <- rownames(m)
+                                   m$Estacion <- name
+                                   
+                                   if (Titles=="Spanish"){
+                                     m$Tipo <- "Diario"
+                                   }else if (Titles=="English") {
+                                     m$Tipo <- "Daily"
+                                   }
+                                   
+                                   metrics=rbind(metrics,m)
+                                 })
+                                 
+                                 try({
+                                   sim = daily2monthly.zoo(sim, FUN = mean)
+                                   obs = daily2monthly.zoo(obs, FUN = mean)
+                                   m <- gof(sim=sim, obs=obs)
+                                   m <- as.data.frame(m)
+                                   m$Metricas <- rownames(m)
+                                   m$Estacion <- name
+                                   
+                                   if (Titles=="Spanish"){
+                                     m$Tipo <- "Mensual"
+                                   }else if (Titles=="English") {
+                                     m$Tipo <- "Monthly"
+                                   }
+                                   
+                                   metrics=rbind(metrics,m)
+                                 })
+                                 
+                                 try({
+                                   sim = monthly2annual(sim, FUN = mean)
+                                   obs = monthly2annual(obs, FUN = mean)
+                                   m <- gof(sim=sim, obs=obs)
+                                   m <- as.data.frame(m)
+                                   m$Metricas <- rownames(m)
+                                   m$Estacion <- name
+                                   if (Titles=="Spanish"){
+                                     m$Tipo <- "Anual"
+                                   }else if (Titles=="English") {
+                                     m$Tipo <- "Annual"
+                                   }
+                                   metrics=rbind(metrics,m)  
+                                 })
+                                 
+                                 try({
+                                   m <- gof(sim=dfsim_d[,2], obs=dfobs_d[,2])
+                                   m <- as.data.frame(m)
+                                   m$Metricas <- rownames(m)
+                                   m$Estacion <- name
+                                   if (Titles=="Spanish"){
+                                     m$Tipo <- "Medio Diario multianual"
+                                   }else if (Titles=="English") {
+                                     m$Tipo <- "Multiannual Daily Mean"
+                                   }
+                                   metrics=rbind(metrics,m)
+                                 })
+                               }
+                               
+                               if (ts==12){
+                                 try({
+                                   m <- gof(sim=sim, obs=obs)
+                                   m <- as.data.frame(m)
+                                   m$Metricas <- rownames(m)
+                                   m$Estacion <- name
+                                   if (Titles=="Spanish"){
+                                     m$Tipo <- "Mensual"
+                                   }else if (Titles=="English") {
+                                     m$Tipo <- "Monthly"
+                                   }
+                                   metrics=rbind(metrics,m)
+                                 })
+                                 
+                                 try({
+                                   
+                                   sim = monthly2annual(sim, FUN = mean)
+                                   obs = monthly2annual(obs, FUN = mean)
+                                   m <- gof(sim=sim, obs=obs)
+                                   m <- as.data.frame(m)
+                                   m$Metricas <- rownames(m)
+                                   m$Estacion <- name
+                                   if (Titles=="Spanish"){
+                                     m$Tipo <- "Anual"
+                                   }else if (Titles=="English") {
+                                     m$Tipo <- "Annual"
+                                   }
+                                   metrics=rbind(metrics,m)  
+                                 })
+                                 
+                                 try({
+                                   m <- gof(sim=dfsim_m[,2], obs=dfobs_m[,2])
+                                   m <- as.data.frame(m)
+                                   m$Metricas <- rownames(m)
+                                   m$Estacion <- name
+                                   if (Titles=="Spanish"){
+                                     m$Tipo <- "Medio Mensual multianual"
+                                   }else if (Titles=="English") {
+                                     m$Tipo <- "Multiannual Monthly Mean"
+                                   }
+                                   metrics=rbind(metrics,m)
+                                 })
+                               } else {
+                                 try({
+                                   m <- gof(sim=sim, obs=obs)
+                                   m <- as.data.frame(m)
+                                   m$Metricas <- rownames(m)
+                                   m$Estacion <- name
+                                   
+                                   if (Titles=="Spanish"){
+                                     m$Tipo <- "Paso de tiempo del modelo"
+                                   }else if (Titles=="English") {
+                                     m$Tipo <- "Model Time Step"
+                                   }
+                                   
+                                   metrics=rbind(metrics,m)
+                                 })
+                               }
+                               
+                               metrics$ID=f
+                               
+                             }
+                             
+                             
+                             metricsALL=rbind(metricsALL,metrics)
+                             
+                           }
+                           try({
+                             
+                             
+                             setwd(dir)
+                             metricas <- subset(metricsALL, Metricas %in% GofTabla)
+                             colnames(metricas)=c("Valor", "GOF", "Estacion", "Tipo" ,    "Run ID"  )
+                             metricas=metricas[,c("Run ID", "Tipo","Estacion", "GOF","Valor")]
+                             
+                             if (Titles=="English") {
+                               colnames(metricas)=c("Run ID", "Type","Gauge", "GOF","Value")
+                             }
+                             
+                             write.csv(metricas, paste0("SummaryGOF2_",paste(dates,collapse ="-"),".csv"),row.names = FALSE)
+                             
+                           })
+                         }
+                       }
+                       ################################################################################################
+                       runTimeGOF2=difftime(Sys.time(),start)
+                       runTimeGOF2
+                       
+                       ##############################################################
+                       
+                       output$textRunEnsemblegraph1 <- renderText({
+                         outTxt = ""
+                         text=paste0("Graphs exported. Check ", dir,". Time: ")
+                         formatedFont = sprintf('<font color="%s">%s</font>',"green",text)
+                         outTxt = paste0(outTxt, formatedFont)
+                         
+                         text=format(as.difftime(difftime(Sys.time(),start), format = "%H:%M")) 
+                         formatedFont = sprintf('<font color="%s">%s</font>',"green",text)
+                         outTxt = paste0(outTxt, formatedFont)
+                         
+                         outTxt
+                         
+                         
+                       })
+                       
+                       
+                       incProgress(1/truns)
+                       
+                     })
+      }
+      
+    })
     ###################################### 
     
     ###################################### 
     
     observeEvent(input$GOFmetrics,{
+      
       Model=VAL$Model2 
       if (length(list.files(pattern ="ResultsWB-")>0) &&  Model==1){
         
@@ -3367,14 +5143,16 @@ shinyApp(
                          
                          for (t in 1:3){
                            
-                           metrics=as.data.frame(matrix(nrow=length(uniqueGauges),ncol=(12+length(errorEvaluar)*2)))
+                          
+                             metrics=as.data.frame(matrix(nrow=length(uniqueGauges),ncol=(12+length(errorEvaluar)*2)))
                            colnames(metrics) <- c("Gauge","Run ID",names_error[errorEvaluar],names_errorLOG[errorEvaluar],"Qmin obs/Qmin sim %","Qmean obs/Qmean sim %","Qmax obs/Qmax sim %","PeriodGOF","TotalRunoff / Precipitation %","BaseFlow / TotalRunoff %", "SurfaceRunoff / TotalRunoff %","Evapotranspiration / Precipitation %","Type","Period")
                            
                            metrics[,1]=uniqueGauges
                            metrics[,2]=runID
                            
                            for (g in 1:length(uniqueGauges)){
-                             
+
+                             try({
                              filesub=file[file$Gauge==uniqueGauges[g],]
                              total=nrow(filesub)
                              filesubt=na.exclude(filesub[filesub$Gauge==uniqueGauges[g],])
@@ -3468,9 +5246,14 @@ shinyApp(
                              metrics[g,2+length(errorEvaluar)*2+1]=min(na.exclude(filesub$Observed))/min( na.exclude(filesub$Modeled))*100   
                              metrics[g,2+length(errorEvaluar)*2+2]=mean(na.exclude(filesub$Observed))/mean( na.exclude(filesub$Modeled))*100   
                              metrics[g,2+length(errorEvaluar)*2+3]=max(na.exclude(filesub$Observed))/max( na.exclude(filesub$Modeled))*100   
-                             
+                          
+                              })  
+        
                              incProgress(1/(length(uniqueGauges)*runs+2))
+                             
+                             
                            }
+                           
                            
                            metricsAll=rbind(metricsAll,metrics)
                            
@@ -3488,11 +5271,12 @@ shinyApp(
                        }
                        
                      })
-        
+        try({
         if (file.exists(paste0("KeyModelInputs.csv"))){
           keysset <- read.csv(paste0("KeyModelInputs.csv"),stringsAsFactors =F,check.names=F)
           metricsALL=merge(metricsALL,keysset,by.x = "Run ID",by.y = "Nrun")
         }
+        }) 
         
         write.csv(metricsALL,paste0("SummaryGOF_",as.character(input$datest[1]),"-",as.character(input$datest[2]),".csv"),row.names=F) 
         
@@ -3532,7 +5316,7 @@ shinyApp(
     observeEvent(list(input$GOFmetrics,input$nse,input$mnse,input$bias,input$d, input$md,input$r2,input$datest),{
       req(input$datest)
       Model=VAL$Model2 
-      #name=paste0("SummaryGOF_",d1,"-",d2,".csv")
+      #name=paste0("SummaryGOF_2015-01-01-2018-12-31.csv")
       name=paste0("SummaryGOF_",as.character(input$datest[1]),"-",as.character(input$datest[2]),".csv")
       
       if (file.exists(name) &&  Model==1){
@@ -3610,7 +5394,7 @@ shinyApp(
                         "KGE" ,    "VE" ) 
           names_error=names_error[errorEvaluar]
           
-          
+          try({
           output[[paste0("GOF_",1)]] = renderPlotly({
             e=1
             data=metricsall
@@ -3618,17 +5402,18 @@ shinyApp(
             data=data[,c("Type","Gauge",title)]
             colnames(data)=c("Type","Gauge","GOF")
             data$Gauge=as.factor(data$Gauge)
+            data$Type=as.factor(data$Type)
             
             data %>%
-              group_by(Gauge) %>%
-              group_map(~ plot_ly(data=., x = ~Type, y = ~GOF, color = ~Gauge, type =  "box"), .keep=TRUE) %>%
+              group_by(Type) %>%
+              group_map(~ plot_ly(data=., x = ~Gauge, y = ~GOF, color = ~Type, type =  "box"), .keep=TRUE) %>%
               subplot(nrows = 1, shareX = TRUE, shareY=TRUE)%>%  
               layout(title = paste0(title),
-                     xaxis = list(title="Type"),
                      yaxis = list(title=title))
             
           }) 
-          
+          })               
+          try({
           output[[paste0("GOF_",2)]] = renderPlotly({
             e=2
             data=metricsall
@@ -3636,17 +5421,18 @@ shinyApp(
             data=data[,c("Type","Gauge",title)]
             colnames(data)=c("Type","Gauge","GOF")
             data$Gauge=as.factor(data$Gauge)
+            data$Type=as.factor(data$Type)
             
             data %>%
-              group_by(Gauge) %>%
-              group_map(~ plot_ly(data=., x = ~Type, y = ~GOF, color = ~Gauge, type =  "box"), .keep=TRUE) %>%
+              group_by(Type) %>%
+              group_map(~ plot_ly(data=., x = ~Gauge, y = ~GOF, color = ~Type, type =  "box"), .keep=TRUE) %>%
               subplot(nrows = 1, shareX = TRUE, shareY=TRUE)%>%  
               layout(title = paste0(title),
-                     xaxis = list(title="Type"),
                      yaxis = list(title=title))
             
           }) 
-          
+          })               
+          try({
           output[[paste0("GOF_",3)]] = renderPlotly({
             e=3
             data=metricsall
@@ -3654,17 +5440,18 @@ shinyApp(
             data=data[,c("Type","Gauge",title)]
             colnames(data)=c("Type","Gauge","GOF")
             data$Gauge=as.factor(data$Gauge)
+            data$Type=as.factor(data$Type)
             
             data %>%
-              group_by(Gauge) %>%
-              group_map(~ plot_ly(data=., x = ~Type, y = ~GOF, color = ~Gauge, type =  "box"), .keep=TRUE) %>%
+              group_by(Type) %>%
+              group_map(~ plot_ly(data=., x = ~Gauge, y = ~GOF, color = ~Type, type =  "box"), .keep=TRUE) %>%
               subplot(nrows = 1, shareX = TRUE, shareY=TRUE)%>%  
               layout(title = paste0(title),
-                     xaxis = list(title="Type"),
                      yaxis = list(title=title))
             
           }) 
-          
+          })               
+          try({
           output[[paste0("GOF_",4)]] = renderPlotly({
             e=4
             data=metricsall
@@ -3672,17 +5459,17 @@ shinyApp(
             data=data[,c("Type","Gauge",title)]
             colnames(data)=c("Type","Gauge","GOF")
             data$Gauge=as.factor(data$Gauge)
+            data$Type=as.factor(data$Type)
             
             data %>%
-              group_by(Gauge) %>%
-              group_map(~ plot_ly(data=., x = ~Type, y = ~GOF, color = ~Gauge, type =  "box"), .keep=TRUE) %>%
+              group_by(Type) %>%
+              group_map(~ plot_ly(data=., x = ~Gauge, y = ~GOF, color = ~Type, type =  "box"), .keep=TRUE) %>%
               subplot(nrows = 1, shareX = TRUE, shareY=TRUE)%>%  
               layout(title = paste0(title),
-                     xaxis = list(title="Type"),
                      yaxis = list(title=title))
-            
           }) 
-          
+          })               
+          try({
           output[[paste0("GOF_",5)]] = renderPlotly({
             e=5
             data=metricsall
@@ -3690,17 +5477,18 @@ shinyApp(
             data=data[,c("Type","Gauge",title)]
             colnames(data)=c("Type","Gauge","GOF")
             data$Gauge=as.factor(data$Gauge)
+            data$Type=as.factor(data$Type)
             
             data %>%
-              group_by(Gauge) %>%
-              group_map(~ plot_ly(data=., x = ~Type, y = ~GOF, color = ~Gauge, type =  "box"), .keep=TRUE) %>%
+              group_by(Type) %>%
+              group_map(~ plot_ly(data=., x = ~Gauge, y = ~GOF, color = ~Type, type =  "box"), .keep=TRUE) %>%
               subplot(nrows = 1, shareX = TRUE, shareY=TRUE)%>%  
               layout(title = paste0(title),
-                     xaxis = list(title="Type"),
                      yaxis = list(title=title))
             
           }) 
-          
+          })               
+          try({
           output[[paste0("GOF_",6)]] = renderPlotly({
             e=6
             data=metricsall
@@ -3708,17 +5496,19 @@ shinyApp(
             data=data[,c("Type","Gauge",title)]
             colnames(data)=c("Type","Gauge","GOF")
             data$Gauge=as.factor(data$Gauge)
+            data$Gauge=as.factor(data$Gauge)
+            data$Type=as.factor(data$Type)
             
             data %>%
-              group_by(Gauge) %>%
-              group_map(~ plot_ly(data=., x = ~Type, y = ~GOF, color = ~Gauge, type =  "box"), .keep=TRUE) %>%
+              group_by(Type) %>%
+              group_map(~ plot_ly(data=., x = ~Gauge, y = ~GOF, color = ~Type, type =  "box"), .keep=TRUE) %>%
               subplot(nrows = 1, shareX = TRUE, shareY=TRUE)%>%  
               layout(title = paste0(title),
-                     xaxis = list(title="Type"),
                      yaxis = list(title=title))
             
           }) 
-          
+          })               
+          try({
           output[[paste0("GOF_",7)]] = renderPlotly({
             e=7
             data=metricsall
@@ -3726,17 +5516,19 @@ shinyApp(
             data=data[,c("Type","Gauge",title)]
             colnames(data)=c("Type","Gauge","GOF")
             data$Gauge=as.factor(data$Gauge)
+            data$Gauge=as.factor(data$Gauge)
+            data$Type=as.factor(data$Type)
             
             data %>%
-              group_by(Gauge) %>%
-              group_map(~ plot_ly(data=., x = ~Type, y = ~GOF, color = ~Gauge, type =  "box"), .keep=TRUE) %>%
+              group_by(Type) %>%
+              group_map(~ plot_ly(data=., x = ~Gauge, y = ~GOF, color = ~Type, type =  "box"), .keep=TRUE) %>%
               subplot(nrows = 1, shareX = TRUE, shareY=TRUE)%>%  
               layout(title = paste0(title),
-                     xaxis = list(title="Type"),
                      yaxis = list(title=title))
             
           }) 
-          
+          })               
+          try({
           output[[paste0("GOF_",8)]] = renderPlotly({
             e=8
             data=metricsall
@@ -3744,17 +5536,19 @@ shinyApp(
             data=data[,c("Type","Gauge",title)]
             colnames(data)=c("Type","Gauge","GOF")
             data$Gauge=as.factor(data$Gauge)
+            data$Gauge=as.factor(data$Gauge)
+            data$Type=as.factor(data$Type)
             
             data %>%
-              group_by(Gauge) %>%
-              group_map(~ plot_ly(data=., x = ~Type, y = ~GOF, color = ~Gauge, type =  "box"), .keep=TRUE) %>%
+              group_by(Type) %>%
+              group_map(~ plot_ly(data=., x = ~Gauge, y = ~GOF, color = ~Type, type =  "box"), .keep=TRUE) %>%
               subplot(nrows = 1, shareX = TRUE, shareY=TRUE)%>%  
               layout(title = paste0(title),
-                     xaxis = list(title="Type"),
                      yaxis = list(title=title))
             
           }) 
-          
+          })               
+          try({
           output[[paste0("GOF_",9)]] = renderPlotly({
             e=9
             data=metricsall
@@ -3762,17 +5556,19 @@ shinyApp(
             data=data[,c("Type","Gauge",title)]
             colnames(data)=c("Type","Gauge","GOF")
             data$Gauge=as.factor(data$Gauge)
+            data$Gauge=as.factor(data$Gauge)
+            data$Type=as.factor(data$Type)
             
             data %>%
-              group_by(Gauge) %>%
-              group_map(~ plot_ly(data=., x = ~Type, y = ~GOF, color = ~Gauge, type =  "box"), .keep=TRUE) %>%
+              group_by(Type) %>%
+              group_map(~ plot_ly(data=., x = ~Gauge, y = ~GOF, color = ~Type, type =  "box"), .keep=TRUE) %>%
               subplot(nrows = 1, shareX = TRUE, shareY=TRUE)%>%  
               layout(title = paste0(title),
-                     xaxis = list(title="Type"),
                      yaxis = list(title=title))
             
           }) 
-          
+          })               
+          try({
           output[[paste0("GOF_",10)]] = renderPlotly({
             e=10
             data=metricsall
@@ -3780,17 +5576,19 @@ shinyApp(
             data=data[,c("Type","Gauge",title)]
             colnames(data)=c("Type","Gauge","GOF")
             data$Gauge=as.factor(data$Gauge)
+            data$Gauge=as.factor(data$Gauge)
+            data$Type=as.factor(data$Type)
             
             data %>%
-              group_by(Gauge) %>%
-              group_map(~ plot_ly(data=., x = ~Type, y = ~GOF, color = ~Gauge, type =  "box"), .keep=TRUE) %>%
+              group_by(Type) %>%
+              group_map(~ plot_ly(data=., x = ~Gauge, y = ~GOF, color = ~Type, type =  "box"), .keep=TRUE) %>%
               subplot(nrows = 1, shareX = TRUE, shareY=TRUE)%>%  
               layout(title = paste0(title),
-                     xaxis = list(title="Type"),
                      yaxis = list(title=title))
             
           }) 
-          
+          })               
+          try({
           output[[paste0("GOF_",11)]] = renderPlotly({
             e=11
             data=metricsall
@@ -3798,17 +5596,18 @@ shinyApp(
             data=data[,c("Type","Gauge",title)]
             colnames(data)=c("Type","Gauge","GOF")
             data$Gauge=as.factor(data$Gauge)
+            data$Gauge=as.factor(data$Gauge)
+            data$Type=as.factor(data$Type)
             
             data %>%
-              group_by(Gauge) %>%
-              group_map(~ plot_ly(data=., x = ~Type, y = ~GOF, color = ~Gauge, type =  "box"), .keep=TRUE) %>%
+              group_by(Type) %>%
+              group_map(~ plot_ly(data=., x = ~Gauge, y = ~GOF, color = ~Type, type =  "box"), .keep=TRUE) %>%
               subplot(nrows = 1, shareX = TRUE, shareY=TRUE)%>%  
               layout(title = paste0(title),
-                     xaxis = list(title="Type"),
                      yaxis = list(title=title))
-            
           }) 
-          
+          })               
+          try({
           output[[paste0("GOF_",12)]] = renderPlotly({
             e=12
             data=metricsall
@@ -3816,17 +5615,19 @@ shinyApp(
             data=data[,c("Type","Gauge",title)]
             colnames(data)=c("Type","Gauge","GOF")
             data$Gauge=as.factor(data$Gauge)
+            data$Gauge=as.factor(data$Gauge)
+            data$Type=as.factor(data$Type)
             
             data %>%
-              group_by(Gauge) %>%
-              group_map(~ plot_ly(data=., x = ~Type, y = ~GOF, color = ~Gauge, type =  "box"), .keep=TRUE) %>%
+              group_by(Type) %>%
+              group_map(~ plot_ly(data=., x = ~Gauge, y = ~GOF, color = ~Type, type =  "box"), .keep=TRUE) %>%
               subplot(nrows = 1, shareX = TRUE, shareY=TRUE)%>%  
               layout(title = paste0(title),
-                     xaxis = list(title="Type"),
                      yaxis = list(title=title))
             
           }) 
-
+          })               
+    
         } else {
           shinyjs::hide("GOF_1")
           shinyjs::hide("GOF_2")
@@ -3943,7 +5744,8 @@ shinyApp(
     })
     
     observeEvent(list(input$UploadedFile,input$Xaxisoptions,input$Yaxisoptions,input$Zaxisoptions,input$Gauge,input$Catchment),{
-      
+                 
+    try({
       d=NULL
       req(input$UploadedFile)
       f=input$UploadedFile
@@ -4055,7 +5857,7 @@ shinyApp(
       
     })
     
-    
+    })               
     
     ###################################### 
   }
