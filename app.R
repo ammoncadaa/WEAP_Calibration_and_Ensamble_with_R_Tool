@@ -14,7 +14,9 @@
 #' Instructions within each tab. READ CAREFULLY. You DO NOT need to run the model before using the tool.
 #' 
 #' Make sure you have installed the package -RDCOMClient- and it is working properly
+#' 
 #' one option to install -RDCOMClient- run:  install.packages("RDCOMClient", repos = "http://www.omegahat.net/R")
+#' 
 #' Other option: In case that you have any problem installing the RDCOMClient package, you can add the folder of 
 #' the package that is within the -RDCOMClient.zip- file. Extract the folder, then copy and paste it within your 
 #' library folder. In general, the library can be found at -Documents\R\win-library\4.0-.
@@ -3183,7 +3185,7 @@ shinyApp(
                            incProgress(1/truns)
                            print(paste0(pbi," of ", total))
                            setwd(dir)
-                           i
+                           
                            ########
                            #i=1
                            RUNID=j
@@ -4456,7 +4458,7 @@ shinyApp(
                            incProgress(1/truns)
                            print(paste0(pbi," of ", total))
                            setwd(dir)
-                           i
+                           
                            ########
                            #i=1
                            RUNID=j
