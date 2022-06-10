@@ -1,10 +1,33 @@
-## WEAP_Calibration_and_Ensemble_with_R_Tool v.3.0##
-## Developed by Angelica Moncada (SEI-LAC Water Group member) (2022) ##
-## R version 4.1.1 ##
+#'/////////////////////////////////////////////////////////////////////////////
+#' 
+#' check updates https://github.com/ammoncadaa/WEAP_Calibration_and_Ensamble_with_R_Tool
+#' 
+#' FILE: "WEAP_Calibration_and_Ensemble_with_R_Tool v.3.0##
+#' AUTHOR: Developed by Angelica Moncada (SEI-LAC Water Group member) ##
+#' CREATED: 2020
+#' MODIFIED: 2022
+#' STATUS: working
+#' PURPOSE: Explore calibration results of a WEAP model
+#' COMMENTS: R version 4.1.1 ## click `Run App` to view the app in the viewer pane
+#' 
+#' 
+#' Instructions within each tab. READ CAREFULLY. You DO NOT need to run the model before using the tool.
+#' 
+#' Make sure you have installed the package -RDCOMClient- and it is working properly
+#' one option to install -RDCOMClient- run:  install.packages("RDCOMClient", repos = "http://www.omegahat.net/R")
+#' Other option: In case that you have any problem installing the RDCOMClient package, you can add the folder of 
+#' the package that is within the -RDCOMClient.zip- file. Extract the folder, then copy and paste it within your 
+#' library folder. In general, the library can be found at -Documents\R\win-library\4.0-.
+#' 
+#' In addition, check that you have Rtools: https://cran.r-project.org/bin/windows/Rtools/rtools40v2-x86_64.exe
+#' 
+#'/////////////////////////////////////////////////////////////////////////////
+#
 
 rm(list=ls()) 
 cat("\014") 
 WD=setwd(dirname(rstudioapi::getSourceEditorContext()$path))
+memory.limit(size = NA)
 
 #devtools::install_github("omegahat/RDCOMClient")
 
@@ -69,7 +92,7 @@ shinyApp(
                 fluidPage(
                   wellPanel(style = "background: white",
                   titlePanel(h1("WEAP Ensemble & Calibration Tool with R", style = "color:green", align = "center")),
-                  h3(em(strong(br(code("Instructions within each tab. READ CAREFULLY."))))),
+                  h3(em(strong(br(code("Instructions within each tab. READ CAREFULLY. You DO NOT need to run the model before using the tool."))))),
                   hr(),
                   wellPanel(style = "background: white",
                             HTML('<center><img src="https://www.weap21.org/img/logocard2.png", height="200"></center>'),
@@ -160,7 +183,7 @@ shinyApp(
                 fluidPage(
                   wellPanel(style = "background: white",
                   titlePanel(h1("Initial estimations (ks, kd)", style = "color:green", align = "center")),
-                  h3(em(strong(br(code("Instructions within each tab. READ CAREFULLY."))))),
+                  h3(em(strong(br(code("Instructions within each tab. READ CAREFULLY. You DO NOT need to run the model before using the tool."))))),
                   hr(),
                   wellPanel(style = "background: white",
                             h4("This is an optional step. The tool can be used to estimate the root zone conductivity and deep conductivity values for a basin based on the characteristics of observed streamflow and its upstream area, and the ratio of observed streamflow to precipitation."), 
@@ -254,7 +277,7 @@ shinyApp(
                 fluidPage(
                   wellPanel(style = "background: white",
                             titlePanel(h1("Setting up your WEAP Runs", style = "color:green", align = "center")),
-                            h3(em(strong(br(code("Instructions within each tab. READ CAREFULLY."))))),
+                            h3(em(strong(br(code("Instructions within each tab. READ CAREFULLY. You DO NOT need to run the model before using the tool."))))),
                   wellPanel(style = "background: white",
                             h4(
                               p("IF YOU HAVE NOT DONE IT. Copy and paste the script - WEAP_CalibrationToolwithR.vbs -within the WEAP model folder. Then, go to Advanced/Scripting/Edit Events. Finally, specify the script - WEAP_CalibrationToolwithR.vbs - as after WEAP's calculations within the Event Scripts screen.
@@ -370,7 +393,7 @@ shinyApp(
                 useShinyjs(),
                 wellPanel(style = "background: white",
                           titlePanel(h1("Navigate Water balance results by combination of set of parameters", style = "color:green", align = "center")),
-                          h3(em(strong(br(code("Instructions within each tab. READ CAREFULLY."))))),
+                          h3(em(strong(br(code("Instructions within each tab. READ CAREFULLY. You DO NOT need to run the model before using the tool."))))),
                   hr(),
                   wellPanel(style = "background: white",
                             h4(
@@ -514,7 +537,7 @@ shinyApp(
                 useShinyjs(),
                 wellPanel(style = "background: white",
                           titlePanel(h1("Navigate Water balance results by run number", style = "color:green", align = "center")),
-                          h3(em(strong(br(code("Instructions within each tab. READ CAREFULLY."))))),
+                          h3(em(strong(br(code("Instructions within each tab. READ CAREFULLY. You DO NOT need to run the model before using the tool."))))),
                           hr(),
                           wellPanel(style = "background: white",
                                     h4(
@@ -655,7 +678,7 @@ shinyApp(
                 wellPanel(style = "background: white",
                           fluidPage(
                   titlePanel(h1("Select paramaters based on performance metrics", style = "color:green", align = "center")),
-                  h3(em(strong(br(code("Instructions within each tab. READ CAREFULLY."))))),
+                  h3(em(strong(br(code("Instructions within each tab. READ CAREFULLY. You DO NOT need to run the model before using the tool."))))),
                   wellPanel(style = "background: white",
                             h4(
                               p("This is another way to interact with the results of your model ensemble. 
@@ -768,7 +791,7 @@ shinyApp(
                 wellPanel(style = "background: white",
                           fluidPage(
                   titlePanel(h1("Select the file which contains the variables to plot", style = "color:green", align = "center")),
-                  h3(em(strong(br(code("Instructions within each tab. READ CAREFULLY."))))),
+                  h3(em(strong(br(code("Instructions within each tab. READ CAREFULLY. You DO NOT need to run the model before using the tool."))))),
                   wellPanel(style = "background: white",
                             h4("You can set graphs by uploading a file within the working directory"),
                             h4("* If the file contains a column with dates, the column must be named as -Dates-. Format must be yyyy-mm-dd"),
@@ -1188,9 +1211,13 @@ shinyApp(
                        
                        WEAP$DeleteResults()
                        
+                       Sys.sleep(10)
+                       
                        WEAP[["ActiveScenario"]] <- Scen
                        
                        WEAP$Calculate() 
+                       
+                       Sys.sleep(10)
                        
                        incProgress(1/5)
                        
@@ -1988,6 +2015,7 @@ shinyApp(
                        WEAP[["BaseYear"]] <- sy
                        WEAP[["EndYear"]] <- ey
                        WEAP[["Verbose"]] <- 0
+                       Sys.sleep(3)
                        
                        sy=as.numeric(sy)+1
 
@@ -2034,6 +2062,8 @@ shinyApp(
                            WEAP[["ActiveScenario"]] <- Scen
                            WEAP$DeleteResults()
                            
+                           Sys.sleep(10)
+                           
                            for(k in 1:length(keys)) {
                              res <- try(
                                WEAP$BranchVariable(keys[k])[["Expression"]] <- keyinputs[i,k+1] 
@@ -2041,6 +2071,8 @@ shinyApp(
                            }
                            
                            WEAP$Calculate() 
+                           
+                           Sys.sleep(10)
                            
                            incProgress(1/(3*runs+2))
                            
@@ -2179,12 +2211,16 @@ shinyApp(
                          res <- try(WEAP$BranchVariable(var)[["Expression"]] <- RUNID)
                          
                          WEAP[["ActiveScenario"]] <- Scen
+                         
                          WEAP$DeleteResults()
+                         
+                         Sys.sleep(10)
                          
                          WEAP$Calculate() 
                          
-                         incProgress(1/(3*runs+2))
+                         Sys.sleep(10)
                          
+                         incProgress(1/(3*runs+2))
                          
                          dir_outg = VAL$dir_outg
                          
@@ -2312,7 +2348,7 @@ shinyApp(
                          VAL$Model3=0
                        }
                        
-                       WEAP$SaveArea()
+                       #WEAP$SaveArea()
                        rm(WEAP)
                        gc()
                        
