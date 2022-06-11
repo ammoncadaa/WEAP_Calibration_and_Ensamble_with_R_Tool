@@ -3410,21 +3410,22 @@ shinyApp(
                              resultsWB=resultsWB[order(resultsWB$Gauge,resultsWB$Year,resultsWB$`Time step`),]
                              write.csv(resultsWB,paste0("ResultsWB-",RUNID,".csv"),row.names=F) 
                              incProgress(1/(3*runs+2))
+                             
+                             files=c(paste0(RUNID,"_",Scen,"_WaterBalance.csv"),paste0(RUNID,"_",Scen,"_ResultsGauges.csv"))
+                             
+                             if (length(list.of.files)>0){
+                               fn=files
+                               for (j in 1:length(fn)) {
+                                 if (file.exists(fn[j])) {
+                                   file.remove(fn[j])
+                                 }
+                               }
+                             }
+                             
                            }
                            VAL$Model3=1
-                           
                          }
                          
-                         files=c(paste0(RUNID,"_",Scen,"_WaterBalance.csv"),paste0(RUNID,"_",Scen,"_ResultsGauges.csv"))
-                         
-                         if (length(list.of.files)>0){
-                           fn=files
-                           for (j in 1:length(fn)) {
-                             if (file.exists(fn[j])) {
-                               file.remove(fn[j])
-                             }
-                           }
-                         }
                          
                          if (is.null(keyinputs)){
                            
@@ -3570,22 +3571,25 @@ shinyApp(
                            write.csv(resultsWB,paste0("ResultsWB-",RUNID,".csv"),row.names=F) 
                            incProgress(1/(3*runs+2))
                            VAL$Model3=0
+                           
+                           files=c(paste0(RUNID,"_",Scen,"_WaterBalance.csv"),paste0(RUNID,"_",Scen,"_ResultsGauges.csv"))
+                           
+                           if (length(list.of.files)>0){
+                             fn=files
+                             for (j in 1:length(fn)) {
+                               if (file.exists(fn[j])) {
+                                 file.remove(fn[j])
+                               }
+                             }
+                           }
+                           
                          }
                          
                          #WEAP$SaveArea()
                          rm(WEAP)
                          gc()
                          
-                         files=c(paste0(RUNID,"_",Scen,"_WaterBalance.csv"),paste0(RUNID,"_",Scen,"_ResultsGauges.csv"))
                          
-                         if (length(list.of.files)>0){
-                           fn=files
-                           for (j in 1:length(fn)) {
-                             if (file.exists(fn[j])) {
-                               file.remove(fn[j])
-                             }
-                           }
-                         }
                          
                          output$textRunEnsemble <- renderText({ 
                            
