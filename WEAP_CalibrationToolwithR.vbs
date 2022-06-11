@@ -82,21 +82,7 @@ Set objFSO = CreateObject("Scripting.FileSystemObject")
 Set objFS = CreateObject("Scripting.FileSystemObject")
 
 CodRun = WEAP.Branch("Key\NumRun").Variables("Annual Activity Level").Value
-Num = WEAP.Branch("Key\Num").Variables("Annual Activity Level").Value
 
-if Num=1 then
-    of1 = CodRun &"_"& WEAP.ActiveScenario & "_WaterBalance.csv"
-    outfile1 = WEAP.ActiveArea.Directory & "\"  & of1
-    set objFile1 = objFSO.CreateTextFile(outfile1)
-    z1 = "Year,Time step,Branch,ObjectType,Scenario,Catchment,Observed Precipitation[M^3],Area Calculated[M^2]"
-    objFile1.WriteLine z1
-
-    of1 = CodRun &"_"& WEAP.ActiveScenario & "_ResultsGauges.csv"
-    outfile2 = WEAP.ActiveArea.Directory & "\"  & of1
-    set objFile2 = objFSO.CreateTextFile(outfile2)
-    z1 = "Year,Time step,Gauge,Observed [M^3],Scenario"
-    objFile2.WriteLine z1
-else
     of1 = CodRun &"_"& WEAP.ActiveScenario & "_WaterBalance.csv"
     outfile1 = WEAP.ActiveArea.Directory & "\"  & of1
     set objFile1 = objFSO.CreateTextFile(outfile1)
@@ -108,7 +94,7 @@ else
     set objFile2 = objFSO.CreateTextFile(outfile2)
     z1 = "Year,Time step,Gauge,Observed,Modeled,Scenario"
     objFile2.WriteLine z1
-end if
+
 
 FOR i =(WEAP.BaseYear+1)  to WEAP.EndYear
 
@@ -129,12 +115,7 @@ FOR i =(WEAP.BaseYear+1)  to WEAP.EndYear
                   if (Ubound(levels) + 1) = cint(LevelFilter) then
                        BrName=Br.Name
 
-                        if Num=1 then
-                        Val = WEAP.ResultValue(Br.fullname & ":Observed Precipitation[M^3]", i, ii, sce)
-                        z1 =  YearFilter & "," & TimeStepFilter & "," & BR.fullname & "," & ObjectTyp  & "," & Sce & "," & BrName & "," & Val
-                        Val = WEAP.ResultValue(Br.fullname & ":Area Calculated[M^2]", i, ii, sce)
-                        z1 =  z1  & "," &  Val
-                        else
+                        
                         Val = WEAP.ResultValue(Br.fullname & ":Observed Precipitation[M^3]", i, ii, sce)
                         z1 =  YearFilter & "," & TimeStepFilter & "," & BR.fullname & "," & ObjectTyp  & "," & Sce & "," & BrName & "," & Val
                         Val = WEAP.ResultValue(Br.fullname & ":Evapotranspiration[M^3]", i, ii, sce)
@@ -159,7 +140,7 @@ FOR i =(WEAP.BaseYear+1)  to WEAP.EndYear
                         z1 =  z1  & "," &  Val
                         Val = WEAP.ResultValue(Br.fullname & ":Relative Soil Moisture 2", i, ii, sce)
                         z1 =  z1  & "," &  Val
-                        end if
+                       
 
                        objFile1.WriteLine z1
                    End If
@@ -177,14 +158,9 @@ FOR i =(WEAP.BaseYear+1)  to WEAP.EndYear
     VarObs = vo(1)
     VarSim = vo(2)
 
-    if Num=1 then
-     Val = WEAP.ResultValue(VarObs, i, ii, sce)
-     z1 =  YearFilter & "," & TimeStepFilter & "," & gauge &"," & Val& "," & Sce
-    else
       Val = WEAP.ResultValue(VarObs, i, ii, sce)
       Val1 = WEAP.ResultValue(VarSim, i, ii, sce)
       z1 =  YearFilter & "," & TimeStepFilter & "," & gauge &"," & Val&"," & Val1& "," & Sce
-    end if
 
     objFile2.WriteLine z1
 
