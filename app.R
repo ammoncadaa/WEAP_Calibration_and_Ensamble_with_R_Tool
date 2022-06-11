@@ -3820,7 +3820,7 @@ shinyApp(
           file$YearMonth=year(file$Dates)*100+month(file$Dates)
           file$Month=month(file$Dates)
           file <- file[which(file$Dates >= input$dates[1] & file$Dates <= input$dates[2]),]
-          
+          uniqueGauges=sort(unique(file$Gauge))
         } else {
           name=NULL
         }
@@ -3837,7 +3837,7 @@ shinyApp(
         file$YearMonth=year(file$Dates)*100+month(file$Dates)
         file$Month=month(file$Dates)
         file <- file[which(file$Dates >= input$dates[1] & file$Dates <= input$dates[2]),]
-        
+        uniqueGauges=sort(unique(file$Gauge))
       }
       
       print(runID)
@@ -3920,7 +3920,7 @@ shinyApp(
             
             names_errorLOG=paste(rep("log10",length(names_error)),names_error) #"logNSE" 
             
-            uniqueGauges=sort(unique(file$Gauge))
+            
             
             metricsAll=NULL
             
@@ -5058,7 +5058,7 @@ shinyApp(
           file$YearMonth=year(file$Dates)*100+month(file$Dates)
           file$Month=month(file$Dates)
           file <- file[which(file$Dates >= input$dates1[1] & file$Dates <= input$dates1[2]),]
-          
+          uniqueGauges=sort(unique(file$Gauge))
         } else {
           name=NULL
         }
@@ -5075,7 +5075,7 @@ shinyApp(
         file$YearMonth=year(file$Dates)*100+month(file$Dates)
         file$Month=month(file$Dates)
         file <- file[which(file$Dates >= input$dates1[1] & file$Dates <= input$dates1[2]),]
-        
+        uniqueGauges=sort(unique(file$Gauge))
       }
       
       print(runID)
@@ -5151,7 +5151,7 @@ shinyApp(
             #19.	KGE, Kling-Gupta efficiency between sim and obs ( 0 <= KGE <= 1 )
             #20.	VE, Volumetric efficiency between sim and obs  ( -Inf <= VE <= 1)
             
-            uniqueGauges=sort(unique(file$Gauge))
+            
             
             metricsAll=NULL
             
@@ -6315,7 +6315,7 @@ shinyApp(
         withProgress(message = 'Calculation in progress',
                      detail = 'This may take a while...', value = 0, {
                        
-                       incProgress(1/(length(uniqueGauges)*runs+2))
+                       
                        i=1
                        for (i in listResults) {
                          
@@ -6327,6 +6327,7 @@ shinyApp(
                          file$Month=month(file$Dates)
                          file <- file[which(file$Dates >= input$datest[1] & file$Dates <= input$datest[2]),]
                          uniqueGauges=sort(unique(file$Gauge))
+                         incProgress(1/(length(uniqueGauges)*runs+2))
                          
                          metricsAll=NULL
                          
