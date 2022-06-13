@@ -1013,9 +1013,9 @@ shinyApp(
             textInput("Scen",label="Scenario:",value ="Reference")
           })
           
-          if (file.exists(paste0("ResultsGauges.csv")) && Model==1) {
+          if (file.exists(paste0("0_ResultsGauges.csv")) && Model==1) {
             
-            file=read.csv(paste0("ResultsGauges.csv"), stringsAsFactors=F, check.names=F)
+            file=read.csv(paste0("0_ResultsGauges.csv"), stringsAsFactors=F, check.names=F)
             file$Dates=ymd(file$Dates)
             starty <- min(file$Dates)
             endy <- max(file$Dates)
@@ -1042,9 +1042,9 @@ shinyApp(
             z1=as.numeric(input$z1)
             z2=as.numeric(input$z2)
             try({
-              if (file.exists(paste0("ResultsGauges.csv")) && Model==1) {
+              if (file.exists(paste0("0_ResultsGauges.csv")) && Model==1) {
                 
-                obs <- read.csv(paste0("ResultsGauges.csv"), stringsAsFactors=F, check.names=F)
+                obs <- read.csv(paste0("0_ResultsGauges.csv"), stringsAsFactors=F, check.names=F)
                 cols=c("Year",
                        "Time step",
                        "Gauge",
@@ -1328,6 +1328,20 @@ shinyApp(
                        Scen <- input$Scen
                        ts <- input$ts
                        
+                       files=list.files(pattern ="Resultsk")
+                       files1=list.files(pattern ="Results_Q_P_")
+                       files=c(files,files1,"0_ResultsGauges.csv",paste0(RUNID,"_",Scen,"_WaterBalance.csv"),paste0(RUNID,"_",Scen,"_ResultsGauges.csv"))
+                       list.of.files <- list.files(files)
+                       
+                       if (length(list.of.files)>0){
+                         fn=files
+                         for (j in 1:length(fn)) {
+                           if (file.exists(fn[j])) {
+                             file.remove(fn[j])
+                           }
+                         }
+                       }
+                       
                        WEAP <- COMCreate("WEAP.WEAPApplication") 
                        
                        Sys.sleep(3)
@@ -1375,19 +1389,6 @@ shinyApp(
                        RUNID=0
                        dir_outg = VAL$dir_outg
                        
-                       files=list.files(pattern ="Resultsk")
-                       files1=list.files(pattern ="Results_Q_P_")
-                       files=c(files,files1,"ResultsGauges.csv",paste0(RUNID,"_",Scen,"_WaterBalance.csv"),paste0(RUNID,"_",Scen,"_ResultsGauges.csv"))
-                       list.of.files <- list.files(files)
-                       
-                       if (length(list.of.files)>0){
-                         fn=files
-                         for (j in 1:length(fn)) {
-                           if (file.exists(fn[j])) {
-                             file.remove(fn[j])
-                           }
-                         }
-                       }
                        
                        files=c(paste0(RUNID,"_",Scen,"_WaterBalance.csv"),paste0(RUNID,"_",Scen,"_ResultsGauges.csv"),"WEAPKeyGaugeBranches.csv","WEAPKeyGaugesCatchments.csv","WEAPdays.csv")
                        current.folder <- paste0(WEAP$AreasDirectory(),Warea)
@@ -1490,11 +1491,11 @@ shinyApp(
                        days$Dates[1]=as.Date(paste0(days$Year[1],"/01/01"))
                        days$Dates=as.Date(days$Dates)      
                        for (d in 2:nrow(days)) {
-                         drow=as.Date(days$Dates[d-1]+days$Days[d])
-                         if ((month(as.Date(days$Dates[d-1]+days$Days[d]))*100+day(as.Date(days$Dates[d-1]+days$Days[d])))==229){
-                           days$Dates[d]=as.Date(days$Dates[d-1]+days$Days[d]+1)
+                         drow=as.Date(days$Dates[d-1]+days$Days[d-1])
+                         if ((month(as.Date(days$Dates[d-1]+days$Days[d-1]))*100+day(as.Date(days$Dates[d-1]+days$Days[d-1])))==229){
+                           days$Dates[d]=as.Date(days$Dates[d-1]+days$Days[d-1]+1)
                          }else {
-                           days$Dates[d]=as.Date(days$Dates[d-1]+days$Days[d])
+                           days$Dates[d]=as.Date(days$Dates[d-1]+days$Days[d-1])
                          }
                          if(year(days$Dates[d])!=days$Year[d]){
                            days$Dates[d]=as.Date(paste0(days$Year[d],"/12/31"))
@@ -1508,7 +1509,7 @@ shinyApp(
                        
                        resultsWB = merge(resultsWB,days,by=c("Year","Time step"))
                        resultsWB = resultsWB[order(resultsWB$Gauge,resultsWB$Dates),]
-                       write.csv(resultsWB,paste0("ResultsGauges.csv"),row.names=F) 
+                       write.csv(resultsWB,paste0("0_ResultsGauges.csv"),row.names=F) 
                        
                        files=c(paste0(RUNID,"_",Scen,"_WaterBalance.csv"),paste0(RUNID,"_",Scen,"_ResultsGauges.csv"))
                        
@@ -1522,7 +1523,7 @@ shinyApp(
                        }
                        
                        file <- resultsWB
-                       #file <- read.csv(paste0("ResultsGauges.csv"), stringsAsFactors=F, check.names=F)
+                       #file <- read.csv(paste0("0_ResultsGauges.csv"), stringsAsFactors=F, check.names=F)
                        #str(file)
                        file$Dates=ymd(file$Dates)
                        file$YearMonth=year(file$Dates)*100+month(file$Dates)
@@ -1615,11 +1616,11 @@ shinyApp(
         
         try({
           
-        if (file.exists(paste0("ResultsGauges.csv")) && Model==1) {
+        if (file.exists(paste0("0_ResultsGauges.csv")) && Model==1) {
            
           gs=gauges[1]
           
-          ResultsGauges=read.csv(paste0("ResultsGauges.csv"), stringsAsFactors=F, check.names=F)
+          ResultsGauges=read.csv(paste0("0_ResultsGauges.csv"), stringsAsFactors=F, check.names=F)
           
           ResultsGauges=ResultsGauges[ResultsGauges$Gauge==gs,]
           ResultsGauges$Dates=ymd(ResultsGauges$Dates)
@@ -1667,9 +1668,9 @@ shinyApp(
         }
         })
         try({
-            if (file.exists(paste0("ResultsGauges.csv")) && Model==1) {
+            if (file.exists(paste0("0_ResultsGauges.csv")) && Model==1) {
               
-              obs <- read.csv(paste0("ResultsGauges.csv"), stringsAsFactors=F, check.names=F)
+              obs <- read.csv(paste0("0_ResultsGauges.csv"), stringsAsFactors=F, check.names=F)
               cols=c("Year",
                      "Time step",
                      "Gauge",
@@ -1804,11 +1805,11 @@ shinyApp(
       Model=VAL$Model1
       try({
         
-        if (file.exists(paste0("ResultsGauges.csv")) && Model==1) {
+        if (file.exists(paste0("0_ResultsGauges.csv")) && Model==1) {
           
           #gs=gauges[1]
           
-          ResultsGauges=read.csv(paste0("ResultsGauges.csv"), stringsAsFactors=F, check.names=F)
+          ResultsGauges=read.csv(paste0("0_ResultsGauges.csv"), stringsAsFactors=F, check.names=F)
           
           ResultsGauges=ResultsGauges[ResultsGauges$Gauge==gs,]
           ResultsGauges$Dates=ymd(ResultsGauges$Dates)
@@ -1874,9 +1875,9 @@ shinyApp(
       # z2=30
 
       try({
-        if (file.exists(paste0("ResultsGauges.csv")) && Model==1) {
+        if (file.exists(paste0("0_ResultsGauges.csv")) && Model==1) {
           
-          obs <- read.csv(paste0("ResultsGauges.csv"), stringsAsFactors=F, check.names=F)
+          obs <- read.csv(paste0("0_ResultsGauges.csv"), stringsAsFactors=F, check.names=F)
           cols=c("Year",
                  "Time step",
                  "Gauge",
@@ -2016,7 +2017,7 @@ shinyApp(
                        dir=VAL$dir_outg
                        
                        # Titles="Spanish" #English
-                       # file=read.csv(paste0("ResultsGauges.csv"), stringsAsFactors=F, check.names=F)
+                       # file=read.csv(paste0("0_ResultsGauges.csv"), stringsAsFactors=F, check.names=F)
                        # yearINI= file$Dates[1]
                        # ey= file$Dates[nrow(file)]
                        # dir=paste0(dirname(rstudioapi::getSourceEditorContext()$path),"/Results ",Warea)
@@ -2112,7 +2113,7 @@ shinyApp(
                        metricsALL=NULL
                        setwd(dir)
                        
-                       file=read.csv("ResultsGauges.csv", stringsAsFactors=F, check.names=F)
+                       file=read.csv("0_ResultsGauges.csv", stringsAsFactors=F, check.names=F)
                        file$Dates=ymd(file$Dates)
                        file$YearMonth=year(file$Dates)*100+month(file$Dates)
                        file$Month=month(file$Dates)
@@ -2189,7 +2190,7 @@ shinyApp(
                        days$Dates=NA
                        days$Dates[1]=as.Date("1981/01/01")
                        for (d in 2:nrow(days)) {
-                         days$Dates[d]=days$Dates[d-1]+days$Days[d]
+                         days$Dates[d]=days$Dates[d-1]+days$Days[d-1]
                        }
                        days$Dates=as.Date(days$Dates)
                        
@@ -2758,9 +2759,9 @@ shinyApp(
       file=NULL
       gs=input$StreamflowSelectA
       
-      if (file.exists(paste0("ResultsGauges.csv")) && Model==1){    
+      if (file.exists(paste0("0_ResultsGauges.csv")) && Model==1){    
         
-        name="ResultsGauges.csv"
+        name="0_ResultsGauges.csv"
         file <- read.csv(name, stringsAsFactors=F, check.names=F)
         file$Dates=ymd(file$Dates)
         #gs=unique(file$Gauge)[1]
@@ -2921,7 +2922,7 @@ shinyApp(
             metrics[,c("Qmin obs/Qmin sim %","Qmean obs/Qmean sim %","Qmax obs/Qmax sim %")]=round(metrics[,c("Qmin obs/Qmin sim %","Qmean obs/Qmean sim %","Qmax obs/Qmax sim %")],2)
             cols <- c("Type","Period","Gauge","PeriodGOF",names_error[errorEvaluar],names_errorLOG[errorEvaluar],"Qmin obs/Qmin sim %","Qmean obs/Qmean sim %","Qmax obs/Qmax sim %","TotalRunoff / Precipitation %","BaseFlow / TotalRunoff %", "SurfaceRunoff / TotalRunoff %","Evapotranspiration / Precipitation %")
             metrics=metrics[,cols]
-            #write.csv(metrics,paste0("SummaryGOF_",as.character(input$dates[1]),"-",as.character(input$dates[2]),".csv"),row.names=F) 
+            write.csv(metrics,paste0("0_SummaryGOF_",as.character(input$dates[1]),"-",as.character(input$dates[2]),".csv"),row.names=F) 
             #write.csv(metrics,paste0("SummaryGOF_",".csv"),row.names=F) 
             
             metrics=metrics[metrics$Gauge==gs,]
@@ -3389,14 +3390,15 @@ shinyApp(
                              days=merge(days,days1,by="Time step")
                              days=days[order(days$Year,days$`Time step`),]
                              days$Dates=NA
+                             days$Dates=as.Date(days$Dates)      
                              days$Dates[1]=as.Date(paste0(days$Year[1],"/01/01"))
                              days$Dates=as.Date(days$Dates)      
                              for (d in 2:nrow(days)) {
-                               drow=as.Date(days$Dates[d-1]+days$Days[d])
-                               if ((month(as.Date(days$Dates[d-1]+days$Days[d]))*100+day(as.Date(days$Dates[d-1]+days$Days[d])))==229){
-                                 days$Dates[d]=as.Date(days$Dates[d-1]+days$Days[d]+1)
+                               drow=as.Date(days$Dates[d-1]+days$Days[d-1])
+                               if ((month(as.Date(days$Dates[d-1]+days$Days[d-1]))*100+day(as.Date(days$Dates[d-1]+days$Days[d-1])))==229){
+                                 days$Dates[d]=as.Date(days$Dates[d-1]+days$Days[d-1]+1)
                                }else {
-                                 days$Dates[d]=as.Date(days$Dates[d-1]+days$Days[d])
+                                 days$Dates[d]=as.Date(days$Dates[d-1]+days$Days[d-1])
                                }
                                if(year(days$Dates[d])!=days$Year[d]){
                                  days$Dates[d]=as.Date(paste0(days$Year[d],"/12/31"))
@@ -3404,7 +3406,7 @@ shinyApp(
                                
                              }
                              days$Dates=as.Date(days$Dates)      
-                             rownames(days)=NULL
+                             rownames(days)=NULL  
                              
                              resultsWB = merge(resultsWB,days,by=c("Year","Time step"))
                              resultsWB=resultsWB[order(resultsWB$Gauge,resultsWB$Year,resultsWB$`Time step`),]
@@ -3547,14 +3549,15 @@ shinyApp(
                            days=merge(days,days1,by="Time step")
                            days=days[order(days$Year,days$`Time step`),]
                            days$Dates=NA
+                           days$Dates=as.Date(days$Dates)      
                            days$Dates[1]=as.Date(paste0(days$Year[1],"/01/01"))
                            days$Dates=as.Date(days$Dates)      
                            for (d in 2:nrow(days)) {
-                             drow=as.Date(days$Dates[d-1]+days$Days[d])
-                             if ((month(as.Date(days$Dates[d-1]+days$Days[d]))*100+day(as.Date(days$Dates[d-1]+days$Days[d])))==229){
-                               days$Dates[d]=as.Date(days$Dates[d-1]+days$Days[d]+1)
+                             drow=as.Date(days$Dates[d-1]+days$Days[d-1])
+                             if ((month(as.Date(days$Dates[d-1]+days$Days[d-1]))*100+day(as.Date(days$Dates[d-1]+days$Days[d-1])))==229){
+                               days$Dates[d]=as.Date(days$Dates[d-1]+days$Days[d-1]+1)
                              }else {
-                               days$Dates[d]=as.Date(days$Dates[d-1]+days$Days[d])
+                               days$Dates[d]=as.Date(days$Dates[d-1]+days$Days[d-1])
                              }
                              if(year(days$Dates[d])!=days$Year[d]){
                                days$Dates[d]=as.Date(paste0(days$Year[d],"/12/31"))
@@ -3562,7 +3565,7 @@ shinyApp(
                              
                            }
                            days$Dates=as.Date(days$Dates)      
-                           rownames(days)=NULL   
+                           rownames(days)=NULL  
                            
                            
                            resultsWB = merge(resultsWB,days,by=c("Year","Time step"))
@@ -4476,7 +4479,7 @@ shinyApp(
                            days$Dates=NA
                            days$Dates[1]=as.Date("1981/01/01")
                            for (d in 2:nrow(days)) {
-                             days$Dates[d]=days$Dates[d-1]+days$Days[d]
+                             days$Dates[d]=days$Dates[d-1]+days$Days[d-1]
                            }
                            days$Dates=as.Date(days$Dates)
                            
@@ -5707,7 +5710,7 @@ shinyApp(
                            days$Dates=NA
                            days$Dates[1]=as.Date("1981/01/01")
                            for (d in 2:nrow(days)) {
-                             days$Dates[d]=days$Dates[d-1]+days$Days[d]
+                             days$Dates[d]=days$Dates[d-1]+days$Days[d-1]
                            }
                            days$Dates=as.Date(days$Dates)
                            
