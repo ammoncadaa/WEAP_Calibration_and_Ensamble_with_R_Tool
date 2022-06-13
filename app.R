@@ -1085,13 +1085,13 @@ shinyApp(
                   
                 }
                 
-                write.csv(table[order(table$Gauge),],paste0("Resultsk_Summary","-DSR",srpercent,"-Z1",z1,"-Z2",z2,".csv"),row.names=F) 
+                write.csv(table[order(table$Gauge),],paste0("0_Resultsk_Summary","-DSR",srpercent,"-Z1",z1,"-Z2",z2,".csv"),row.names=F) 
                 
-                list=list.files(getwd(),pattern = "Resultsk_Summary-DSR")
+                list=list.files(getwd(),pattern = "0_Resultsk_Summary-DSR")
                 list
                 list1=list
                 list1=gsub(".csv","",list1,fixed = TRUE)
-                list1=gsub("Resultsk_Summary-","",list1,fixed = TRUE)
+                list1=gsub("0_Resultsk_Summary-","",list1,fixed = TRUE)
                 
                 file1=NULL
                 for (i in 1:length(list)){
@@ -1102,7 +1102,7 @@ shinyApp(
                 }
                 
                 file1=file1[order(file1$Gauge),]
-                write.csv(file1,paste0("Resultsk_SummaryALL.csv"),row.names=F) 
+                write.csv(file1,paste0("0_Resultsk_SummaryALL.csv"),row.names=F) 
                 
                 output$textRunEnsembleAConduc <- renderText({ 
                   
@@ -1328,12 +1328,14 @@ shinyApp(
                        Scen <- input$Scen
                        ts <- input$ts
                        
+                       RUNID=0
                        files=list.files(pattern ="Resultsk")
                        files1=list.files(pattern ="Results_Q_P_")
-                       files=c(files,files1,"0_ResultsGauges.csv",paste0(RUNID,"_",Scen,"_WaterBalance.csv"),paste0(RUNID,"_",Scen,"_ResultsGauges.csv"))
-                       list.of.files <- list.files(files)
+                       files2=list.files(pattern ="0_SummaryGOF_")
+                       files3=list.files(pattern ="0_SummaryGOF2_")
+                       files=c(files,files1,files2,files3,"0_ResultsGauges.csv",paste0(RUNID,"_",Scen,"_WaterBalance.csv"),paste0(RUNID,"_",Scen,"_ResultsGauges.csv"))
                        
-                       if (length(list.of.files)>0){
+                       if (length(files)>0){
                          fn=files
                          for (j in 1:length(fn)) {
                            if (file.exists(fn[j])) {
@@ -1386,7 +1388,7 @@ shinyApp(
                        
                        incProgress(1/5)
                        
-                       RUNID=0
+                       
                        dir_outg = VAL$dir_outg
                        
                        
@@ -1567,10 +1569,10 @@ shinyApp(
                        }
                        
                        file2=file2[,c("Gauge" ,"Precipitation","Observed","Q_P","Dates")]
-                       write.csv(file2,paste0("Results_Q_P_monthly.csv"),row.names=F) 
+                       write.csv(file2,paste0("0_Results_Q_P_monthly.csv"),row.names=F) 
                        
                        file3=file3[,c("Gauge" ,"Precipitation","Observed","Q_P","Month")]
-                       write.csv(file3,paste0("Results_Q_P_monthlyMeanSummary.csv"),row.names=F) 
+                       write.csv(file3,paste0("0_Results_Q_P_monthlyMeanSummary.csv"),row.names=F) 
                        
                        #WEAP$SaveArea()
                        rm(WEAP)
@@ -1711,13 +1713,13 @@ shinyApp(
                 
               }
               
-              write.csv(table[order(table$Gauge),],paste0("Resultsk_Summary","-DSR",srpercent,"-Z1",z1,"-Z2",z2,".csv"),row.names=F) 
+              write.csv(table[order(table$Gauge),],paste0("0_Resultsk_Summary","-DSR",srpercent,"-Z1",z1,"-Z2",z2,".csv"),row.names=F) 
               
-              list=list.files(getwd(),pattern = "Resultsk_Summary-DSR")
+              list=list.files(getwd(),pattern = "0_Resultsk_Summary-DSR")
               list
               list1=list
               list1=gsub(".csv","",list1,fixed = TRUE)
-              list1=gsub("Resultsk_Summary-","",list1,fixed = TRUE)
+              list1=gsub("0_Resultsk_Summary-","",list1,fixed = TRUE)
               
               file1=NULL
               for (i in 1:length(list)){
@@ -1728,7 +1730,7 @@ shinyApp(
               }
               
               file1=file1[order(file1$Gauge),]
-              write.csv(file1,paste0("Resultsk_SummaryALL.csv"),row.names=F) 
+              write.csv(file1,paste0("0_Resultsk_SummaryALL.csv"),row.names=F) 
               
               output$textRunEnsembleAConduc <- renderText({ 
                 
@@ -1918,13 +1920,13 @@ shinyApp(
             
           }
           
-          write.csv(table[order(table$Gauge),],paste0("Resultsk_Summary","-DSR",srpercent,"-Z1",z1,"-Z2",z2,".csv"),row.names=F) 
+          write.csv(table[order(table$Gauge),],paste0("0_Resultsk_Summary","-DSR",srpercent,"-Z1",z1,"-Z2",z2,".csv"),row.names=F) 
           
-          list=list.files(getwd(),pattern = "Resultsk_Summary-DSR")
+          list=list.files(getwd(),pattern = "0_Resultsk_Summary-DSR")
           list
           list1=list
           list1=gsub(".csv","",list1,fixed = TRUE)
-          list1=gsub("Resultsk_Summary-","",list1,fixed = TRUE)
+          list1=gsub("0_Resultsk_Summary-","",list1,fixed = TRUE)
           
           file1=NULL
           for (i in 1:length(list)){
@@ -1935,7 +1937,7 @@ shinyApp(
           }
           
           file1=file1[order(file1$Gauge),]
-          write.csv(file1,paste0("Resultsk_SummaryALL.csv"),row.names=F) 
+          write.csv(file1,paste0("0_Resultsk_SummaryALL.csv"),row.names=F) 
           
           output$textRunEnsembleAConduc <- renderText({ 
             
@@ -2717,7 +2719,7 @@ shinyApp(
                            colnames(metricas)=c("Run ID", "Type","Gauge", "GOF","Value")
                          }
                          
-                         write.csv(metricas, paste0("SummaryGOF2_",paste(dates,collapse ="-"),".csv"),row.names = FALSE)
+                         write.csv(metricas, paste0("0_SummaryGOF2_",paste(dates,collapse ="-"),".csv"),row.names = FALSE)
                          
                        })
                        
@@ -2773,157 +2775,166 @@ shinyApp(
         file1=file
       
         try({
-          output$metricsi <- DT::renderDataTable({
+        if (!file.exists(paste0("0_SummaryGOF_",as.character(input$datesi[1]),"-",as.character(input$datesi[2]),".csv"))){
+          #########################
+          errorEvaluar=c(
+            1, #1.	me, Mean Error
+            2, #2.	mae, Mean Absolute Error
+            # 3, #3.	mse, Mean Squared Error
+            # 4, #4.	rmse, Root Mean Square Error
+            5, #5.	nrmse, Normalized Root Mean Square Error ( -100% <= nrms <= 100% )
+            6, #6.	PBIAS, Percent Bias
+            # 7, #7.	RSR, Ratio of RMSE to the Standard Deviation of the Observations, RSR = rms / sd(obs). ( 0 <= RSR <= +Inf )
+            # 8, #8.	rSD, Ratio of Standard Deviations, rSD = sd(sim) / sd(obs)
+            9, #9.	NSE, Nash-Sutcliffe Efficiency ( -Inf <= NSE <= 1 )
+            10, #10.	mNSE, Modified Nash-Sutcliffe Efficiency
+            # 11, #11.	rNSE, Relative Nash-Sutcliffe Efficiency
+            12,  #12.	d, Index of Agreement ( 0 <= d <= 1 )
+            13,  #13.	md, Modified Index of Agreement 
+            # 14,#14.	rd, Relative Index of Agreement
+            # 15, #15.	cp, Persistence Index ( 0 <= PI <= 1 )
+            # 16, #16.	r, Pearson Correlation coefficient ( -1 <= r <= 1 )
+            17,  #17.	R2, Coefficient of Determination ( 0 <= R2 <= 1 ). 
+            18,  #8.	bR2, R2 multiplied by the coefficient of the regression line between sim and obs ( 0 <= bR2 <= 1 )
+            19, #19.	KGE, Kling-Gupta efficiency between sim and obs ( 0 <= KGE <= 1 )
+            20 #20.	VE, Volumetric efficiency between sim and obs  ( -Inf <= VE <= 1)
+          ) 
+          names_error=c("ME"  ,    "MAE"  ,   "MSE" ,    "RMSE" ,   "NRMSE %" ,"PBIAS %", "RSR"   ,  "rSD"  ,   "NSE" ,   
+                        "mNSE" ,   "rNSE"  ,  "d"  ,     "md"    ,  "rd"   ,   "cp"    ,  "r"  ,     "R2"    ,  "bR2",    
+                        "KGE" ,    "VE" ) 
+          #names_error[errorEvaluar]
+          
+          names_errorLOG=paste(rep("log10",length(names_error)),names_error) #"logNSE" 
+          
+          uniqueGauges=sort(unique(file$Gauge))
+          
+          metricsAll=NULL
+          
+          runID=0
+          t=1
+          for (t in 1:3){
             
-            errorEvaluar=c(
-              1, #1.	me, Mean Error
-              2, #2.	mae, Mean Absolute Error
-              # 3, #3.	mse, Mean Squared Error
-              # 4, #4.	rmse, Root Mean Square Error
-              5, #5.	nrmse, Normalized Root Mean Square Error ( -100% <= nrms <= 100% )
-              6, #6.	PBIAS, Percent Bias
-              # 7, #7.	RSR, Ratio of RMSE to the Standard Deviation of the Observations, RSR = rms / sd(obs). ( 0 <= RSR <= +Inf )
-              # 8, #8.	rSD, Ratio of Standard Deviations, rSD = sd(sim) / sd(obs)
-              9, #9.	NSE, Nash-Sutcliffe Efficiency ( -Inf <= NSE <= 1 )
-              10, #10.	mNSE, Modified Nash-Sutcliffe Efficiency
-              # 11, #11.	rNSE, Relative Nash-Sutcliffe Efficiency
-              12,  #12.	d, Index of Agreement ( 0 <= d <= 1 )
-              13,  #13.	md, Modified Index of Agreement 
-              # 14,#14.	rd, Relative Index of Agreement
-              # 15, #15.	cp, Persistence Index ( 0 <= PI <= 1 )
-              # 16, #16.	r, Pearson Correlation coefficient ( -1 <= r <= 1 )
-              17,  #17.	R2, Coefficient of Determination ( 0 <= R2 <= 1 ). 
-              18,  #8.	bR2, R2 multiplied by the coefficient of the regression line between sim and obs ( 0 <= bR2 <= 1 )
-              19, #19.	KGE, Kling-Gupta efficiency between sim and obs ( 0 <= KGE <= 1 )
-              20 #20.	VE, Volumetric efficiency between sim and obs  ( -Inf <= VE <= 1)
-            ) 
-            names_error=c("ME"  ,    "MAE"  ,   "MSE" ,    "RMSE" ,   "NRMSE %" ,"PBIAS %", "RSR"   ,  "rSD"  ,   "NSE" ,   
-                          "mNSE" ,   "rNSE"  ,  "d"  ,     "md"    ,  "rd"   ,   "cp"    ,  "r"  ,     "R2"    ,  "bR2",    
-                          "KGE" ,    "VE" ) 
-            #names_error[errorEvaluar]
+            metrics=as.data.frame(matrix(nrow=length(uniqueGauges),ncol=(12+length(errorEvaluar)*2)))
+            colnames(metrics) <- c("Gauge","Run ID",names_error[errorEvaluar],names_errorLOG[errorEvaluar],"Qmin obs/Qmin sim %","Qmean obs/Qmean sim %","Qmax obs/Qmax sim %","PeriodGOF","TotalRunoff / Precipitation %","BaseFlow / TotalRunoff %", "SurfaceRunoff / TotalRunoff %","Evapotranspiration / Precipitation %","Type","Period")
             
-            names_errorLOG=paste(rep("log10",length(names_error)),names_error) #"logNSE" 
+            metrics[,1]=uniqueGauges
+            metrics[,2]=runID
             
-            uniqueGauges=sort(unique(file$Gauge))
-            
-            metricsAll=NULL
-            
-            runID=0
-            t=1
-            for (t in 1:3){
+            g=1
+            for (g in 1:length(uniqueGauges)){
               
-              metrics=as.data.frame(matrix(nrow=length(uniqueGauges),ncol=(12+length(errorEvaluar)*2)))
-              colnames(metrics) <- c("Gauge","Run ID",names_error[errorEvaluar],names_errorLOG[errorEvaluar],"Qmin obs/Qmin sim %","Qmean obs/Qmean sim %","Qmax obs/Qmax sim %","PeriodGOF","TotalRunoff / Precipitation %","BaseFlow / TotalRunoff %", "SurfaceRunoff / TotalRunoff %","Evapotranspiration / Precipitation %","Type","Period")
+              filesub=file[file$Gauge==uniqueGauges[g],]
+              total=nrow(filesub)
               
-              metrics[,1]=uniqueGauges
-              metrics[,2]=runID
+              filesubt=na.exclude(filesub[filesub$Gauge==uniqueGauges[g],])
+              r1=nrow(filesubt)
+              DatesRegister=paste0(as.character(as.Date(filesub$Dates[1]))," - ",as.character(as.Date(filesub$Dates[nrow(filesub)])),"(N",r1,",NA",round(100-r1/total*100,1),"%",")")
               
-              g=1
-              for (g in 1:length(uniqueGauges)){
-                
-                filesub=file[file$Gauge==uniqueGauges[g],]
-                total=nrow(filesub)
+              metrics[g,"Period"]=DatesRegister
+              
+              n=round(nrow(filesubt)*0.7,0)
+              
+              
+              if (t==1){
                 
                 filesubt=na.exclude(filesub[filesub$Gauge==uniqueGauges[g],])
                 r1=nrow(filesubt)
-                DatesRegister=paste0(as.character(as.Date(filesub$Dates[1]))," - ",as.character(as.Date(filesub$Dates[nrow(filesub)])),"(N",r1,",NA",round(100-r1/total*100,1),"%",")")
                 
-                metrics[g,"Period"]=DatesRegister
+                filewb=filesub[which(filesub$Dates >=filesubt$Dates[1] & filesub$Dates <= filesubt$Dates[nrow(filesubt)]),]
                 
-                n=round(nrow(filesubt)*0.7,0)
+                total <- nrow(filewb)
+                DatesRegister=paste0(as.character(as.Date(filesubt$Dates[1]))," - ",as.character(as.Date(filesubt$Dates[nrow(filesubt)])),"(N",r1,",NA",round(100-r1/total*100,1),"%",")")
+                DatesRegister
+                
+                metrics$Type="All"
+                
+              } else if (t==2) {
+                
+                filesubt=na.exclude(filesub[filesub$Gauge==uniqueGauges[g],])
+                filesubt=filesubt[1:n,]
+                r1=nrow(filesubt)
+                
+                filewb=filesub[which(filesub$Dates >=filesubt$Dates[1] & filesub$Dates <= filesubt$Dates[nrow(filesubt)]),]
+                total <- nrow(filewb)
+                DatesRegister=paste0(as.character(as.Date(filesubt$Dates[1]))," - ",as.character(as.Date(filesubt$Dates[nrow(filesubt)])),"(N",r1,",NA",round(100-r1/total*100,1),"%",")")
+                DatesRegister
+                
+                metrics$Type="Calibration (70%)"
+                
+              } else {
+                
+                filesubt=na.exclude(filesub[filesub$Gauge==uniqueGauges[g],])
+                filesubt=filesubt[(n+1):nrow(filesubt),]
+                r1=nrow(filesubt)
+                
+                filewb=filesub[which(filesub$Dates >=filesubt$Dates[1] & filesub$Dates <= filesubt$Dates[nrow(filesubt)]),]
+                total <- nrow(filewb)
+                DatesRegister=paste0(as.character(as.Date(filesubt$Dates[1]))," - ",as.character(as.Date(filesubt$Dates[nrow(filesubt)])),"(N",r1,",NA",round(100-r1/total*100,1),"%",")")
+                DatesRegister
                 
                 
-                if (t==1){
-                  
-                  filesubt=na.exclude(filesub[filesub$Gauge==uniqueGauges[g],])
-                  r1=nrow(filesubt)
-                  
-                  filewb=filesub[which(filesub$Dates >=filesubt$Dates[1] & filesub$Dates <= filesubt$Dates[nrow(filesubt)]),]
-                  
-                  total <- nrow(filewb)
-                  DatesRegister=paste0(as.character(as.Date(filesubt$Dates[1]))," - ",as.character(as.Date(filesubt$Dates[nrow(filesubt)])),"(N",r1,",NA",round(100-r1/total*100,1),"%",")")
-                  DatesRegister
-                  
-                  metrics$Type="All"
-                  
-                } else if (t==2) {
-                  
-                  filesubt=na.exclude(filesub[filesub$Gauge==uniqueGauges[g],])
-                  filesubt=filesubt[1:n,]
-                  r1=nrow(filesubt)
-                  
-                  filewb=filesub[which(filesub$Dates >=filesubt$Dates[1] & filesub$Dates <= filesubt$Dates[nrow(filesubt)]),]
-                  total <- nrow(filewb)
-                  DatesRegister=paste0(as.character(as.Date(filesubt$Dates[1]))," - ",as.character(as.Date(filesubt$Dates[nrow(filesubt)])),"(N",r1,",NA",round(100-r1/total*100,1),"%",")")
-                  DatesRegister
-                  
-                  metrics$Type="Calibration (70%)"
-                  
-                } else {
-                  
-                  filesubt=na.exclude(filesub[filesub$Gauge==uniqueGauges[g],])
-                  filesubt=filesubt[(n+1):nrow(filesubt),]
-                  r1=nrow(filesubt)
-                  
-                  filewb=filesub[which(filesub$Dates >=filesubt$Dates[1] & filesub$Dates <= filesubt$Dates[nrow(filesubt)]),]
-                  total <- nrow(filewb)
-                  DatesRegister=paste0(as.character(as.Date(filesubt$Dates[1]))," - ",as.character(as.Date(filesubt$Dates[nrow(filesubt)])),"(N",r1,",NA",round(100-r1/total*100,1),"%",")")
-                  DatesRegister
-                
-                    
-                  metrics$Type="Validation (30%)"
-                  
-                }
-                
-                filesub=filewb
-                Filemonthly <- aggregate(filesub[,c("Modeled","Precipitation","Evapotranspiration","Surface_Runoff", "Base_Flow")], by=list(YearMonth=filesub$YearMonth),sum,na.rm=F)
-                Filemonthly$N=1
-                Filemonthly <- aggregate(Filemonthly[,c("Modeled","Precipitation","Evapotranspiration","Surface_Runoff", "Base_Flow")], by=list(N=Filemonthly$N),mean,na.rm=T)
-                Filemonthly$TotalRunoff_Precipitation=round(Filemonthly$Modeled/Filemonthly$Precipitation*100,1)
-                Filemonthly$BaseFlow_TotalRunoff=round(Filemonthly$Base_Flow/Filemonthly$Modeled*100,1)
-                Filemonthly$SurfaceRunoff_TotalRunoff=round(Filemonthly$Surface_Runoff/Filemonthly$Modeled*100,1)
-                Filemonthly$Evapotranspiration_Precipitation=round(Filemonthly$Evapotranspiration/Filemonthly$Precipitation*100,1)
-                metrics[g,(7+length(errorEvaluar)*2):(7+2*length(errorEvaluar)+3)]=Filemonthly[1,7:10]
-                
-                filesub=filesubt
-                r=nrow(filesub)
-                modeled <- filesub[filesub$Gauge==uniqueGauges[g],]$Modeled
-                observed <- filesub[filesub$Gauge==uniqueGauges[g],]$Observed
-                
-                filesub$Modeled[which(filesub$Modeled ==0)]=NA
-                filesub$Observed[which(filesub$Observed ==0)]=NA
-                filesub=na.exclude(filesub[filesub$Gauge==uniqueGauges[g],])
-                modeledlog <- log(filesub[filesub$Gauge==uniqueGauges[g],]$Modeled,10)
-                observedlog <- log(filesub[filesub$Gauge==uniqueGauges[g],]$Observed,10)
-                
-                if (sum(modeled)!=0 && sum(observed,na.rm=TRUE)!=0) {
-                  error=gof(modeled,observed,na.rm=TRUE)
-                  metrics[g,3:(2+length(errorEvaluar))]=round(error[errorEvaluar],3)
-                  errorLOG=gof(modeledlog,observedlog,digits=5,na.rm=TRUE)
-                  metrics[g,(3+length(errorEvaluar)):(2+2*length(errorEvaluar))]=round(errorLOG[errorEvaluar],3)
-                } else {
-                  metrics[g,3:(2+length(errorEvaluar))]=NA
-                  metrics[g,(3+length(errorEvaluar)):(2+2*length(errorEvaluar))]=NA
-                }
-                metrics$PeriodGOF[g]=DatesRegister
-                metrics[g,2+length(errorEvaluar)*2+1]=min(na.exclude(filesub$Observed))/min( na.exclude(filesub$Modeled))*100   
-                metrics[g,2+length(errorEvaluar)*2+2]=mean(na.exclude(filesub$Observed))/mean( na.exclude(filesub$Modeled))*100   
-                metrics[g,2+length(errorEvaluar)*2+3]=max(na.exclude(filesub$Observed))/max( na.exclude(filesub$Modeled))*100   
+                metrics$Type="Validation (30%)"
                 
               }
               
-              metricsAll=rbind(metricsAll,metrics)
+              filesub=filewb
+              Filemonthly <- aggregate(filesub[,c("Modeled","Precipitation","Evapotranspiration","Surface_Runoff", "Base_Flow")], by=list(YearMonth=filesub$YearMonth),sum,na.rm=F)
+              Filemonthly$N=1
+              Filemonthly <- aggregate(Filemonthly[,c("Modeled","Precipitation","Evapotranspiration","Surface_Runoff", "Base_Flow")], by=list(N=Filemonthly$N),mean,na.rm=T)
+              Filemonthly$TotalRunoff_Precipitation=round(Filemonthly$Modeled/Filemonthly$Precipitation*100,1)
+              Filemonthly$BaseFlow_TotalRunoff=round(Filemonthly$Base_Flow/Filemonthly$Modeled*100,1)
+              Filemonthly$SurfaceRunoff_TotalRunoff=round(Filemonthly$Surface_Runoff/Filemonthly$Modeled*100,1)
+              Filemonthly$Evapotranspiration_Precipitation=round(Filemonthly$Evapotranspiration/Filemonthly$Precipitation*100,1)
+              metrics[g,(7+length(errorEvaluar)*2):(7+2*length(errorEvaluar)+3)]=Filemonthly[1,7:10]
               
+              filesub=filesubt
+              r=nrow(filesub)
+              modeled <- filesub[filesub$Gauge==uniqueGauges[g],]$Modeled
+              observed <- filesub[filesub$Gauge==uniqueGauges[g],]$Observed
+              
+              filesub$Modeled[which(filesub$Modeled ==0)]=NA
+              filesub$Observed[which(filesub$Observed ==0)]=NA
+              filesub=na.exclude(filesub[filesub$Gauge==uniqueGauges[g],])
+              modeledlog <- log(filesub[filesub$Gauge==uniqueGauges[g],]$Modeled,10)
+              observedlog <- log(filesub[filesub$Gauge==uniqueGauges[g],]$Observed,10)
+              
+              if (sum(modeled)!=0 && sum(observed,na.rm=TRUE)!=0) {
+                error=gof(modeled,observed,na.rm=TRUE)
+                metrics[g,3:(2+length(errorEvaluar))]=round(error[errorEvaluar],3)
+                errorLOG=gof(modeledlog,observedlog,digits=5,na.rm=TRUE)
+                metrics[g,(3+length(errorEvaluar)):(2+2*length(errorEvaluar))]=round(errorLOG[errorEvaluar],3)
+              } else {
+                metrics[g,3:(2+length(errorEvaluar))]=NA
+                metrics[g,(3+length(errorEvaluar)):(2+2*length(errorEvaluar))]=NA
+              }
+              metrics$PeriodGOF[g]=DatesRegister
+              metrics[g,2+length(errorEvaluar)*2+1]=min(na.exclude(filesub$Observed))/min( na.exclude(filesub$Modeled))*100   
+              metrics[g,2+length(errorEvaluar)*2+2]=mean(na.exclude(filesub$Observed))/mean( na.exclude(filesub$Modeled))*100   
+              metrics[g,2+length(errorEvaluar)*2+3]=max(na.exclude(filesub$Observed))/max( na.exclude(filesub$Modeled))*100   
               
             }
             
-            metrics=metricsAll
+            metricsAll=rbind(metricsAll,metrics)
             
-            metrics[,c("Qmin obs/Qmin sim %","Qmean obs/Qmean sim %","Qmax obs/Qmax sim %")]=round(metrics[,c("Qmin obs/Qmin sim %","Qmean obs/Qmean sim %","Qmax obs/Qmax sim %")],2)
-            cols <- c("Type","Period","Gauge","PeriodGOF",names_error[errorEvaluar],names_errorLOG[errorEvaluar],"Qmin obs/Qmin sim %","Qmean obs/Qmean sim %","Qmax obs/Qmax sim %","TotalRunoff / Precipitation %","BaseFlow / TotalRunoff %", "SurfaceRunoff / TotalRunoff %","Evapotranspiration / Precipitation %")
-            metrics=metrics[,cols]
-            write.csv(metrics,paste0("0_SummaryGOF_",as.character(input$dates[1]),"-",as.character(input$dates[2]),".csv"),row.names=F) 
-            #write.csv(metrics,paste0("SummaryGOF_",".csv"),row.names=F) 
+            
+          }
+          
+          metrics=metricsAll
+          
+          metrics[,c("Qmin obs/Qmin sim %","Qmean obs/Qmean sim %","Qmax obs/Qmax sim %")]=round(metrics[,c("Qmin obs/Qmin sim %","Qmean obs/Qmean sim %","Qmax obs/Qmax sim %")],2)
+          cols <- c("Type","Period","Gauge","PeriodGOF",names_error[errorEvaluar],names_errorLOG[errorEvaluar],"Qmin obs/Qmin sim %","Qmean obs/Qmean sim %","Qmax obs/Qmax sim %","TotalRunoff / Precipitation %","BaseFlow / TotalRunoff %", "SurfaceRunoff / TotalRunoff %","Evapotranspiration / Precipitation %")
+          metrics=metrics[,cols]
+          write.csv(metrics,paste0("0_SummaryGOF_",as.character(input$datesi[1]),"-",as.character(input$datesi[2]),".csv"),row.names=F) 
+          #write.csv(metrics,paste0("SummaryGOF_",".csv"),row.names=F) 
+          ####################################
+        } else {
+          name=paste0("0_SummaryGOF_",as.character(input$datesi[1]),"-",as.character(input$datesi[2]),".csv")
+          metrics <- read.csv(name, stringsAsFactors=F, check.names=F)
+        }
+      }) 
+        
+        try({
+          output$metricsi <- DT::renderDataTable({
             
             metrics=metrics[metrics$Gauge==gs,]
             DT::datatable(metrics, rownames= FALSE)
