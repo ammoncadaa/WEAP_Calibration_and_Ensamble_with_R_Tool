@@ -991,7 +991,7 @@ shinyApp(
           
           output$textts <-renderText({
             outTxt = ""
-            text="*When the time step is 365, Make sure that the -Add Leap Day?-option (General/Years and Time Steps) is deactivated in WEAP."
+            text="*Make sure that the -Add Leap Day?-option (General/Years and Time Steps) is deactivated in WEAP."
             formatedFont = sprintf('<font color="%s">%s</font>',"red",text)
             outTxt = paste0(outTxt, formatedFont)
             outTxt
