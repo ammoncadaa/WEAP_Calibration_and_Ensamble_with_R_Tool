@@ -2151,7 +2151,7 @@ shinyApp(
                          ggtitle(text)
                        p
                        
-                       plotpath = paste0("Time series_sim vs obs_",RUNID,".jpg") #creates a pdf path to produce a graphic of the span of records in the Data
+                       plotpath = paste0(RUNID,"_Time series_sim vs obs_",paste(dates,collapse ="-"),".jpg") #creates a pdf path to produce a graphic of the span of records in the Data
                        ggsave(plotpath,width =40 , height = 22,units = "cm")
                        
                        ################################################################################################
@@ -2766,14 +2766,13 @@ shinyApp(
         name="0_ResultsGauges.csv"
         file <- read.csv(name, stringsAsFactors=F, check.names=F)
         file$Dates=ymd(file$Dates)
-        #gs=unique(file$Gauge)[1]
-        #file=file[file$Gauge==gauge,]
-        file=file[file$Gauge==gs,]
         file$YearMonth=year(file$Dates)*100+month(file$Dates)
         file$Month=month(file$Dates)
         file <- file[which(file$Dates >= input$datesi[1] & file$Dates <= input$datesi[2]),]
-        file1=file
-      
+        #gs=unique(file$Gauge)[1]
+        #file=file[file$Gauge==gauge,]
+        file1=file[file$Gauge==gs,]
+        
         try({
         if (!file.exists(paste0("0_SummaryGOF_",as.character(input$datesi[1]),"-",as.character(input$datesi[2]),".csv"))){
           #########################
@@ -2932,6 +2931,7 @@ shinyApp(
           metrics <- read.csv(name, stringsAsFactors=F, check.names=F)
         }
       }) 
+        
         
         try({
           output$metricsi <- DT::renderDataTable({
@@ -4435,7 +4435,7 @@ shinyApp(
                              ggtitle(text)
                            p
                            
-                           plotpath = paste0("Time series_sim vs obs_",RUNID,".jpg") #creates a pdf path to produce a graphic of the span of records in the Data
+                           plotpath = paste0(RUNID,"_Time series_sim vs obs_",paste(dates,collapse ="-"),".jpg") #creates a pdf path to produce a graphic of the span of records in the Data
                            ggsave(plotpath,width =40 , height = 22,units = "cm")
                            
                            
@@ -5666,7 +5666,7 @@ shinyApp(
                              ggtitle(text)
                            p
                            
-                           plotpath = paste0("Time series_sim vs obs_",RUNID,".jpg") #creates a pdf path to produce a graphic of the span of records in the Data
+                           plotpath = paste0(RUNID,"_Time series_sim vs obs_",paste(dates,collapse ="-"),".jpg") #creates a pdf path to produce a graphic of the span of records in the Data
                            ggsave(plotpath,width =40 , height = 22,units = "cm")
                            
                            
