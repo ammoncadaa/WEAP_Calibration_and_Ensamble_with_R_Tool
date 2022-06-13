@@ -305,9 +305,10 @@ shinyApp(
                                         tabPanel("P/Q",
                                                  h3("Ratio of Observed Streamflow to Precipitation (you can filter by streamflow gauge)", style = "color:green"),
                                                  wellPanel(style = "background: white",
-                                                           plotlyOutput("Q_Pmonthly")),
+                                                           plotlyOutput("Q_Pboxplot")),
                                                  wellPanel(style = "background: white",
-                                                           plotlyOutput("Q_Pboxplot"))
+                                                           plotlyOutput("Q_Panual"))
+                                                 
                                                  ),
                                         tabPanel("Streamflow",
                                                  h3("Simulated vs observed (you can filter by streamflow gauge and dates)", style = "color:green"),
@@ -1524,62 +1525,38 @@ shinyApp(
                          }
                        }
                        
-                       file <- resultsWB
-                       #file <- read.csv(paste0("0_ResultsGauges.csv"), stringsAsFactors=F, check.names=F)
-                       #str(file)
-                       file$Dates=ymd(file$Dates)
-                       file$YearMonth=year(file$Dates)*100+month(file$Dates)
-                       file$Precipitation<- file$Precipitation/file$Area*1000
-                       file$Observed <- file$Observed/file$Area*1000
-                       starty <- min(file$Dates)
-                       endy <- max(file$Dates)
-                       gauges=sort(unique(file$Gauge))
+                       #file <- resultsWB
+                       #ResultsGauges=read.csv(paste0("0_ResultsGauges.csv"), stringsAsFactors=F, check.names=F)
+                       ResultsGauges$Dates=ymd(ResultsGauges$Dates)
+                       ResultsGauges$Precipitation<- ResultsGauges$Precipitation/ResultsGauges$Area*1000
+                       ResultsGauges$Observed <- ResultsGauges$Observed/ResultsGauges$Area*1000
                        
-                       years <- seq(as.numeric(year(min(file$Dates))),as.numeric(year(max(file$Dates))))
-                       Dates=seq(as.Date(paste0(year(min(file$Dates)),"-01-01")), to=as.Date(paste0(year(max(file$Dates)),"-12-31")),by="month")
+                       ResultsGaugesa <- aggregate(ResultsGauges[,c("Observed","Precipitation")], by=list(Gauge=ResultsGauges$Gauge, Year=ResultsGauges$Year),sum,na.rm=F)
+                       ResultsGaugesa$Q_P=round(ResultsGaugesa$Observed/ResultsGaugesa$Precipitation*100,2)
+                    
+                       ResultsGaugess <- aggregate(ResultsGaugesa[,c("Q_P"),drop=FALSE], by=list(Gauge=ResultsGaugesa$Gauge),mean,na.rm=TRUE)
+                       colnames(ResultsGaugess)=c("Gauge","Q_P mean")
+                       ResultsGaugesa=merge(ResultsGaugesa,ResultsGaugess,by="Gauge")
+                       
+                       Dates=seq(as.Date(paste0(year(min(ResultsGauges$Dates)),"-01-01")), to=as.Date(paste0(year(max(ResultsGauges$Dates)),"-12-31")),by="year")
                        Dates=as.data.frame(Dates)
-                       Dates$YearMonth=year(Dates$Dates)*100+month(Dates$Dates)
+                       Dates$Year=year(Dates$Dates)
+                       ResultsGaugesa=merge(ResultsGaugesa,Dates,by="Year")
                        
-                       VAL$gauges1=gauges
+                       ResultsGaugesa=ResultsGaugesa[,c( "Gauge" ,"Year",  "Dates","Observed","Precipitation", "Q_P","Q_P mean")]  
                        
-                       file1=file
-                       
-                       file2=NULL
-                       
-                       file3=NULL
-                       
-                       i=1
-                       for (i in 1:length(gauges)){
-                         file=file1
-                         file=file[file$Gauge==gauges[i],]
-                         file=file[,c("Observed","Precipitation","YearMonth")]
-                         file <- aggregate(file[,c("Observed","Precipitation")], by=list(YearMonth=file$YearMonth),sum,na.rm=F)
-                         file=merge(file,Dates,by="YearMonth")
-                         file$Q_P=round(file$Observed/file$Precipitation*100,2)
-                         file$Gauge=gauges[i]
-                         #fileB=file
-                         #fileB
-                         file2=rbind(file2,file)
-                         
-                         file$Month=file$YearMonth%%100
-                         file <- aggregate(file[,c("Observed","Precipitation","Q_P" )], by=list(Month=file$Month),mean,na.rm=T)
-                         file$Gauge=gauges[i]
-                         file3=rbind(file3,file)
-                         
-                       }
-                       
-                       file2=file2[,c("Gauge" ,"Precipitation","Observed","Q_P","Dates")]
-                       write.csv(file2,paste0("0_Results_Q_P_monthly.csv"),row.names=F) 
-                       
-                       file3=file3[,c("Gauge" ,"Precipitation","Observed","Q_P","Month")]
-                       write.csv(file3,paste0("0_Results_Q_P_monthlyMeanSummary.csv"),row.names=F) 
-                       
+                       write.csv(ResultsGaugesa,paste0("0_Results_Q_P_AnnualSummary.csv"),row.names=F) 
+
                        #WEAP$SaveArea()
                        rm(WEAP)
                        gc()
                        
           ######################           
-        
+                       starty <- min(ResultsGaugesa$Dates)
+                       endy <- max(ResultsGaugesa$Dates)
+                       gauges=sort(unique(ResultsGaugesa$Gauge))
+                      
+                       
         output$textRunEnsembleA <- renderText({
           outTxt = ""
           text=paste0("Run finished. Total run Time: ")
@@ -1619,30 +1596,40 @@ shinyApp(
         try({
           
         if (file.exists(paste0("0_ResultsGauges.csv")) && Model==1) {
-           
+          
+          #gs=unique(ResultsGaugesa$Gauge)[1] 
           gs=gauges[1]
           
           ResultsGauges=read.csv(paste0("0_ResultsGauges.csv"), stringsAsFactors=F, check.names=F)
-          
-          ResultsGauges=ResultsGauges[ResultsGauges$Gauge==gs,]
           ResultsGauges$Dates=ymd(ResultsGauges$Dates)
-          ResultsGauges$YearMonth=year(ResultsGauges$Dates)*100+month(ResultsGauges$Dates)
           ResultsGauges$Precipitation<- ResultsGauges$Precipitation/ResultsGauges$Area*1000
           ResultsGauges$Observed <- ResultsGauges$Observed/ResultsGauges$Area*1000
           
-          #gs=sort(unique(ResultsGauges$Gauge))[1]
+          Dates=seq(as.Date(paste0(year(min(ResultsGauges$Dates)),"-01-01")), to=as.Date(paste0(year(max(ResultsGauges$Dates)),"-12-31")),by="year")
+          Dates=as.data.frame(Dates)
+          Dates$Year=year(Dates$Dates)
           
+          ResultsGaugesa <- aggregate(ResultsGauges[,c("Observed","Precipitation")], by=list(Gauge=ResultsGauges$Gauge, Year=ResultsGauges$Year),sum,na.rm=F)
+          ResultsGaugesa$Q_P=round(ResultsGaugesa$Observed/ResultsGaugesa$Precipitation*100,2)
+          ResultsGaugesa$Gauge=as.factor(ResultsGaugesa$Gauge)
           
-          ResultsGauges=ResultsGauges[,c("Observed","Precipitation","YearMonth")]
-          ResultsGauges <- aggregate(ResultsGauges[,1:(ncol(ResultsGauges)-1)], by=list(YearMonth=ResultsGauges$YearMonth),sum,na.rm=F)
-          ResultsGauges=merge(ResultsGauges,Dates,by="YearMonth")
-          ResultsGauges$Q_P=round(ResultsGauges$Observed/ResultsGauges$Precipitation*100,2)
+          output$Q_Pboxplot <- renderPlotly({
+            
+            text=paste0("Annual Observed streamflow/Precipitation (%)")
+            
+            p <-plot_ly(ResultsGaugesa, x = ~Gauge, y = ~Q_P, color= ~Gauge,type="box")  %>% 
+              layout( title = text,
+                      xaxis = list(title=""),
+                      yaxis = list(title= "Observed streamflow/Precipitation (%)"))
+            p
+          }) 
           
-          output$Q_Pmonthly <- renderPlotly({
-            # ResultsGauges=ResultsGaugesB()
-            text=paste0(gs," - Observed streamflow and Precipitation (mm)")
-            p <-plot_ly(ResultsGauges, x=~Dates, y=~Precipitation, name = "Precipitation", type="bar",text=~paste0("Precipitation = ", Precipitation)) %>%
-              add_trace(y=~Observed, name="Observed Streamflow", type="scatter", mode="line", text=~paste0("Observed = ", Observed)) %>%
+          output$Q_Panual <- renderPlotly({
+            ResultsGaugesa=ResultsGaugesa[ResultsGaugesa$Gauge==gs,]
+            ResultsGaugesa=merge(ResultsGaugesa,Dates,by="Year")
+            text=paste0(gs," - Annual Observed streamflow and Precipitation (mm)")
+            p <-plot_ly(ResultsGaugesa, x=~Dates, y=~Precipitation, name = "Precipitation", type="bar",text=~paste0("Precipitation = ", Precipitation)) %>%
+              add_trace(x = ~Dates,y=~Observed, name="Observed Streamflow", type="scatter", mode="line", text=~paste0("Observed = ", Observed)) %>%
               add_trace(x = ~Dates, y = ~Q_P, name = "% Observed streamflow/Precipitation", type="scatter", mode="line", text=~paste0("% Observed streamflow/Precipitation = ", Q_P), yaxis = "y2") %>%
               layout(yaxis2 = list(overlaying = "y", side = "right", title = "Observed streamflow/Precipitation (%)"), 
                      title = text,
@@ -1652,20 +1639,6 @@ shinyApp(
             
             
           })
-          
-          output$Q_Pboxplot <- renderPlotly({
-            # ResultsGauges=ResultsGaugesB()
-            ResultsGauges$Month=ResultsGauges$YearMonth%%100
-            text=paste0(gs," - Monthly Observed streamflow/Precipitation (%)")
-            ResultsGauges1 <- aggregate(ResultsGauges[,c(2,3,5)], by=list(Month=ResultsGauges$Month),mean,na.rm=T)
-            final_df=merge(ResultsGauges1,ResultsGauges,all.x = TRUE,all.y = TRUE,by="Month")
-            p <-plot_ly(final_df, x = ~Month, y = ~Q_P.x, name = "% Observed streamflow/Precipitation", type="scatter", mode="line", text=~paste0("% Observed streamflow/Precipitation = ",  Q_P.x))  %>% 
-              add_trace(x = ~Month, y = ~Q_P.y, type="box", name="% Observed streamflow/Precipitation",  text=~paste0("% Observed streamflow/Precipitation = ", Q_P.y)) %>% 
-              layout( title = text,
-                      xaxis = list(title="Month"),
-                      yaxis = list(title= "Observed streamflow/Precipitation (%)"))
-            p
-          }) 
           
         }
         })
@@ -1809,30 +1782,39 @@ shinyApp(
         
         if (file.exists(paste0("0_ResultsGauges.csv")) && Model==1) {
           
-          #gs=gauges[1]
-          
           ResultsGauges=read.csv(paste0("0_ResultsGauges.csv"), stringsAsFactors=F, check.names=F)
-          
-          ResultsGauges=ResultsGauges[ResultsGauges$Gauge==gs,]
           ResultsGauges$Dates=ymd(ResultsGauges$Dates)
-          ResultsGauges$YearMonth=year(ResultsGauges$Dates)*100+month(ResultsGauges$Dates)
           ResultsGauges$Precipitation<- ResultsGauges$Precipitation/ResultsGauges$Area*1000
           ResultsGauges$Observed <- ResultsGauges$Observed/ResultsGauges$Area*1000
           
-          Dates=seq(as.Date(paste0(year(min(ResultsGauges$Dates)),"-01-01")), to=as.Date(paste0(year(max(ResultsGauges$Dates)),"-12-31")),by="month")
+          Dates=seq(as.Date(paste0(year(min(ResultsGauges$Dates)),"-01-01")), to=as.Date(paste0(year(max(ResultsGauges$Dates)),"-12-31")),by="year")
           Dates=as.data.frame(Dates)
-          Dates$YearMonth=year(Dates$Dates)*100+month(Dates$Dates)
+          Dates$Year=year(Dates$Dates)
           
-          ResultsGauges=ResultsGauges[,c("Observed","Precipitation","YearMonth")]
-          ResultsGauges <- aggregate(ResultsGauges[,1:(ncol(ResultsGauges)-1)], by=list(YearMonth=ResultsGauges$YearMonth),sum,na.rm=F)
-          ResultsGauges=merge(ResultsGauges,Dates,by="YearMonth")
-          ResultsGauges$Q_P=round(ResultsGauges$Observed/ResultsGauges$Precipitation*100,2)
+          ResultsGaugesa <- aggregate(ResultsGauges[,c("Observed","Precipitation")], by=list(Gauge=ResultsGauges$Gauge, Year=ResultsGauges$Year),sum,na.rm=F)
+          ResultsGaugesa$Q_P=round(ResultsGaugesa$Observed/ResultsGaugesa$Precipitation*100,2)
+          ResultsGaugesa$Gauge=as.factor(ResultsGaugesa$Gauge)
           
-          output$Q_Pmonthly <- renderPlotly({
-            # ResultsGauges=ResultsGaugesB()
-            text=paste0(gs," - Observed streamflow and Precipitation (mm)")
-            p <-plot_ly(ResultsGauges, x=~Dates, y=~Precipitation, name = "Precipitation", type="bar",text=~paste0("Precipitation = ", Precipitation)) %>%
-              add_trace(y=~Observed, name="Observed Streamflow", type="scatter", mode="line", text=~paste0("Observed = ", Observed)) %>%
+          output$Q_Pboxplot <- renderPlotly({
+            
+            text=paste0("Annual Observed streamflow/Precipitation (%)")
+            
+            p <-plot_ly(ResultsGaugesa, x = ~Gauge, y = ~Q_P, color= ~Gauge,type="box")  %>% 
+              layout( title = text,
+                      xaxis = list(title=""),
+                      yaxis = list(title= "Observed streamflow/Precipitation (%)"))
+            p
+          }) 
+          
+         
+          
+          output$Q_Panual <- renderPlotly({
+            ResultsGaugesa=ResultsGaugesa[ResultsGaugesa$Gauge==gs,]
+            ResultsGaugesa=merge(ResultsGaugesa,Dates,by="Year")
+            
+            text=paste0(gs," - Annual Observed streamflow and Precipitation (mm)")
+            p <-plot_ly(ResultsGaugesa, x=~Dates, y=~Precipitation, name = "Precipitation", type="bar",text=~paste0("Precipitation = ", Precipitation)) %>%
+              add_trace(x = ~Dates,y=~Observed, name="Observed Streamflow", type="scatter", mode="line", text=~paste0("Observed = ", Observed)) %>%
               add_trace(x = ~Dates, y = ~Q_P, name = "% Observed streamflow/Precipitation", type="scatter", mode="line", text=~paste0("% Observed streamflow/Precipitation = ", Q_P), yaxis = "y2") %>%
               layout(yaxis2 = list(overlaying = "y", side = "right", title = "Observed streamflow/Precipitation (%)"), 
                      title = text,
@@ -1842,20 +1824,6 @@ shinyApp(
             
             
           })
-          
-          output$Q_Pboxplot <- renderPlotly({
-            # ResultsGauges=ResultsGaugesB()
-            ResultsGauges$Month=ResultsGauges$YearMonth%%100
-            text=paste0(gs," - Monthly Observed streamflow/Precipitation (%)")
-            ResultsGauges1 <- aggregate(ResultsGauges[,c(2,3,5)], by=list(Month=ResultsGauges$Month),mean,na.rm=T)
-            final_df=merge(ResultsGauges1,ResultsGauges,all.x = TRUE,all.y = TRUE,by="Month")
-            p <-plot_ly(final_df, x = ~Month, y = ~Q_P.x, name = "% Observed streamflow/Precipitation", type="scatter", mode="line", text=~paste0("% Observed streamflow/Precipitation = ",  Q_P.x))  %>% 
-              add_trace(x = ~Month, y = ~Q_P.y, type="box", name="% Observed streamflow/Precipitation",  text=~paste0("% Observed streamflow/Precipitation = ", Q_P.y)) %>% 
-              layout( title = text,
-                      xaxis = list(title="Month"),
-                      yaxis = list(title= "Observed streamflow/Precipitation (%)"))
-            p
-          }) 
           
         }
       })
