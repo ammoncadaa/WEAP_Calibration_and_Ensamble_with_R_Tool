@@ -1525,7 +1525,7 @@ shinyApp(
                          }
                        }
                        
-                       #file <- resultsWB
+                       ResultsGauges <- resultsWB
                        #ResultsGauges=read.csv(paste0("0_ResultsGauges.csv"), stringsAsFactors=F, check.names=F)
                        ResultsGauges$Dates=ymd(ResultsGauges$Dates)
                        ResultsGauges$Precipitation<- ResultsGauges$Precipitation/ResultsGauges$Area*1000
